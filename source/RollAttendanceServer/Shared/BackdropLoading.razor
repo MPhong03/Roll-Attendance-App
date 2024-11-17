@@ -1,0 +1,25 @@
+﻿<MudOverlay @bind-Visible="visible" DarkBackground="true" ZIndex="9999" AutoClose="false">
+    <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);">
+        <MudProgressCircular Color="Color.Primary" Indeterminate="true" />
+    </div>
+</MudOverlay>
+
+@code {
+    private bool visible;
+
+    protected override void OnInitialized()
+    {
+        LoadingService.OnChange += ToggleVisibility;
+    }
+
+    private void ToggleVisibility(bool isVisible)
+    {
+        visible = isVisible;
+        StateHasChanged();
+    }
+
+    public void Dispose()
+    {
+        LoadingService.OnChange -= ToggleVisibility;
+    }
+}

@@ -1,0 +1,22 @@
+﻿@using System.Net.Http
+@using System.Diagnostics
+@using Microsoft.AspNetCore.Authorization
+@using Microsoft.AspNetCore.Components.Authorization
+@using Microsoft.AspNetCore.Components.Forms
+@using Microsoft.AspNetCore.Components.Routing
+@using Microsoft.AspNetCore.Components.Web
+@using Microsoft.AspNetCore.Components.Web.Virtualization
+@using Microsoft.JSInterop
+@using RollAttendanceServer
+@using RollAttendanceServer.Authentication
+@using RollAttendanceServer.Services
+@using RollAttendanceServer.Shared
+@using RollAttendanceServer.DTOs
+@using RollAttendanceServer.Data
+@using MudBlazor
+@inject NavigationManager NavigationManager
+@inject ISnackbar Snackbar
+@inject CustomAuthenticationStateProvider _authenticationStateProvider
+@inject LoadingService LoadingService
+@inject IAuthorizationService AuthorizationService
+

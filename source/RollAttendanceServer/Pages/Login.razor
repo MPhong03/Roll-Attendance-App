@@ -1,0 +1,102 @@
+﻿@page "/login"
+@layout AuthLayout
+@inject AuthService AuthService
+
+<div class="container flex flex-col mx-auto bg-white rounded-lg pt-12 my-5">
+    <div class="flex justify-center w-full h-full my-auto xl:gap-14 lg:justify-normal md:gap-5 draggable">
+        <div class="flex items-center justify-center w-full lg:p-12">
+            <div class="flex items-center xl:p-10">
+                <EditForm class="flex flex-col w-full h-full pb-6 text-center bg-white rounded-3xl" Model="userModel" OnValidSubmit="HandleLogin">
+                    <h3 class="mb-3 text-4xl font-extrabold text-dark-grey-900">Sign In</h3>
+                    <p class="mb-4 text-grey-700">Enter your email and password</p>
+
+                    <MudTextField @bind-Value="userModel.Email" Label="Email" Variant="Variant.Outlined" Class="mb-3" />
+                    <ValidationMessage For="@(() => userModel.Email)" />
+
+                    <MudTextField @bind-Value="userModel.Password" Label="Password" Variant="Variant.Outlined" InputType="@PasswordInput" Adornment="Adornment.End" AdornmentIcon="@PasswordInputIcon" OnAdornmentClick="ShowPassword" AdornmentAriaLabel="Show Password" Class="mb-3" />
+                    <ValidationMessage For="@(() => userModel.Password)" />
+
+                    <div class="flex flex-row justify-between mb-8">
+                        <label class="relative inline-flex items-center mr-3 cursor-pointer select-none">
+                            <input type="checkbox" checked value="" class="sr-only peer">
+                            <div class="w-5 h-5 bg-white border-2 rounded-sm border-grey-500 peer peer-checked:border-0 peer-checked:bg-purple-blue-500">
+                                <img class="" src="https://raw.githubusercontent.com/Loopple/loopple-public-assets/main/motion-tailwind/img/icons/check.png" alt="tick">
+                            </div>
+                            <span class="ml-3 text-sm font-normal text-grey-900">Keep me logged in</span>
+                        </label>
+                        <a href="javascript:void(0)" class="mr-4 text-sm font-medium text-purple-blue-500">Forget password?</a>
+                    </div>
+                    <button type="submit" class="w-full px-6 py-5 mb-5 text-sm font-bold leading-none text-white transition duration-300 md:w-96 rounded-2xl hover:bg-purple-blue-600 focus:ring-4 focus:ring-purple-blue-100 bg-purple-blue-500">Sign In</button>
+                    @if (message != "")
+                    {
+                        <div class="flex items-center p-4 mb-4 text-sm text-red-800 rounded-lg bg-red-50 dark:bg-gray-800 dark:text-red-400" role="alert">
+                            <svg class="flex-shrink-0 inline w-4 h-4 me-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
+                                <path d="M10 .5a9.5 9.5 0 1 0 9.5 9.5A9.51 9.51 0 0 0 10 .5ZM9.5 4a1.5 1.5 0 1 1 0 3 1.5 1.5 0 0 1 0-3ZM12 15H8a1 1 0 0 1 0-2h1v-3H8a1 1 0 0 1 0-2h2a1 1 0 0 1 1 1v4h1a1 1 0 0 1 0 2Z" />
+                            </svg>
+                            <span class="sr-only">Info</span>
+                            <div>
+                                @message
+                            </div>
+                        </div>
+                    }
+                </EditForm>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    private LoginDTO userModel = new();
+    private string message = "";
+
+    bool isShow;
+    InputType PasswordInput = InputType.Password;
+    string PasswordInputIcon = Icons.Material.Filled.VisibilityOff;
+
+    private async Task HandleLogin()
+    {
+        try
+        {
+            LoadingService.Show();
+            var response = await AuthService.LoginAsync(userModel);
+
+            if (response.Success)
+            {
+                message = "";
+                LoadingService.Hide();
+                NavigationManager.NavigateTo("/");
+            }
+            else
+            {
+                LoadingService.Hide();
+                message = response.Message;
+            }
+        }
+        catch (Exception ex)
+        {
+            LoadingService.Hide();
+            message = "An unexpected error occurred.";
+            Debug.WriteLine(ex.Message);
+        }
+        finally
+        {
+            LoadingService.Hide();
+        }
+    }
+
+    void ShowPassword()
+    {
+        @if (isShow)
+        {
+            isShow = false;
+            PasswordInputIcon = Icons.Material.Filled.VisibilityOff;
+            PasswordInput = InputType.Password;
+        }
+        else
+        {
+            isShow = true;
+            PasswordInputIcon = Icons.Material.Filled.Visibility;
+            PasswordInput = InputType.Text;
+        }
+    }
+}

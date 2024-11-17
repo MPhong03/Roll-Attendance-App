@@ -1,0 +1,47 @@
+## User-specific files
+.idea/
+.vscode/
+
+## Windows Installer files
+Thumbs.db
+Desktop.ini
+
+## ASP.NET Core files
+bin/
+obj/
+
+## ASP.NET Core build artifacts
+
+## User-specific VS files
+.vs/
+.vs2019/
+.vs2017/
+
+## Windows-specific
+*.pdb
+*.user
+*.userosscache
+*.suo
+*.sln.docstates
+
+## Rider IDE config files
+.idea/
+
+## Logs
+*.log
+
+## Node.js and npm files (if using front-end with Node.js)
+node_modules/
+npm-debug.log
+yarn-debug.log
+yarn-error.log
+
+## ASP.NET temporary files
+appsettings.json
+appsettings.Development.json
+
+# Ignore all files created by dotnet publish or dotnet build
+publish/
+
+# Ignore packages from NuGet
+*.nupkg

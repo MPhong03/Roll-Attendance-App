@@ -1,0 +1,46 @@
+﻿@inherits LayoutComponentBase
+@inject IHttpContextAccessor HttpContextAccessor
+
+<PageTitle>RollAttendanceServer</PageTitle>
+
+<CascadingAuthenticationState>
+    @if (authenticationState == null)
+    {
+        <p>Loading...</p>
+    }
+    else
+    {
+        var user = authenticationState.User;
+
+        if (!user.Identity.IsAuthenticated)
+        {
+            <h2>You don't have permission to access this page.</h2>
+            <p>Please contact the administrator if you believe this is an error.</p>
+        }
+        else
+        {
+            <div class="page">
+                <NavMenu />
+
+                <main>
+                    <div class="top-row px-4">
+                        <a href="https://docs.microsoft.com/aspnet/" target="_blank">About</a>
+                    </div>
+
+                    <article class="content px-4">
+                        @Body
+                    </article>
+                </main>
+            </div>
+        }
+    }
+</CascadingAuthenticationState>
+
+@code {
+    private AuthenticationState authenticationState;
+
+    protected override async Task OnInitializedAsync()
+    {
+        authenticationState = await _authenticationStateProvider.GetAuthenticationStateAsync();
+    }
+}

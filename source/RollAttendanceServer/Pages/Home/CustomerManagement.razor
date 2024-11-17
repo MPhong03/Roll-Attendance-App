@@ -1,0 +1,31 @@
+﻿@page "/customer-management"
+
+@if (_hasAccess)
+{
+    <p>You have access to customer management features.</p>
+}
+else
+{
+    <p>You do not have permission to access this page.</p>
+}
+
+@code {
+    private bool _hasAccess;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var authState = await _authenticationStateProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+
+        _hasAccess = user?.HasClaim(c => c.Type == "Permission" && c.Value == "admin") ?? false;
+
+        if (_hasAccess)
+        {
+            _hasAccess = true;
+        }
+        else
+        {
+            _hasAccess = user?.HasClaim(c => c.Type == "Permission" && c.Value == "customer_management") ?? false;
+        }
+    }
+}
