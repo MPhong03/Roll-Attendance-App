@@ -45,3 +45,5 @@ publish/
 
 # Ignore packages from NuGet
 *.nupkg
+
+/AppData/

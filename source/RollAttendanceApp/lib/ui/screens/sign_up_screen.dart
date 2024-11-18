@@ -1,7 +1,9 @@
 import 'package:awesome_dialog/awesome_dialog.dart';
 import 'package:blurry_modal_progress_hud/blurry_modal_progress_hud.dart';
 import 'package:flutter/material.dart';
-import 'package:itproject/services/api_service.dart';
+// import 'package:itproject/services/api_service.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:itproject/services/user_service.dart';
 
 class SignUpScreen extends StatefulWidget {
   const SignUpScreen({super.key, required this.controller});
@@ -14,10 +16,12 @@ class _SignUpScreenState extends State<SignUpScreen> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passController = TextEditingController();
   final TextEditingController _repassController = TextEditingController();
-  final ApiService _apiService = ApiService();
+  // final ApiService _apiService = ApiService();
   bool _isLoading = false;
   bool _isPasswordHidden = true;
   bool _isConfirmPasswordHidden = true;
+
+  final UserService _userService = UserService();
 
   Future<void> _register() async {
     try {
@@ -57,28 +61,46 @@ class _SignUpScreenState extends State<SignUpScreen> {
         return;
       }
 
-      final data = {
-        "email": _emailController.text,
-        "password": _passController.text,
-      };
+      // FIREBASE SERVICE
+      final userCredential =
+          await FirebaseAuth.instance.createUserWithEmailAndPassword(
+        email: _emailController.text,
+        password: _passController.text,
+      );
 
-      // Send POST request using ApiService
-      final response = await _apiService.post("api/Auth/register", data);
+      if (userCredential.user != null) {
+        final userProfile = await _userService.createProfile(
+            _emailController.text, userCredential.user?.uid);
 
-      if (response.statusCode == 200) {
-        if (mounted) {
-          AwesomeDialog(
-            context: context,
-            dialogType: DialogType.success,
-            animType: AnimType.bottomSlide,
-            title: 'Success',
-            desc: 'Register successful!',
-            btnOkOnPress: () {
-              widget.controller.animateToPage(0,
-                  duration: const Duration(milliseconds: 500),
-                  curve: Curves.ease);
-            },
-          ).show();
+        if (userProfile != null) {
+          if (mounted) {
+            AwesomeDialog(
+              context: context,
+              dialogType: DialogType.success,
+              animType: AnimType.bottomSlide,
+              title: 'Success',
+              desc: 'Register successful!',
+              btnOkOnPress: () {
+                widget.controller.animateToPage(0,
+                    duration: const Duration(milliseconds: 500),
+                    curve: Curves.ease);
+              },
+            ).show();
+          }
+        } else {
+          // Xóa user vừa tạo trong Firebase nếu tạo profile thất bại
+          await userCredential.user?.delete();
+
+          if (mounted) {
+            AwesomeDialog(
+              context: context,
+              dialogType: DialogType.error,
+              animType: AnimType.bottomSlide,
+              title: 'Error',
+              desc: 'Failed to create profile. Registration canceled.',
+              btnCancelOnPress: () {},
+            ).show();
+          }
         }
       } else {
         if (mounted) {
@@ -87,19 +109,36 @@ class _SignUpScreenState extends State<SignUpScreen> {
             dialogType: DialogType.error,
             animType: AnimType.bottomSlide,
             title: 'Error',
-            desc: response.body,
+            desc: 'Registration failed. Please try again.',
             btnCancelOnPress: () {},
           ).show();
         }
       }
     } catch (e) {
       if (mounted) {
+        String errorMessage = 'Register failed. $e';
+        if (e is FirebaseAuthException) {
+          switch (e.code) {
+            case 'email-already-in-use':
+              errorMessage = 'This email is already in use.';
+              break;
+            case 'weak-password':
+              errorMessage = 'The password is too weak.';
+              break;
+            case 'invalid-email':
+              errorMessage = 'The email address is not valid.';
+              break;
+            default:
+              errorMessage = 'An error occurred: ${e.message}';
+              break;
+          }
+        }
         AwesomeDialog(
           context: context,
           dialogType: DialogType.error,
           animType: AnimType.bottomSlide,
           title: 'Error',
-          desc: 'Register failed. $e',
+          desc: errorMessage,
           btnCancelOnPress: () {},
         ).show();
       }

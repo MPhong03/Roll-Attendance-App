@@ -27,9 +27,13 @@ migrate_working_dir/
 .dart_tool/
 .flutter-plugins
 .flutter-plugins-dependencies
+.packages
 .pub-cache/
 .pub/
 /build/
+
+# Web related
+lib/generated_plugin_registrant.dart
 
 # Symbolication related
 app.*.symbols
@@ -41,6 +45,25 @@ app.*.map.json
 /android/app/debug
 /android/app/profile
 /android/app/release
+analytics/android/app/google-services.json
+analytics/ios/firebase_app_id_file.json
+analytics/ios/Runner/GoogleService-Info.plist
+analytics/macos/firebase_app_id_file.json
+analytics/macos/Runner/GoogleService-Info.plist
+
+# ignore .firebaserc for all examples
+**/.firebaserc
+
+**/GoogleService-Info.plist
+**/google-services.json
+**/firebase_app_id_file.json
+
+# Firebase config file (if you don't want to push it to Git)
+firebase.json
+
+# Firebase configuration files
+firebase.json
+/lib/firebase_options.dart
 
 # VSCode
 .vscode

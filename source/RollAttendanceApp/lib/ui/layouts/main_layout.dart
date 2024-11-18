@@ -1,7 +1,9 @@
+import 'package:awesome_dialog/awesome_dialog.dart';
 import 'package:blurry_modal_progress_hud/blurry_modal_progress_hud.dart';
 import 'package:flutter/material.dart';
 import 'package:itproject/ui/main_view.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 
 class MainLayout extends StatefulWidget {
   final Widget child;
@@ -15,25 +17,49 @@ class MainLayout extends StatefulWidget {
 class _MainLayoutState extends State<MainLayout> {
   bool _isLoading = false;
 
-  Future<void> _logout(BuildContext context) async {
+  Future<void> _logout() async {
     setState(() {
       _isLoading = true;
     });
 
-    // Clear the access token from SharedPreferences
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.remove('accessToken');
+    try {
+      await FirebaseAuth.instance.signOut();
 
-    // Check if the widget is still mounted before navigating
-    if (context.mounted) {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+
+        Fluttertoast.showToast(
+          msg: "You have been logged out",
+          toastLength: Toast.LENGTH_SHORT,
+          gravity: ToastGravity.BOTTOM,
+          timeInSecForIosWeb: 1,
+          backgroundColor: Colors.black,
+          textColor: Colors.white,
+          fontSize: 16.0,
+        );
+
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => const MainView()),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        AwesomeDialog(
+          context: context,
+          dialogType: DialogType.error,
+          animType: AnimType.bottomSlide,
+          title: 'Error',
+          desc: 'Error, $e',
+          btnCancelOnPress: () {},
+        ).show();
+      }
+    } finally {
       setState(() {
-        _isLoading = false; // Hide loading backdrop after logout
+        _isLoading = false;
       });
-
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => const MainView()),
-      );
     }
   }
 
@@ -54,7 +80,7 @@ class _MainLayoutState extends State<MainLayout> {
                   if (value == 'profile') {
                     // Navigate to the profile page
                   } else if (value == 'logout') {
-                    _logout(context); // Trigger logout
+                    _logout(); // Trigger logout
                   }
                 },
                 itemBuilder: (BuildContext context) {

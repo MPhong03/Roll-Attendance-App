@@ -3,7 +3,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:itproject/ui/main_view.dart';
 import 'package:itproject/ui/screens/home_screen.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+// import 'package:shared_preferences/shared_preferences.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'firebase_options.dart';
 
 class MyHttpOverrides extends HttpOverrides {
   @override
@@ -18,10 +21,15 @@ Future<void> main() async {
   await dotenv.load(fileName: ".env");
   HttpOverrides.global = MyHttpOverrides();
 
-  final prefs = await SharedPreferences.getInstance();
-  final accessToken = prefs.getString('accessToken');
+  WidgetsFlutterBinding.ensureInitialized();
 
-  runApp(MyApp(isLoggedIn: accessToken != null));
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
+
+  final user = FirebaseAuth.instance.currentUser;
+
+  runApp(MyApp(isLoggedIn: user != null));
 }
 
 class MyApp extends StatelessWidget {

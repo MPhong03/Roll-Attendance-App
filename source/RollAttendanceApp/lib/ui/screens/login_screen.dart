@@ -1,10 +1,10 @@
-import 'dart:convert';
 import 'package:awesome_dialog/awesome_dialog.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 import 'package:blurry_modal_progress_hud/blurry_modal_progress_hud.dart';
 import 'package:flutter/material.dart';
-import 'package:itproject/services/api_service.dart';
+import 'package:itproject/services/user_service.dart';
 import 'package:itproject/ui/screens/home_screen.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key, required this.controller});
@@ -16,9 +16,13 @@ class LoginScreen extends StatefulWidget {
 class _LoginScreenState extends State<LoginScreen> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passController = TextEditingController();
-  final ApiService _apiService = ApiService();
+  // final ApiService _apiService = ApiService();
   bool _isLoading = false;
   bool _isPasswordHidden = true;
+
+  final FirebaseAuth _auth = FirebaseAuth.instance;
+  final GoogleSignIn _googleSignIn = GoogleSignIn();
+  final UserService _userService = UserService();
 
   Future<void> _login() async {
     try {
@@ -41,39 +45,27 @@ class _LoginScreenState extends State<LoginScreen> {
         return;
       }
 
-      final data = {
-        "email": _emailController.text,
-        "password": _passController.text,
-      };
+      // FIREBASE SERVICE
+      final userCredential = await _auth.signInWithEmailAndPassword(
+        email: _emailController.text,
+        password: _passController.text,
+      );
 
-      // Send POST request using ApiService
-      final response = await _apiService.post("api/Auth/login", data);
-
-      if (response.statusCode == 200) {
-        final responseBody = jsonDecode(response.body);
-        final accessToken = responseBody['accessToken'];
-
-        if (accessToken != null) {
-          final prefs = await SharedPreferences.getInstance();
-          await prefs.setString('accessToken', accessToken);
-
-          if (mounted) {
-            AwesomeDialog(
-                    context: context,
-                    dialogType: DialogType.success,
-                    animType: AnimType.bottomSlide,
-                    title: 'Success',
-                    desc: 'Login successful!',
-                    btnOkOnPress: () {
-                      Navigator.pushReplacement(
-                        context,
-                        MaterialPageRoute(
-                            builder: (context) => const HomeScreen()),
-                      );
-                    },
-                    dismissOnTouchOutside: false)
-                .show();
-          }
+      if (userCredential.user != null) {
+        if (mounted) {
+          AwesomeDialog(
+            context: context,
+            dialogType: DialogType.success,
+            animType: AnimType.bottomSlide,
+            title: 'Success',
+            desc: 'Login successful!',
+            btnOkOnPress: () {
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(builder: (context) => const HomeScreen()),
+              );
+            },
+          ).show();
         }
       } else {
         if (mounted) {
@@ -82,9 +74,108 @@ class _LoginScreenState extends State<LoginScreen> {
             dialogType: DialogType.error,
             animType: AnimType.bottomSlide,
             title: 'Error',
-            desc: response.body,
+            desc: 'Login failed. Please try again.',
             btnCancelOnPress: () {},
           ).show();
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        String errorMessage = 'Login failed. $e';
+        if (e is FirebaseAuthException) {
+          switch (e.code) {
+            case 'user-not-found':
+              errorMessage = 'No user found with this email.';
+              break;
+            case 'wrong-password':
+              errorMessage = 'Incorrect password.';
+              break;
+            case 'invalid-email':
+              errorMessage = 'The email address is not valid.';
+              break;
+            default:
+              errorMessage = 'An error occurred: ${e.message}';
+              break;
+          }
+        }
+        AwesomeDialog(
+          context: context,
+          dialogType: DialogType.error,
+          animType: AnimType.bottomSlide,
+          title: 'Error',
+          desc: errorMessage,
+          btnCancelOnPress: () {},
+        ).show();
+      }
+    } finally {
+      setState(() {
+        _isLoading = false;
+      });
+    }
+  }
+
+  Future<void> _loginWithGoogle() async {
+    try {
+      setState(() {
+        _isLoading = true;
+      });
+
+      final GoogleSignInAccount? googleUser = await _googleSignIn.signIn();
+      if (googleUser == null) {
+        setState(() {
+          _isLoading = false;
+        });
+        return;
+      }
+
+      final GoogleSignInAuthentication googleAuth =
+          await googleUser.authentication;
+
+      final OAuthCredential credential = GoogleAuthProvider.credential(
+        accessToken: googleAuth.accessToken,
+        idToken: googleAuth.idToken,
+      );
+
+      final userCredential = await _auth.signInWithCredential(credential);
+
+      if (userCredential.user != null) {
+        final uid = userCredential.user!.uid;
+        final email = userCredential.user!.email;
+
+        final profileResponse = await _userService.createProfile(email, uid);
+
+        if (profileResponse?.toLowerCase() == 'profile created successfully.') {
+          if (mounted) {
+            AwesomeDialog(
+              context: context,
+              dialogType: DialogType.success,
+              animType: AnimType.bottomSlide,
+              title: 'Success',
+              desc: 'Profile created and logged in successfully!',
+              btnOkOnPress: () {
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(builder: (context) => const HomeScreen()),
+                );
+              },
+            ).show();
+          }
+        } else {
+          if (mounted) {
+            AwesomeDialog(
+              context: context,
+              dialogType: DialogType.success,
+              animType: AnimType.bottomSlide,
+              title: 'Success',
+              desc: 'Logged in successfully!',
+              btnOkOnPress: () {
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(builder: (context) => const HomeScreen()),
+                );
+              },
+            ).show();
+          }
         }
       }
     } catch (e) {
@@ -94,7 +185,7 @@ class _LoginScreenState extends State<LoginScreen> {
           dialogType: DialogType.error,
           animType: AnimType.bottomSlide,
           title: 'Error',
-          desc: 'Login failed. $e',
+          desc: 'An error occurred: $e',
           btnCancelOnPress: () {},
         ).show();
       }
@@ -178,7 +269,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       ),
                     ),
                     const SizedBox(
-                      height: 30,
+                      height: 20,
                     ),
                     TextField(
                       controller: _passController,
@@ -233,8 +324,8 @@ class _LoginScreenState extends State<LoginScreen> {
                     ClipRRect(
                       borderRadius: const BorderRadius.all(Radius.circular(10)),
                       child: SizedBox(
-                        width: 329,
-                        height: 56,
+                        width: double.infinity,
+                        height: 35,
                         child: ElevatedButton(
                           onPressed: _login,
                           style: ElevatedButton.styleFrom(
@@ -248,6 +339,44 @@ class _LoginScreenState extends State<LoginScreen> {
                               fontFamily: 'Poppins',
                               fontWeight: FontWeight.w500,
                             ),
+                          ),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(
+                      height: 15,
+                    ),
+                    ClipRRect(
+                      borderRadius: const BorderRadius.all(Radius.circular(10)),
+                      child: SizedBox(
+                        width: double.infinity,
+                        height: 45,
+                        child: ElevatedButton(
+                          onPressed: _loginWithGoogle,
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.white,
+                            side: const BorderSide(color: Colors.black),
+                            padding: const EdgeInsets.symmetric(horizontal: 16),
+                          ),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Image.asset(
+                                'assets/images/google.png',
+                                width: 24,
+                                height: 24,
+                              ),
+                              const SizedBox(width: 10),
+                              const Text(
+                                'Sign In with Google',
+                                style: TextStyle(
+                                  color: Color(0xFF755DC1),
+                                  fontSize: 15,
+                                  fontFamily: 'Poppins',
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                            ],
                           ),
                         ),
                       ),
@@ -289,16 +418,23 @@ class _LoginScreenState extends State<LoginScreen> {
                       ],
                     ),
                     const SizedBox(
-                      height: 15,
+                      height: 5,
                     ),
-                    const Center(
-                      child: Text(
-                        'Forget Password?',
-                        style: TextStyle(
-                          color: Color(0xFF755DC1),
-                          fontSize: 13,
-                          fontFamily: 'Poppins',
-                          fontWeight: FontWeight.w500,
+                    Center(
+                      child: InkWell(
+                        onTap: () {
+                          widget.controller.animateToPage(2,
+                              duration: const Duration(milliseconds: 500),
+                              curve: Curves.ease);
+                        },
+                        child: const Text(
+                          'Forget Password?',
+                          style: TextStyle(
+                            color: Color(0xFF755DC1),
+                            fontSize: 13,
+                            fontFamily: 'Poppins',
+                            fontWeight: FontWeight.w500,
+                          ),
                         ),
                       ),
                     ),

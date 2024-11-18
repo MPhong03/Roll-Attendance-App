@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:itproject/ui/screens/forgot_password_screen.dart';
 import 'package:itproject/ui/screens/login_screen.dart';
 import 'package:itproject/ui/screens/sign_up_screen.dart';
 import 'package:itproject/ui/screens/verify_screen.dart';
@@ -27,6 +28,10 @@ class _MainViewState extends State<MainView> {
             );
           } else if (index == 1) {
             return SignUpScreen(
+              controller: controller,
+            );
+          } else if (index == 2) {
+            return ForgotPasswordScreen(
               controller: controller,
             );
           } else {
