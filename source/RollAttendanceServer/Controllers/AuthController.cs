@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using FirebaseAdmin.Auth;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -6,6 +7,7 @@ using RollAttendanceServer.Data;
 using RollAttendanceServer.DTOs;
 using RollAttendanceServer.Models;
 using RollAttendanceServer.Services;
+using System.Diagnostics;
 
 namespace RollAttendanceServer.Controllers
 {
@@ -137,11 +139,39 @@ namespace RollAttendanceServer.Controllers
             }
         }
 
-        [Authorize]
         [HttpGet("test-authorization")]
-        public IActionResult TestAuthorization()
+        [Authorize(AuthenticationSchemes = "Firebase")]
+        public IActionResult TestUser()
         {
-            return Ok("You are authorized.");
+            var user = User.Identity;
+            return Ok($"Hello {user?.Name}, your API access is authorized!");
+        }
+
+        [HttpGet("profile")]
+        [Authorize(AuthenticationSchemes = "Firebase")]
+        public async Task<IActionResult> GetProfile()
+        {
+            try
+            {
+                var identity = User.Identity;
+
+                if (identity == null) return BadRequest("Unauthorized");
+
+                UserRecord user = await FirebaseAuth.DefaultInstance.GetUserAsync(identity?.Name);
+
+                return Ok(new
+                {
+                    user.Uid,
+                    user.Email,
+                    user.DisplayName,
+                    user.PhotoUrl,
+                    user.EmailVerified
+                });
+            }
+            catch (FirebaseAuthException ex)
+            {
+                return NotFound(new { message = ex.Message });
+            }
         }
 
         private bool UserExists(int id)

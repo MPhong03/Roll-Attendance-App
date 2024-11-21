@@ -14,6 +14,11 @@ using Microsoft.AspNetCore.Components.Authorization;
 using RollAttendanceServer.Authentication;
 using RollAttendanceServer.Models;
 using Microsoft.AspNetCore.Authorization;
+using RollAttendanceServer.Middlewares;
+using Microsoft.AspNetCore.Authentication;
+using FirebaseAdmin;
+using Google.Apis.Auth.OAuth2;
+using Microsoft.Extensions.Configuration;
 
 namespace RollAttendanceServer
 {
@@ -40,21 +45,30 @@ namespace RollAttendanceServer
             builder.Services.AddScoped<AuthService>();
             builder.Services.AddScoped<LoadingService>();
 
+            // FIREBASE
+            FirebaseApp.Create(new AppOptions
+            {
+                Credential = GoogleCredential.FromFile(builder.Configuration.GetValue<string>("Firebase:CredentialsPath"))
+            });
+
             // AUTHENTICATION
-            builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-                .AddJwtBearer(options =>
-                {
-                    options.TokenValidationParameters = new TokenValidationParameters
-                    {
-                        ValidateIssuer = true,
-                        ValidateAudience = true,
-                        ValidateLifetime = true,
-                        ValidateIssuerSigningKey = true,
-                        ValidIssuer = builder.Configuration["Jwt:Issuer"],
-                        ValidAudience = builder.Configuration["Jwt:Audience"],
-                        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]))
-                    };
-                });
+            //builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+            //    .AddJwtBearer(options =>
+            //    {
+            //        options.TokenValidationParameters = new TokenValidationParameters
+            //        {
+            //            ValidateIssuer = true,
+            //            ValidateAudience = true,
+            //            ValidateLifetime = true,
+            //            ValidateIssuerSigningKey = true,
+            //            ValidIssuer = builder.Configuration["Jwt:Issuer"],
+            //            ValidAudience = builder.Configuration["Jwt:Audience"],
+            //            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]))
+            //        };
+            //    });
+            builder.Services.AddAuthentication("Firebase")
+                .AddScheme<AuthenticationSchemeOptions, FirebaseAuthenticationHandler>("Firebase", null);
+
 
             builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
                 .AddCookie(options =>
@@ -98,14 +112,15 @@ namespace RollAttendanceServer
 
             app.UseHttpsRedirection();
 
+            app.UseRouting();
+
             app.UseAuthentication();
             app.UseAuthorization();
 
             app.UseStaticFiles();
 
-            app.UseRouting();
-
             // API Controllers
+            app.UseMiddleware<FirebaseAuthMiddlewares>();
             app.MapControllers();
 
             // CORS Policy
