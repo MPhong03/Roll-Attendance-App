@@ -72,7 +72,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
         final userProfile = await _userService.createProfile(
             _emailController.text, userCredential.user?.uid);
 
-        if (userProfile != null) {
+        if (userProfile == "Create profile successfully") {
           if (mounted) {
             AwesomeDialog(
               context: context,
@@ -97,7 +97,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
               dialogType: DialogType.error,
               animType: AnimType.bottomSlide,
               title: 'Error',
-              desc: 'Failed to create profile. Registration canceled.',
+              desc: 'Failed to create profile. $userProfile',
               btnCancelOnPress: () {},
             ).show();
           }

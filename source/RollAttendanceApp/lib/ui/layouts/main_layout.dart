@@ -1,9 +1,11 @@
 import 'package:awesome_dialog/awesome_dialog.dart';
 import 'package:blurry_modal_progress_hud/blurry_modal_progress_hud.dart';
 import 'package:flutter/material.dart';
+import 'package:itproject/models/profile_model.dart';
 import 'package:itproject/ui/main_view.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:itproject/ui/screens/profile_screen.dart';
 
 class MainLayout extends StatefulWidget {
   final Widget child;
@@ -79,6 +81,11 @@ class _MainLayoutState extends State<MainLayout> {
                 onSelected: (value) {
                   if (value == 'profile') {
                     // Navigate to the profile page
+                    Navigator.pushReplacement(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => const ProfileScreen()),
+                    );
                   } else if (value == 'logout') {
                     _logout(); // Trigger logout
                   }

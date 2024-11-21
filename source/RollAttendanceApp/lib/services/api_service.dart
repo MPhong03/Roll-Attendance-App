@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:logging/logging.dart';
@@ -23,8 +24,8 @@ class ApiService {
   /// GET ACCESS TOKEN FOR HEADERS ///
   Future<String?> _getAccessToken() async {
     try {
-      final prefs = await SharedPreferences.getInstance();
-      return prefs.getString('accessToken');
+      User? user = FirebaseAuth.instance.currentUser;
+      return await user?.getIdToken();
     } catch (e) {
       _logger.severe('Error fetching access token: $e');
       return null;
