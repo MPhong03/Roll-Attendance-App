@@ -120,7 +120,6 @@ namespace RollAttendanceServer
             app.UseStaticFiles();
 
             // API Controllers
-            app.UseMiddleware<FirebaseAuthMiddlewares>();
             app.MapControllers();
 
             // CORS Policy

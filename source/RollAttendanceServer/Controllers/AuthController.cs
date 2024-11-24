@@ -173,8 +173,21 @@ namespace RollAttendanceServer.Controllers
                 return NotFound(new { message = ex.Message });
             }
         }
+        [HttpGet("roles")]
+        public async Task<ActionResult<IEnumerable<Role>>> GetRoles()
+        {
+            var roles = await _context.Roles
+                .Include(r => r.Permissions)
+                .ToListAsync();
 
-        private bool UserExists(int id)
+            if (roles == null || !roles.Any())
+            {
+                return NotFound("No roles found.");
+            }
+
+            return Ok(roles);
+        }
+        private bool UserExists(string id)
         {
             return _context.Users.Any(e => e.Id == id);
         }

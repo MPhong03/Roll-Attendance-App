@@ -54,7 +54,7 @@ namespace RollAttendanceServer.Services
                 var userSession = new UserSession
                 {
                     Email = user.Email,
-                    RoleId = user.RoleId.ToString(),
+                    RoleId = user.Role.Id,
                     Permissions = user.Role.Permissions.Select(p => p.PermissionValue).ToList(),
                 };
 

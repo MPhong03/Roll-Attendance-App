@@ -14,8 +14,7 @@
 
         if (!user.Identity.IsAuthenticated)
         {
-            <h2>You don't have permission to access this page.</h2>
-            <p>Please contact the administrator if you believe this is an error.</p>
+            NavigationManager.NavigateTo("/login");
         }
         else
         {
@@ -39,8 +38,12 @@
 @code {
     private AuthenticationState authenticationState;
 
-    protected override async Task OnInitializedAsync()
+    protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        authenticationState = await _authenticationStateProvider.GetAuthenticationStateAsync();
+        if (firstRender)
+        {
+            authenticationState = await _authenticationStateProvider.GetAuthenticationStateAsync();
+            StateHasChanged();
+        }
     }
 }
