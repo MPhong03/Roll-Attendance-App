@@ -12,6 +12,7 @@ namespace RollAttendanceServer.Data
         public virtual DbSet<Admin> Admins { get; set; }
         public virtual DbSet<Organization> Organizations { get; set; }
         public virtual DbSet<Event> Events { get; set; }
+        public DbSet<UserOrganizationRole> UserOrganizationRoles { get; set; }
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options)
         {
         }
@@ -98,12 +99,27 @@ namespace RollAttendanceServer.Data
                     j =>
                     {
                         j.HasData(
-                            new { PermissionsId = permission1Id, RolesId = role3Id },
-                            new { PermissionsId = permission2Id, RolesId = role3Id },
                             new { PermissionsId = permission3Id, RolesId = role3Id }
                         );
                     }
                 );
+
+            modelBuilder.Entity<UserOrganizationRole>()
+            .HasKey(uor => new { uor.UserId, uor.OrganizationId });
+
+            modelBuilder.Entity<UserOrganizationRole>()
+                .HasOne(uor => uor.User)
+                .WithMany(u => u.UserOrganizationRoles)
+                .HasForeignKey(uor => uor.UserId);
+
+            modelBuilder.Entity<UserOrganizationRole>()
+                .HasOne(uor => uor.Organization)
+                .WithMany(o => o.UserOrganizationRoles)
+                .HasForeignKey(uor => uor.OrganizationId);
+
+            modelBuilder.Entity<UserOrganizationRole>()
+                .Property(uor => uor.Role)
+                .HasConversion<int>();
         }
         public override int SaveChanges()
         {

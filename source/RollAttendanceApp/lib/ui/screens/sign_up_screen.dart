@@ -362,8 +362,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
                     ClipRRect(
                       borderRadius: const BorderRadius.all(Radius.circular(10)),
                       child: SizedBox(
-                        width: 329,
-                        height: 56,
+                        width: double.infinity,
+                        height: 35,
                         child: ElevatedButton(
                           onPressed: _register,
                           style: ElevatedButton.styleFrom(

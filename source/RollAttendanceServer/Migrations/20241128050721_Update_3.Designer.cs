@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using RollAttendanceServer.Data;
 
@@ -11,9 +12,10 @@ using RollAttendanceServer.Data;
 namespace RollAttendanceServer.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20241128050721_Update_3")]
+    partial class Update_3
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -39,8 +41,8 @@ namespace RollAttendanceServer.Migrations
                     b.HasData(
                         new
                         {
-                            PermissionsId = "D570AC80420744459C55429B7600E978",
-                            RolesId = "405402E3E5F4484A8DD5F871E204097E"
+                            PermissionsId = "53282CBC94354B958B136762DDE33922",
+                            RolesId = "62DB22F21EA34D37B05C4A880BBC9AFE"
                         });
                 });
 
@@ -87,12 +89,12 @@ namespace RollAttendanceServer.Migrations
                     b.HasData(
                         new
                         {
-                            Id = "7AE87665AD8E4FF4A0C3E69F941C1624",
+                            Id = "72C16393B1AD4935B44BD369631745A5",
                             Email = "admin@gmail.com",
                             IsDeleted = false,
-                            Password = "$2a$10$mF6FiPZZo2QKs/7V5ejtMO8QzxdfRZE.O/N12ZIDqKr79AT9IlLp2",
+                            Password = "$2a$10$/UCqfN.AooikYMAQgYWtA.68pk4rIPwMrnO3LkTOQaQzVy8K.4cj.",
                             Phone = "0000000000",
-                            RoleId = "405402E3E5F4484A8DD5F871E204097E"
+                            RoleId = "62DB22F21EA34D37B05C4A880BBC9AFE"
                         });
                 });
 
@@ -155,9 +157,6 @@ namespace RollAttendanceServer.Migrations
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
 
-                    b.Property<bool>("IsPrivate")
-                        .HasColumnType("bit");
-
                     b.Property<string>("Name")
                         .HasColumnType("nvarchar(max)");
 
@@ -204,30 +203,30 @@ namespace RollAttendanceServer.Migrations
                     b.HasData(
                         new
                         {
-                            Id = "617C1C86D3F0457C9DE3BADFFEBF1436",
-                            CreatedAt = new DateTime(2024, 11, 30, 11, 4, 24, 894, DateTimeKind.Utc).AddTicks(6751),
+                            Id = "FB55885A201B412796D972DAE7671950",
+                            CreatedAt = new DateTime(2024, 11, 28, 5, 7, 20, 255, DateTimeKind.Utc).AddTicks(2863),
                             IsDeleted = false,
                             PermissionName = "Organization Management",
                             PermissionValue = "organization_management",
-                            UpdatedAt = new DateTime(2024, 11, 30, 11, 4, 24, 894, DateTimeKind.Utc).AddTicks(6754)
+                            UpdatedAt = new DateTime(2024, 11, 28, 5, 7, 20, 255, DateTimeKind.Utc).AddTicks(2866)
                         },
                         new
                         {
-                            Id = "C723EDF3A5F8484D83F5EE0A6FE7DCCD",
-                            CreatedAt = new DateTime(2024, 11, 30, 11, 4, 24, 894, DateTimeKind.Utc).AddTicks(6772),
+                            Id = "BD70289CA2ED4266968980B694D21A27",
+                            CreatedAt = new DateTime(2024, 11, 28, 5, 7, 20, 255, DateTimeKind.Utc).AddTicks(2875),
                             IsDeleted = false,
                             PermissionName = "User Management",
                             PermissionValue = "user_management",
-                            UpdatedAt = new DateTime(2024, 11, 30, 11, 4, 24, 894, DateTimeKind.Utc).AddTicks(6773)
+                            UpdatedAt = new DateTime(2024, 11, 28, 5, 7, 20, 255, DateTimeKind.Utc).AddTicks(2876)
                         },
                         new
                         {
-                            Id = "D570AC80420744459C55429B7600E978",
-                            CreatedAt = new DateTime(2024, 11, 30, 11, 4, 24, 894, DateTimeKind.Utc).AddTicks(6776),
+                            Id = "53282CBC94354B958B136762DDE33922",
+                            CreatedAt = new DateTime(2024, 11, 28, 5, 7, 20, 255, DateTimeKind.Utc).AddTicks(2882),
                             IsDeleted = false,
                             PermissionName = "Administrator",
                             PermissionValue = "all_permissions",
-                            UpdatedAt = new DateTime(2024, 11, 30, 11, 4, 24, 894, DateTimeKind.Utc).AddTicks(6776)
+                            UpdatedAt = new DateTime(2024, 11, 28, 5, 7, 20, 255, DateTimeKind.Utc).AddTicks(2882)
                         });
                 });
 
@@ -260,11 +259,11 @@ namespace RollAttendanceServer.Migrations
                     b.HasData(
                         new
                         {
-                            Id = "405402E3E5F4484A8DD5F871E204097E",
-                            CreatedAt = new DateTime(2024, 11, 30, 11, 4, 24, 894, DateTimeKind.Utc).AddTicks(6916),
+                            Id = "62DB22F21EA34D37B05C4A880BBC9AFE",
+                            CreatedAt = new DateTime(2024, 11, 28, 5, 7, 20, 255, DateTimeKind.Utc).AddTicks(3135),
                             IsDeleted = false,
                             RoleName = "Administrator",
-                            UpdatedAt = new DateTime(2024, 11, 30, 11, 4, 24, 894, DateTimeKind.Utc).AddTicks(6916)
+                            UpdatedAt = new DateTime(2024, 11, 28, 5, 7, 20, 255, DateTimeKind.Utc).AddTicks(3136)
                         });
                 });
 
@@ -299,6 +298,15 @@ namespace RollAttendanceServer.Migrations
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
 
+                    b.Property<string>("OrganizationId")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("OrganizationId1")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("OrganizationId2")
+                        .HasColumnType("nvarchar(450)");
+
                     b.Property<string>("Uid")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -312,38 +320,13 @@ namespace RollAttendanceServer.Migrations
 
                     b.HasIndex("EventId");
 
-                    b.ToTable("Users");
-                });
-
-            modelBuilder.Entity("RollAttendanceServer.Models.UserOrganizationRole", b =>
-                {
-                    b.Property<string>("UserId")
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<string>("OrganizationId")
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("datetime2")
-                        .HasDefaultValueSql("GETUTCDATE()");
-
-                    b.Property<bool>("IsDeleted")
-                        .HasColumnType("bit");
-
-                    b.Property<int>("Role")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime>("UpdatedAt")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("datetime2")
-                        .HasDefaultValueSql("GETUTCDATE()");
-
-                    b.HasKey("UserId", "OrganizationId");
-
                     b.HasIndex("OrganizationId");
 
-                    b.ToTable("UserOrganizationRoles");
+                    b.HasIndex("OrganizationId1");
+
+                    b.HasIndex("OrganizationId2");
+
+                    b.ToTable("Users");
                 });
 
             modelBuilder.Entity("RolePermissions", b =>
@@ -377,25 +360,18 @@ namespace RollAttendanceServer.Migrations
                     b.HasOne("RollAttendanceServer.Models.Event", null)
                         .WithMany("PermitedUser")
                         .HasForeignKey("EventId");
-                });
 
-            modelBuilder.Entity("RollAttendanceServer.Models.UserOrganizationRole", b =>
-                {
-                    b.HasOne("RollAttendanceServer.Models.Organization", "Organization")
-                        .WithMany("UserOrganizationRoles")
-                        .HasForeignKey("OrganizationId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                    b.HasOne("RollAttendanceServer.Models.Organization", null)
+                        .WithMany("Organizers")
+                        .HasForeignKey("OrganizationId");
 
-                    b.HasOne("RollAttendanceServer.Models.User", "User")
-                        .WithMany("UserOrganizationRoles")
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                    b.HasOne("RollAttendanceServer.Models.Organization", null)
+                        .WithMany("Representatives")
+                        .HasForeignKey("OrganizationId1");
 
-                    b.Navigation("Organization");
-
-                    b.Navigation("User");
+                    b.HasOne("RollAttendanceServer.Models.Organization", null)
+                        .WithMany("Users")
+                        .HasForeignKey("OrganizationId2");
                 });
 
             modelBuilder.Entity("RollAttendanceServer.Models.Event", b =>
@@ -405,12 +381,11 @@ namespace RollAttendanceServer.Migrations
 
             modelBuilder.Entity("RollAttendanceServer.Models.Organization", b =>
                 {
-                    b.Navigation("UserOrganizationRoles");
-                });
+                    b.Navigation("Organizers");
 
-            modelBuilder.Entity("RollAttendanceServer.Models.User", b =>
-                {
-                    b.Navigation("UserOrganizationRoles");
+                    b.Navigation("Representatives");
+
+                    b.Navigation("Users");
                 });
 #pragma warning restore 612, 618
         }

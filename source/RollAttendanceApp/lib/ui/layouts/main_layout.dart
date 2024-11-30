@@ -1,10 +1,9 @@
 import 'package:awesome_dialog/awesome_dialog.dart';
-import 'package:blurry_modal_progress_hud/blurry_modal_progress_hud.dart';
 import 'package:flutter/material.dart';
-import 'package:itproject/models/profile_model.dart';
 import 'package:itproject/ui/main_view.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:itproject/ui/screens/organizations/modals/create_organization.dart';
 import 'package:itproject/ui/screens/profile_screen.dart';
 
 class MainLayout extends StatefulWidget {
@@ -17,21 +16,37 @@ class MainLayout extends StatefulWidget {
 }
 
 class _MainLayoutState extends State<MainLayout> {
-  bool _isLoading = false;
+  OverlayEntry? _overlayEntry;
+
+  void _showLoadingOverlay() {
+    if (_overlayEntry != null) return; // Nếu overlay đã tồn tại, không tạo lại
+    _overlayEntry = OverlayEntry(
+      builder: (context) => Positioned.fill(
+        child: Container(
+          color: Colors.black.withOpacity(0.3),
+          child: const Center(
+            child: CircularProgressIndicator(), // Loading Indicator
+          ),
+        ),
+      ),
+    );
+    Overlay.of(context).insert(_overlayEntry!);
+  }
+
+  void _hideLoadingOverlay() {
+    if (_overlayEntry != null) {
+      _overlayEntry!.remove();
+      _overlayEntry = null;
+    }
+  }
 
   Future<void> _logout() async {
-    setState(() {
-      _isLoading = true;
-    });
+    _showLoadingOverlay(); // Hiển thị loading
 
     try {
       await FirebaseAuth.instance.signOut();
 
       if (mounted) {
-        setState(() {
-          _isLoading = false;
-        });
-
         Fluttertoast.showToast(
           msg: "You have been logged out",
           toastLength: Toast.LENGTH_SHORT,
@@ -59,101 +74,89 @@ class _MainLayoutState extends State<MainLayout> {
         ).show();
       }
     } finally {
-      setState(() {
-        _isLoading = false;
-      });
+      _hideLoadingOverlay(); // Ẩn loading
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    return BlurryModalProgressHUD(
-      inAsyncCall: _isLoading,
-      opacity: 0.3,
-      blurEffectIntensity: 5,
-      child: Scaffold(
-        body: widget.child, // The current screen will be placed here
-        bottomNavigationBar: BottomAppBar(
-          color: Colors.blueAccent,
-          child: Row(
-            children: [
-              PopupMenuButton<String>(
-                onSelected: (value) {
-                  if (value == 'profile') {
-                    // Navigate to the profile page
-                    Navigator.pushReplacement(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) => const ProfileScreen()),
-                    );
-                  } else if (value == 'logout') {
-                    _logout(); // Trigger logout
+    return Scaffold(
+      body: widget.child,
+      bottomNavigationBar: BottomAppBar(
+        color: Colors.blueAccent,
+        child: Row(
+          children: [
+            PopupMenuButton<String>(
+              onSelected: (value) {
+                if (value == 'profile') {
+                  Navigator.pushReplacement(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => const ProfileScreen()),
+                  );
+                } else if (value == 'logout') {
+                  _logout(); // Gọi logout
+                }
+              },
+              itemBuilder: (context) {
+                final iconColor =
+                    Theme.of(context).brightness == Brightness.dark
+                        ? Colors.white
+                        : Colors.black;
+                return [
+                  PopupMenuItem<String>(
+                    value: 'profile',
+                    child: Row(
+                      children: [
+                        Icon(Icons.account_circle, color: iconColor),
+                        const SizedBox(width: 8),
+                        const Text('Profile'),
+                      ],
+                    ),
+                  ),
+                  PopupMenuItem<String>(
+                    value: 'logout',
+                    child: Row(
+                      children: [
+                        Icon(Icons.logout, color: iconColor),
+                        const SizedBox(width: 8),
+                        const Text('Logout'),
+                      ],
+                    ),
+                  ),
+                ];
+              },
+              icon: const Icon(Icons.more_vert),
+            ),
+            IconButton(icon: const Icon(Icons.home), onPressed: () {}),
+            IconButton(icon: const Icon(Icons.notifications), onPressed: () {}),
+          ],
+        ),
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          showDialog(
+            context: context,
+            builder: (context) => Dialog(
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(15),
+              ),
+              child: CreateOrganizationModal(
+                onLoadingStateChange: (isLoading) {
+                  if (isLoading) {
+                    _showLoadingOverlay();
+                  } else {
+                    _hideLoadingOverlay();
                   }
                 },
-                itemBuilder: (BuildContext context) {
-                  final iconColor =
-                      Theme.of(context).brightness == Brightness.dark
-                          ? Colors.white // White icon for dark theme
-                          : Colors.black;
-
-                  return [
-                    PopupMenuItem<String>(
-                      value: 'profile',
-                      child: Row(
-                        children: [
-                          Icon(
-                            Icons.account_circle,
-                            color: iconColor,
-                          ),
-                          const SizedBox(width: 8),
-                          const Text('Profile'),
-                        ],
-                      ),
-                    ),
-                    PopupMenuItem<String>(
-                      value: 'logout',
-                      child: Row(
-                        children: [
-                          Icon(
-                            Icons.logout,
-                            color: iconColor,
-                          ),
-                          const SizedBox(width: 8),
-                          const Text('Logout'),
-                        ],
-                      ),
-                    ),
-                  ];
-                },
-                icon: const Icon(Icons.more_vert),
               ),
-              IconButton(
-                icon: const Icon(Icons.home),
-                onPressed: () {},
-              ),
-              // IconButton(
-              //   icon: const Icon(Icons.search),
-              //   onPressed: () {},
-              // ),
-              IconButton(
-                icon: const Icon(Icons.notifications),
-                onPressed: () {},
-              ),
-              // IconButton(
-              //   icon: const Icon(Icons.account_circle),
-              //   onPressed: () {},
-              // ),
-              // Popup menu button with Profile and Logout options
-            ],
-          ),
-        ),
-        floatingActionButton: const FloatingActionButton(
-          onPressed: null,
-          tooltip: 'Create',
-          child: Icon(Icons.add),
-        ),
-        floatingActionButtonLocation: FloatingActionButtonLocation.endContained,
+            ),
+          );
+        },
+        tooltip: 'Create Organization',
+        child: const Icon(Icons.add),
       ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.endContained,
     );
   }
 }

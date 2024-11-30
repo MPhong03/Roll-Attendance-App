@@ -1,6 +1,10 @@
 ﻿using FirebaseAdmin;
 using FirebaseAdmin.Auth;
 using Google.Apis.Auth.OAuth2;
+using Microsoft.EntityFrameworkCore;
+using RollAttendanceServer.Data;
+using RollAttendanceServer.Models;
+using System.Security.Claims;
 
 namespace RollAttendanceServer.Services
 {

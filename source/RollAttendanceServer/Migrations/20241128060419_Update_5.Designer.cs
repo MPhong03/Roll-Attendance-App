@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using RollAttendanceServer.Data;
 
@@ -11,9 +12,10 @@ using RollAttendanceServer.Data;
 namespace RollAttendanceServer.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20241128060419_Update_5")]
+    partial class Update_5
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -39,8 +41,8 @@ namespace RollAttendanceServer.Migrations
                     b.HasData(
                         new
                         {
-                            PermissionsId = "D570AC80420744459C55429B7600E978",
-                            RolesId = "405402E3E5F4484A8DD5F871E204097E"
+                            PermissionsId = "C4990E5CB813472E909B8288D6EC54AC",
+                            RolesId = "C1ECC039C5484FC3B91F90D46E94E1F9"
                         });
                 });
 
@@ -87,12 +89,12 @@ namespace RollAttendanceServer.Migrations
                     b.HasData(
                         new
                         {
-                            Id = "7AE87665AD8E4FF4A0C3E69F941C1624",
+                            Id = "CCB8BB1E27914AF0B7CA0018AE1DB32C",
                             Email = "admin@gmail.com",
                             IsDeleted = false,
-                            Password = "$2a$10$mF6FiPZZo2QKs/7V5ejtMO8QzxdfRZE.O/N12ZIDqKr79AT9IlLp2",
+                            Password = "$2a$10$60aZ7uaI.UIeiNRU2BziIOYketrZelLcE90rp9xmF9iGYZG/1xa9G",
                             Phone = "0000000000",
-                            RoleId = "405402E3E5F4484A8DD5F871E204097E"
+                            RoleId = "C1ECC039C5484FC3B91F90D46E94E1F9"
                         });
                 });
 
@@ -155,9 +157,6 @@ namespace RollAttendanceServer.Migrations
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
 
-                    b.Property<bool>("IsPrivate")
-                        .HasColumnType("bit");
-
                     b.Property<string>("Name")
                         .HasColumnType("nvarchar(max)");
 
@@ -204,30 +203,30 @@ namespace RollAttendanceServer.Migrations
                     b.HasData(
                         new
                         {
-                            Id = "617C1C86D3F0457C9DE3BADFFEBF1436",
-                            CreatedAt = new DateTime(2024, 11, 30, 11, 4, 24, 894, DateTimeKind.Utc).AddTicks(6751),
+                            Id = "AC8D092B0B7D498F86B9D65C997072A3",
+                            CreatedAt = new DateTime(2024, 11, 28, 6, 4, 19, 484, DateTimeKind.Utc).AddTicks(1990),
                             IsDeleted = false,
                             PermissionName = "Organization Management",
                             PermissionValue = "organization_management",
-                            UpdatedAt = new DateTime(2024, 11, 30, 11, 4, 24, 894, DateTimeKind.Utc).AddTicks(6754)
+                            UpdatedAt = new DateTime(2024, 11, 28, 6, 4, 19, 484, DateTimeKind.Utc).AddTicks(1994)
                         },
                         new
                         {
-                            Id = "C723EDF3A5F8484D83F5EE0A6FE7DCCD",
-                            CreatedAt = new DateTime(2024, 11, 30, 11, 4, 24, 894, DateTimeKind.Utc).AddTicks(6772),
+                            Id = "6BF3F19BADC3488D86A33E2843550A52",
+                            CreatedAt = new DateTime(2024, 11, 28, 6, 4, 19, 484, DateTimeKind.Utc).AddTicks(2002),
                             IsDeleted = false,
                             PermissionName = "User Management",
                             PermissionValue = "user_management",
-                            UpdatedAt = new DateTime(2024, 11, 30, 11, 4, 24, 894, DateTimeKind.Utc).AddTicks(6773)
+                            UpdatedAt = new DateTime(2024, 11, 28, 6, 4, 19, 484, DateTimeKind.Utc).AddTicks(2003)
                         },
                         new
                         {
-                            Id = "D570AC80420744459C55429B7600E978",
-                            CreatedAt = new DateTime(2024, 11, 30, 11, 4, 24, 894, DateTimeKind.Utc).AddTicks(6776),
+                            Id = "C4990E5CB813472E909B8288D6EC54AC",
+                            CreatedAt = new DateTime(2024, 11, 28, 6, 4, 19, 484, DateTimeKind.Utc).AddTicks(2008),
                             IsDeleted = false,
                             PermissionName = "Administrator",
                             PermissionValue = "all_permissions",
-                            UpdatedAt = new DateTime(2024, 11, 30, 11, 4, 24, 894, DateTimeKind.Utc).AddTicks(6776)
+                            UpdatedAt = new DateTime(2024, 11, 28, 6, 4, 19, 484, DateTimeKind.Utc).AddTicks(2008)
                         });
                 });
 
@@ -260,11 +259,11 @@ namespace RollAttendanceServer.Migrations
                     b.HasData(
                         new
                         {
-                            Id = "405402E3E5F4484A8DD5F871E204097E",
-                            CreatedAt = new DateTime(2024, 11, 30, 11, 4, 24, 894, DateTimeKind.Utc).AddTicks(6916),
+                            Id = "C1ECC039C5484FC3B91F90D46E94E1F9",
+                            CreatedAt = new DateTime(2024, 11, 28, 6, 4, 19, 484, DateTimeKind.Utc).AddTicks(2209),
                             IsDeleted = false,
                             RoleName = "Administrator",
-                            UpdatedAt = new DateTime(2024, 11, 30, 11, 4, 24, 894, DateTimeKind.Utc).AddTicks(6916)
+                            UpdatedAt = new DateTime(2024, 11, 28, 6, 4, 19, 484, DateTimeKind.Utc).AddTicks(2210)
                         });
                 });
 

@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using RollAttendanceServer.Data;
+using RollAttendanceServer.Data.Enum;
 using RollAttendanceServer.DTOs;
 using RollAttendanceServer.Models;
 
@@ -21,36 +22,79 @@ namespace RollAttendanceServer.Controllers
             _context = context;
         }
 
-        [HttpPost("CreateOrganization")]
+        [HttpGet("getall/{uid}")]
+        public async Task<IActionResult> GetMyOrganizations(string uid)
+        {
+            try
+            {
+                var organizations = await _context.UserOrganizationRoles
+                    .Where(uor => uor.User.Uid == uid && uor.Role == UserRole.REPRESENTATIVE)
+                    .Select(uor => uor.Organization)
+                    .ToListAsync();
+
+                if (organizations == null || organizations.Count == 0)
+                {
+                    return NotFound("No organizations found for the specified user.");
+                }
+
+                return Ok(organizations);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
+        }
+
+        [HttpGet("detail/{id}")]
+        public async Task<IActionResult> GetOrganization(string id)
+        {
+            try
+            {
+                var organization = await _context.Organizations
+                    .FirstOrDefaultAsync(org => org.Id == id && !org.IsDeleted);
+
+                if (organization == null)
+                {
+                    return NotFound($"Organization with ID {id} not found.");
+                }
+
+                return Ok(organization);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
+        }
+
+        [HttpPost]
         public async Task<IActionResult> CreateOrganization([FromBody] OrganizationDTO dto)
         {
             try
             {
-                var existingOrganization = await _context.Organizations
-                    .FirstOrDefaultAsync(o => o.Name == dto.Name && !o.IsDeleted);
-
-                if (existingOrganization != null)
-                {
-                    return BadRequest("Organization with the same name already exists.");
-                }
-
                 var organization = new Organization
                 {
                     Id = Guid.NewGuid().ToString("N").ToUpper(),
                     Name = dto.Name,
                     Description = dto.Description,
-                    Address = dto.Address,
+                    Address = dto.Address ?? string.Empty,
+                    IsPrivate = (bool)dto.IsPrivate,
                     IsDeleted = false
                 };
 
                 _context.Organizations.Add(organization);
                 await _context.SaveChangesAsync();
 
-                // Thêm User vào Representatives
-                var user = await _context.Users.FirstOrDefaultAsync(u => u.Id == dto.UserId);
+                var user = await _context.Users.FirstOrDefaultAsync(u => u.Uid == dto.UserId);
                 if (user != null)
                 {
-                    organization.Representatives.Add(user);
+                    var userRole = new UserOrganizationRole
+                    {
+                        UserId = user.Id,
+                        OrganizationId = organization.Id,
+                        Role = UserRole.REPRESENTATIVE
+                    };
+
+                    _context.UserOrganizationRoles.Add(userRole);
                     await _context.SaveChangesAsync();
                 }
 
@@ -62,7 +106,7 @@ namespace RollAttendanceServer.Controllers
             }
         }
 
-        [HttpPut("UpdateOrganization/{id}")]
+        [HttpPut("{id}")]
         public async Task<IActionResult> UpdateOrganization(string id, [FromBody] OrganizationDTO dto)
         {
             try
@@ -89,21 +133,38 @@ namespace RollAttendanceServer.Controllers
             }
         }
 
-        [HttpPost("AddUser/{id}")]
-        public async Task<IActionResult> AddUser(string id, [FromQuery] string userId)
+        [HttpPost("Add/{organizationId}")]
+        public async Task<IActionResult> AddToRole(string organizationId, [FromQuery] string userId, [FromQuery] UserRole role)
         {
             try
             {
-                var organization = await _context.Organizations.Include(o => o.Users).FirstOrDefaultAsync(o => o.Id == id);
-                if (organization == null || organization.IsDeleted) return NotFound("Organization not found");
+                var organization = await _context.Organizations
+                    .FirstOrDefaultAsync(o => o.Id == organizationId && !o.IsDeleted);
 
-                var user = await _context.Users.FindAsync(userId);
+                if (organization == null) return NotFound("Organization not found");
+
+                var user = await _context.Users.FirstOrDefaultAsync(u => u.Uid == userId);
                 if (user == null) return NotFound("User not found");
 
-                organization.Users.Add(user);
+                var existingRole = await _context.UserOrganizationRoles
+                    .FirstOrDefaultAsync(uor => uor.UserId == userId && uor.OrganizationId == organizationId);
+
+                if (existingRole != null)
+                {
+                    return BadRequest("User already has a role in this organization.");
+                }
+
+                var userRole = new UserOrganizationRole
+                {
+                    UserId = user.Id,
+                    OrganizationId = organization.Id,
+                    Role = role
+                };
+
+                _context.UserOrganizationRoles.Add(userRole);
                 await _context.SaveChangesAsync();
 
-                return Ok(organization);
+                return Ok(new { organizationId = organization.Id, userId = user.Id, role = role });
             }
             catch (Exception ex)
             {
@@ -111,51 +172,7 @@ namespace RollAttendanceServer.Controllers
             }
         }
 
-        [HttpPost("AddToOrganizers/{id}")]
-        public async Task<IActionResult> AddToOrganizers(string id, [FromQuery] string userId)
-        {
-            try
-            {
-                var organization = await _context.Organizations.Include(o => o.Organizers).FirstOrDefaultAsync(o => o.Id == id);
-                if (organization == null || organization.IsDeleted) return NotFound("Organization not found");
-
-                var user = await _context.Users.FindAsync(userId);
-                if (user == null) return NotFound("User not found");
-
-                organization.Organizers.Add(user);
-                await _context.SaveChangesAsync();
-
-                return Ok(organization);
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, $"Internal server error: {ex.Message}");
-            }
-        }
-
-        [HttpPost("AddToRepresentatives/{id}")]
-        public async Task<IActionResult> AddToRepresentatives(string id, [FromQuery] string userId)
-        {
-            try
-            {
-                var organization = await _context.Organizations.Include(o => o.Representatives).FirstOrDefaultAsync(o => o.Id == id);
-                if (organization == null || organization.IsDeleted) return NotFound("Organization not found");
-
-                var user = await _context.Users.FindAsync(userId);
-                if (user == null) return NotFound("User not found");
-
-                organization.Representatives.Add(user);
-                await _context.SaveChangesAsync();
-
-                return Ok(organization);
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, $"Internal server error: {ex.Message}");
-            }
-        }
-
-        [HttpDelete("DeleteOrganization/{id}")]
+        [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteOrganization(string id)
         {
             try

@@ -1,5 +1,6 @@
 ﻿using RollAttendanceServer.Models.Common;
 using System.ComponentModel.DataAnnotations;
+using System.Text.Json.Serialization;
 
 namespace RollAttendanceServer.Models
 {
@@ -10,8 +11,9 @@ namespace RollAttendanceServer.Models
         public string? Name { get; set; }
         public string? Description { get; set; }
         public string Address { get; set; } = string.Empty;
-        public ICollection<User> Representatives { get; set; } = new List<User>();
-        public ICollection<User> Organizers { get; set; } = new List<User>();
-        public ICollection<User> Users { get; set; } = new List<User>();
+        public bool IsPrivate { get; set; } = false;
+
+        [JsonIgnore]
+        public ICollection<UserOrganizationRole> UserOrganizationRoles { get; set; } = new List<UserOrganizationRole>();
     }
 }

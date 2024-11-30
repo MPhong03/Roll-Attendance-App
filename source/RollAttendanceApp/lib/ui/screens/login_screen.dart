@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:itproject/services/user_service.dart';
 import 'package:itproject/ui/screens/home_screen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:itproject/services/google_sign_in_service.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key, required this.controller});
@@ -21,7 +22,7 @@ class _LoginScreenState extends State<LoginScreen> {
   bool _isPasswordHidden = true;
 
   final FirebaseAuth _auth = FirebaseAuth.instance;
-  final GoogleSignIn _googleSignIn = GoogleSignIn();
+  final GoogleSignIn _googleSignIn = GoogleSignInService.getInstance();
   final UserService _userService = UserService();
 
   Future<void> _login() async {

@@ -25,7 +25,7 @@ else
         }
         else
         {
-            _hasAccess = user?.HasClaim(c => c.Type == "Permission" && c.Value == "customer_management") ?? false;
+            _hasAccess = user?.HasClaim(c => c.Type == "Permission" && c.Value == "user_management") ?? false;
         }
     }
 }

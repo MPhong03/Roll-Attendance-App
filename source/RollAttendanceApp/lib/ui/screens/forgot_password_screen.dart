@@ -150,8 +150,8 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                     ClipRRect(
                       borderRadius: const BorderRadius.all(Radius.circular(10)),
                       child: SizedBox(
-                        width: 329,
-                        height: 56,
+                        width: double.infinity,
+                        height: 35,
                         child: ElevatedButton(
                           onPressed: _sendPasswordResetEmail,
                           style: ElevatedButton.styleFrom(
