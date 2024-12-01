@@ -1,10 +1,12 @@
+import 'dart:convert';
+
 import 'package:awesome_dialog/awesome_dialog.dart';
 import 'package:flutter/material.dart';
-import 'package:itproject/ui/main_view.dart';
+import 'package:go_router/go_router.dart';
+import 'package:itproject/services/api_service.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:fluttertoast/fluttertoast.dart';
-import 'package:itproject/ui/screens/organizations/modals/create_organization.dart';
-import 'package:itproject/ui/screens/profile_screen.dart';
+import 'package:sidebarx/sidebarx.dart';
 
 class MainLayout extends StatefulWidget {
   final Widget child;
@@ -17,9 +19,12 @@ class MainLayout extends StatefulWidget {
 
 class _MainLayoutState extends State<MainLayout> {
   OverlayEntry? _overlayEntry;
+  final SidebarXController _controller = SidebarXController(selectedIndex: 0);
+  final ApiService _apiService = ApiService();
+  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
   void _showLoadingOverlay() {
-    if (_overlayEntry != null) return; // Nếu overlay đã tồn tại, không tạo lại
+    if (_overlayEntry != null) return;
     _overlayEntry = OverlayEntry(
       builder: (context) => Positioned.fill(
         child: Container(
@@ -40,8 +45,18 @@ class _MainLayoutState extends State<MainLayout> {
     }
   }
 
+  Future<Map<String, dynamic>> _getUserProfile() async {
+    final response = await _apiService.get('api/auth/profile');
+
+    if (response.statusCode == 200) {
+      return jsonDecode(response.body);
+    } else {
+      throw Exception('Failed to load profile');
+    }
+  }
+
   Future<void> _logout() async {
-    _showLoadingOverlay(); // Hiển thị loading
+    _showLoadingOverlay();
 
     try {
       await FirebaseAuth.instance.signOut();
@@ -57,10 +72,7 @@ class _MainLayoutState extends State<MainLayout> {
           fontSize: 16.0,
         );
 
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (context) => const MainView()),
-        );
+        context.go('/');
       }
     } catch (e) {
       if (mounted) {
@@ -74,89 +86,138 @@ class _MainLayoutState extends State<MainLayout> {
         ).show();
       }
     } finally {
-      _hideLoadingOverlay(); // Ẩn loading
+      _hideLoadingOverlay();
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    final isSmallScreen = MediaQuery.of(context).size.width < 600;
+
     return Scaffold(
-      body: widget.child,
-      bottomNavigationBar: BottomAppBar(
-        color: Colors.blueAccent,
-        child: Row(
-          children: [
-            PopupMenuButton<String>(
-              onSelected: (value) {
-                if (value == 'profile') {
-                  Navigator.pushReplacement(
-                    context,
-                    MaterialPageRoute(
-                        builder: (context) => const ProfileScreen()),
-                  );
-                } else if (value == 'logout') {
-                  _logout(); // Gọi logout
-                }
-              },
-              itemBuilder: (context) {
-                final iconColor =
-                    Theme.of(context).brightness == Brightness.dark
-                        ? Colors.white
-                        : Colors.black;
-                return [
-                  PopupMenuItem<String>(
-                    value: 'profile',
-                    child: Row(
-                      children: [
-                        Icon(Icons.account_circle, color: iconColor),
-                        const SizedBox(width: 8),
-                        const Text('Profile'),
-                      ],
-                    ),
-                  ),
-                  PopupMenuItem<String>(
-                    value: 'logout',
-                    child: Row(
-                      children: [
-                        Icon(Icons.logout, color: iconColor),
-                        const SizedBox(width: 8),
-                        const Text('Logout'),
-                      ],
-                    ),
-                  ),
-                ];
-              },
-              icon: const Icon(Icons.more_vert),
-            ),
-            IconButton(icon: const Icon(Icons.home), onPressed: () {}),
-            IconButton(icon: const Icon(Icons.notifications), onPressed: () {}),
-          ],
+      key: _scaffoldKey,
+      appBar: isSmallScreen
+          ? AppBar(
+              backgroundColor: Colors.blueAccent,
+              title: const Text('Dashboard'),
+              leading: IconButton(
+                onPressed: () {
+                  _scaffoldKey.currentState?.openDrawer();
+                },
+                icon: const Icon(Icons.menu),
+              ),
+            )
+          : null,
+      drawer: isSmallScreen ? _buildSidebarX() : null,
+      body: Row(
+        children: [
+          if (!isSmallScreen) _buildSidebarX(),
+          Expanded(
+            child: widget.child,
+          ),
+        ],
+      ),
+    );
+  }
+
+  SidebarX _buildSidebarX() {
+    return SidebarX(
+      controller: _controller,
+      theme: SidebarXTheme(
+        margin: const EdgeInsets.all(10),
+        decoration: BoxDecoration(
+          color: Colors.blueAccent,
+          borderRadius: BorderRadius.circular(10),
+        ),
+        hoverColor: Colors.blue.withOpacity(0.1),
+        textStyle: TextStyle(color: Colors.white.withOpacity(0.7)),
+        selectedTextStyle: const TextStyle(color: Colors.white),
+        itemTextPadding: const EdgeInsets.only(left: 30),
+        selectedItemTextPadding: const EdgeInsets.only(left: 30),
+        itemDecoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(10),
+        ),
+        selectedItemDecoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(10),
+          border: Border.all(color: Colors.blueAccent.withOpacity(0.5)),
+          gradient: const LinearGradient(
+            colors: [Colors.blue, Colors.blueAccent],
+          ),
+        ),
+        iconTheme: IconThemeData(
+          color: Colors.white.withOpacity(0.7),
+          size: 20,
+        ),
+        selectedIconTheme: const IconThemeData(
+          color: Colors.white,
+          size: 20,
         ),
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          showDialog(
-            context: context,
-            builder: (context) => Dialog(
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(15),
-              ),
-              child: CreateOrganizationModal(
-                onLoadingStateChange: (isLoading) {
-                  if (isLoading) {
-                    _showLoadingOverlay();
-                  } else {
-                    _hideLoadingOverlay();
-                  }
-                },
-              ),
-            ),
-          );
-        },
-        tooltip: 'Create Organization',
-        child: const Icon(Icons.add),
+      extendedTheme: const SidebarXTheme(
+        width: 200,
+        decoration: BoxDecoration(
+          color: Colors.blueAccent,
+        ),
       ),
-      floatingActionButtonLocation: FloatingActionButtonLocation.endContained,
+      footerDivider: Divider(color: Colors.white.withOpacity(0.3), height: 1),
+      headerBuilder: (context, extended) {
+        return FutureBuilder<Map<String, dynamic>>(
+          future: _getUserProfile(),
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return const Center(child: CircularProgressIndicator());
+            }
+
+            if (snapshot.hasError) {
+              return Center(child: Text('Error: ${snapshot.error}'));
+            }
+
+            final user = snapshot.data!;
+            return Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                children: [
+                  CircleAvatar(
+                    backgroundImage: NetworkImage(user['photoUrl'] ?? ''),
+                    radius: 40,
+                  ),
+                  if (extended) ...[
+                    const SizedBox(height: 8),
+                    Text(user['displayName'] ?? 'No Name',
+                        style:
+                            const TextStyle(fontSize: 18, color: Colors.white)),
+                    const SizedBox(height: 4),
+                    Text(user['email'] ?? 'No Email',
+                        style:
+                            const TextStyle(fontSize: 14, color: Colors.white)),
+                  ],
+                ],
+              ),
+            );
+          },
+        );
+      },
+      items: [
+        SidebarXItem(
+          icon: Icons.account_circle,
+          label: 'Profile',
+          onTap: () {
+            context.push('/profile');
+          },
+        ),
+        SidebarXItem(
+          icon: Icons.add,
+          label: 'Create Organization',
+          onTap: () {
+            context.push('/create-organization');
+          },
+        ),
+        SidebarXItem(
+          icon: Icons.logout,
+          label: 'Logout',
+          onTap: _logout,
+        ),
+      ],
     );
   }
 }

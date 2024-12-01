@@ -1,4 +1,5 @@
 import 'package:awesome_dialog/awesome_dialog.dart';
+import 'package:go_router/go_router.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:blurry_modal_progress_hud/blurry_modal_progress_hud.dart';
 import 'package:flutter/material.dart';
@@ -61,10 +62,7 @@ class _LoginScreenState extends State<LoginScreen> {
             title: 'Success',
             desc: 'Login successful!',
             btnOkOnPress: () {
-              Navigator.pushReplacement(
-                context,
-                MaterialPageRoute(builder: (context) => const HomeScreen()),
-              );
+              GoRouter.of(context).go('/home');
             },
           ).show();
         }

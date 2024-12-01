@@ -4,6 +4,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:blurry_modal_progress_hud/blurry_modal_progress_hud.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:go_router/go_router.dart';
 import 'package:itproject/models/organization_model.dart';
 import 'package:itproject/services/api_service.dart';
 import 'package:itproject/ui/layouts/main_layout.dart';
@@ -129,8 +130,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         color: org.isPrivate ? Colors.red : Colors.green,
                       ),
                       onTap: () {
-                        Navigator.pushNamed(context, '/organization-detail',
-                            arguments: org.id);
+                        context.push('/organization-detail/${org.id}');
                       },
                     ),
                   );

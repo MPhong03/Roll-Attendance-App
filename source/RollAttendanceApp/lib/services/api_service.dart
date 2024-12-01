@@ -1,4 +1,6 @@
 import 'dart:convert';
+import 'dart:io';
+import 'dart:typed_data';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter_dotenv/flutter_dotenv.dart';
@@ -102,6 +104,43 @@ class ApiService {
     } catch (e) {
       _logger.severe('Error during DELETE request to $endpoint: $e');
       throw Exception('Failed to delete data');
+    }
+  }
+
+  Future<http.Response> postFile(String endpoint, dynamic selectedImageFile,
+      {Map<String, String>? additionalData}) async {
+    try {
+      final accessToken = await _getAccessToken();
+      final uri = Uri.parse('$baseUrl/$endpoint');
+      final request = http.MultipartRequest('POST', uri)
+        ..headers['Authorization'] = 'Bearer $accessToken'
+        ..headers['Content-Type'] = 'multipart/form-data';
+
+      // For Web: selectedImageFile is a Uint8List (file bytes)
+      if (selectedImageFile is Uint8List) {
+        // Convert Uint8List to MultipartFile
+        request.files.add(http.MultipartFile.fromBytes(
+            'file', selectedImageFile,
+            filename: 'profile_image.jpg'));
+      }
+      // For Mobile: selectedImageFile is a File (file path)
+      else if (selectedImageFile is File) {
+        request.files.add(
+            await http.MultipartFile.fromPath('file', selectedImageFile.path));
+      }
+
+      if (additionalData != null) {
+        additionalData.forEach((key, value) {
+          request.fields[key] = value;
+        });
+      }
+
+      final response = await request.send();
+      final responseData = await http.Response.fromStream(response);
+      return responseData;
+    } catch (e) {
+      _logger.severe('Error during POST request with file to $endpoint: $e');
+      throw Exception('Failed to upload file');
     }
   }
 }

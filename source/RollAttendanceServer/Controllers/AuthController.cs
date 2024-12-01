@@ -17,11 +17,13 @@ namespace RollAttendanceServer.Controllers
     {
         private readonly ApplicationDbContext _context;
         private readonly JwtService _jwtService;
+        private readonly CloudinaryService _cloudinaryService;
 
-        public AuthController(ApplicationDbContext context, JwtService jwtService)
+        public AuthController(ApplicationDbContext context, JwtService jwtService, CloudinaryService cloudinaryService)
         {
             _context = context;
             _jwtService = jwtService;
+            _cloudinaryService = cloudinaryService;
         }
         //// DEPRECATED
         //[HttpPost("register")]
@@ -173,6 +175,46 @@ namespace RollAttendanceServer.Controllers
                 return NotFound(new { message = ex.Message });
             }
         }
+
+        [HttpPost("upload-profile-image")]
+        [Authorize(AuthenticationSchemes = "Firebase")]
+        public async Task<IActionResult> UploadProfileImage(IFormFile file)
+        {
+            try
+            {
+                if (file == null || file.Length == 0)
+                {
+                    return BadRequest("No file uploaded.");
+                }
+
+                // Get the authenticated user ID
+                var identity = User.Identity;
+                if (identity == null)
+                    return Unauthorized("User is not authenticated.");
+
+                string uid = identity.Name;
+
+                string timestamp = DateTime.UtcNow.ToString("yyyyMMddHHmmss");
+                string fileName = $"{uid}_{timestamp}.jpg";
+
+                // Create the file stream
+                using (var stream = file.OpenReadStream())
+                {
+                    string url = await _cloudinaryService.UploadImageAsync(stream, fileName, uid);
+
+                    return Ok(new
+                    {
+                        message = "Profile image uploaded successfully.",
+                        url = url
+                    });
+                }
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+        }
+
         [HttpGet("roles")]
         public async Task<ActionResult<IEnumerable<Role>>> GetRoles()
         {

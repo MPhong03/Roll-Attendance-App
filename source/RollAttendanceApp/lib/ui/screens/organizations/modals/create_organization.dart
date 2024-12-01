@@ -1,37 +1,35 @@
 import 'dart:convert';
 
 import 'package:awesome_dialog/awesome_dialog.dart';
+import 'package:blurry_modal_progress_hud/blurry_modal_progress_hud.dart';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:itproject/services/api_service.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
-class CreateOrganizationModal extends StatefulWidget {
-  final void Function(bool) onLoadingStateChange;
-  const CreateOrganizationModal(
-      {super.key, required this.onLoadingStateChange});
+class CreateOrganizationScreen extends StatefulWidget {
+  const CreateOrganizationScreen({super.key});
 
   @override
-  State<CreateOrganizationModal> createState() =>
-      _CreateOrganizationModalState();
+  State<CreateOrganizationScreen> createState() =>
+      _CreateOrganizationScreenState();
 }
 
-class _CreateOrganizationModalState extends State<CreateOrganizationModal> {
+class _CreateOrganizationScreenState extends State<CreateOrganizationScreen> {
   final _formKey = GlobalKey<FormState>();
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _descriptionController = TextEditingController();
   final TextEditingController _addressController = TextEditingController();
   bool _isPrivate = false;
-  bool _isSubmitting = false; // To manage the loading state
+  bool _isLoading = false;
   final ApiService _apiService = ApiService();
 
   Future<void> _createOrganization() async {
     if (!_formKey.currentState!.validate()) return;
 
     setState(() {
-      _isSubmitting = true; // Start submitting
+      _isLoading = true;
     });
-
-    widget.onLoadingStateChange(true); // Start loading state change
 
     try {
       final data = {
@@ -54,9 +52,7 @@ class _CreateOrganizationModalState extends State<CreateOrganizationModal> {
             title: 'Success',
             desc: 'Organization created successfully',
             btnOkOnPress: () {
-              Navigator.pop(context);
-              Navigator.pushNamed(context, '/organization-detail',
-                  arguments: organizationId);
+              context.push('/organization-detail/$organizationId');
             },
           ).show();
         }
@@ -68,7 +64,7 @@ class _CreateOrganizationModalState extends State<CreateOrganizationModal> {
             animType: AnimType.scale,
             title: 'Error',
             desc: 'Failed to create organization',
-            btnCancelOnPress: () => Navigator.pop(context),
+            btnCancelOnPress: () {},
           ).show();
         }
       }
@@ -85,89 +81,89 @@ class _CreateOrganizationModalState extends State<CreateOrganizationModal> {
       }
     } finally {
       setState(() {
-        _isSubmitting = false; // End submitting
+        _isLoading = false;
       });
-      widget.onLoadingStateChange(false); // End loading state change
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(16.0),
-      child: Form(
-        key: _formKey,
-        child: SingleChildScrollView(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const Text(
-                'Create Organization',
-                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-              ),
-              const SizedBox(height: 16),
-              TextFormField(
-                controller: _nameController,
-                decoration: InputDecoration(
-                  labelText: 'Organization Name',
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(10.0),
+    return BlurryModalProgressHUD(
+      inAsyncCall: _isLoading,
+      opacity: 0.3,
+      blurEffectIntensity: 5,
+      child: Scaffold(
+        appBar: AppBar(
+          title: const Text('Create Organization'),
+        ),
+        body: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Form(
+            key: _formKey,
+            child: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const SizedBox(height: 16),
+                  TextFormField(
+                    controller: _nameController,
+                    decoration: InputDecoration(
+                      labelText: 'Organization Name',
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(10.0),
+                      ),
+                    ),
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'Please enter organization name';
+                      }
+                      return null;
+                    },
                   ),
-                ),
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Please enter organization name';
-                  }
-                  return null;
-                },
-                enabled: !_isSubmitting, // Disable input while submitting
-              ),
-              const SizedBox(height: 16),
-              TextFormField(
-                controller: _descriptionController,
-                decoration: InputDecoration(
-                  labelText: 'Description',
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(10.0),
+                  const SizedBox(height: 16),
+                  TextFormField(
+                    controller: _descriptionController,
+                    decoration: InputDecoration(
+                      labelText: 'Description',
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(10.0),
+                      ),
+                    ),
+                    maxLines: 3,
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'Please enter description';
+                      }
+                      return null;
+                    },
                   ),
-                ),
-                maxLines: 3,
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Please enter description';
-                  }
-                  return null;
-                },
-                enabled: !_isSubmitting, // Disable input while submitting
-              ),
-              const SizedBox(height: 16),
-              TextFormField(
-                controller: _addressController,
-                decoration: InputDecoration(
-                  labelText: 'Address (Optional)',
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(10.0),
+                  const SizedBox(height: 16),
+                  TextFormField(
+                    controller: _addressController,
+                    decoration: InputDecoration(
+                      labelText: 'Address (Optional)',
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(10.0),
+                      ),
+                    ),
                   ),
-                ),
-                enabled: !_isSubmitting, // Disable input while submitting
+                  SwitchListTile(
+                    title: const Text('Private'),
+                    value: _isPrivate,
+                    onChanged: (bool value) {
+                      setState(() {
+                        _isPrivate = value;
+                      });
+                    },
+                  ),
+                  const SizedBox(height: 16),
+                  ElevatedButton(
+                    onPressed: _isLoading ? null : _createOrganization,
+                    child: const Text('Create'),
+                  ),
+                ],
               ),
-              SwitchListTile(
-                title: const Text('Private'),
-                value: _isPrivate,
-                onChanged: _isSubmitting
-                    ? null // Disable switch while submitting
-                    : (bool value) {
-                        setState(() {
-                          _isPrivate = value;
-                        });
-                      },
-              ),
-              const SizedBox(height: 16),
-              ElevatedButton(
-                onPressed: _isSubmitting ? null : _createOrganization,
-                child: const Text('Create'),
-              ),
-            ],
+            ),
           ),
         ),
       ),

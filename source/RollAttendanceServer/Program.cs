@@ -45,6 +45,9 @@ namespace RollAttendanceServer
             builder.Services.AddScoped<AuthService>();
             builder.Services.AddScoped<LoadingService>();
 
+            // SINGLETON
+            builder.Services.AddSingleton<CloudinaryService>();
+
             // FIREBASE
             FirebaseApp.Create(new AppOptions
             {

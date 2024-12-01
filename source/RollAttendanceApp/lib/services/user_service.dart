@@ -33,6 +33,7 @@ class UserService {
         final body = jsonDecode(response.body);
 
         ProfileModel profile = ProfileModel(
+          uid: body['uid'] ?? '',
           name: body['displayName'] ?? '',
           email: body['email'] ?? '',
           profileImageUrl: body['photoUrl'] ?? '',

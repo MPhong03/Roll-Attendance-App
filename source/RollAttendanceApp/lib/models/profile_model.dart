@@ -1,16 +1,31 @@
 class ProfileModel {
+  String _uid;
   String _name;
   String _email;
   String _profileImageUrl;
 
   // Constructor
   ProfileModel({
+    required String uid,
     required String name,
     required String email,
     required String profileImageUrl,
-  })  : _name = name,
+  })  : _uid = uid,
+        _name = name,
         _email = email,
         _profileImageUrl = profileImageUrl;
+
+  // Getter for uid
+  String get uid => _uid;
+
+  // Setter for uid
+  set uid(String value) {
+    if (value.isNotEmpty) {
+      _uid = value;
+    } else {
+      throw Exception("Uid cannot be empty");
+    }
+  }
 
   // Getter for name
   String get name => _name;
@@ -51,6 +66,7 @@ class ProfileModel {
   // Method to convert object to a map (e.g., for API or database)
   Map<String, dynamic> toMap() {
     return {
+      'uid': _uid,
       'name': _name,
       'email': _email,
       'profileImageUrl': _profileImageUrl,
@@ -60,6 +76,7 @@ class ProfileModel {
   // Factory constructor to create object from map (e.g., from API or database)
   factory ProfileModel.fromMap(Map<String, dynamic> map) {
     return ProfileModel(
+      uid: map['uid'] ?? "",
       name: map['name'] ?? "",
       email: map['email'] ?? "",
       profileImageUrl: map['profileImageUrl'] ?? "",
