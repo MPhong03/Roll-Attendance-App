@@ -127,7 +127,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       ),
                       trailing: Icon(
                         org.isPrivate ? Icons.lock : Icons.lock_open,
-                        color: org.isPrivate ? Colors.red : Colors.green,
+                        color: org.isPrivate ? Colors.red : Colors.blue,
                       ),
                       onTap: () {
                         context.push('/organization-detail/${org.id}');

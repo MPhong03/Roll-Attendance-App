@@ -15,5 +15,8 @@ namespace RollAttendanceServer.Models
 
         [JsonIgnore]
         public ICollection<UserOrganizationRole> UserOrganizationRoles { get; set; } = new List<UserOrganizationRole>();
+
+        [JsonIgnore]
+        public ICollection<Event> Events { get; set; } = new List<Event>();
     }
 }

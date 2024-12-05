@@ -10,12 +10,12 @@ using System;
 using System.Diagnostics;
 using System.Security.Claims;
 
-namespace RollAttendanceServer.Services
+namespace RollAttendanceServer.Services.Configs
 {
     public class AuthService
     {
         private readonly ApplicationDbContext _context;
-        private readonly CustomAuthenticationStateProvider _authenticationStateProvider; 
+        private readonly CustomAuthenticationStateProvider _authenticationStateProvider;
 
         public AuthService(ApplicationDbContext context,
                            CustomAuthenticationStateProvider authenticationStateProvider)

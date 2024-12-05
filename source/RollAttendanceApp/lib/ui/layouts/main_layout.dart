@@ -140,9 +140,9 @@ class _MainLayoutState extends State<MainLayout> {
         selectedItemDecoration: BoxDecoration(
           borderRadius: BorderRadius.circular(10),
           border: Border.all(color: Colors.blueAccent.withOpacity(0.5)),
-          gradient: const LinearGradient(
-            colors: [Colors.blue, Colors.blueAccent],
-          ),
+          // gradient: const LinearGradient(
+          //   colors: [Colors.blue, Colors.blueAccent],
+          // ),
         ),
         iconTheme: IconThemeData(
           color: Colors.white.withOpacity(0.7),
@@ -198,6 +198,13 @@ class _MainLayoutState extends State<MainLayout> {
         );
       },
       items: [
+        SidebarXItem(
+          icon: Icons.home,
+          label: 'Home',
+          onTap: () {
+            context.push('/home');
+          },
+        ),
         SidebarXItem(
           icon: Icons.account_circle,
           label: 'Profile',

@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:itproject/ui/main_view.dart';
+import 'package:itproject/ui/screens/events/create_event.dart';
 import 'package:itproject/ui/screens/home_screen.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -68,6 +69,13 @@ class MyApp extends StatelessWidget {
             return OrganizationDetailScreen(organizationId: id);
           },
         ),
+        GoRoute(
+          path: '/create-event/:id',
+          builder: (context, state) {
+            final id = state.pathParameters['id']!;
+            return CreateEventScreen(organizationId: id);
+          },
+        ),
       ],
       errorPageBuilder: (context, state) => const MaterialPage(
         child: NotFoundScreen(),
@@ -107,7 +115,7 @@ class NotFoundScreen extends StatelessWidget {
                 if (Navigator.canPop(context)) {
                   Navigator.pop(context);
                 } else {
-                  context.go('/');
+                  context.go('/home');
                 }
               },
               child: const Text('Go Back'),

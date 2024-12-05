@@ -6,7 +6,6 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using RollAttendanceServer.Configs;
 using RollAttendanceServer.Data;
-using RollAttendanceServer.Services;
 using MudBlazor.Services;
 using System.Text;
 using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage;
@@ -19,6 +18,9 @@ using Microsoft.AspNetCore.Authentication;
 using FirebaseAdmin;
 using Google.Apis.Auth.OAuth2;
 using Microsoft.Extensions.Configuration;
+using RollAttendanceServer.Services.Configs;
+using RollAttendanceServer.Services.Systems;
+using System.Reflection;
 
 namespace RollAttendanceServer
 {
@@ -27,6 +29,8 @@ namespace RollAttendanceServer
         public static void Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
+
+            builder.Services.ConfigureServices(builder);
 
             // DATABASE CONNECTION
             builder.Services.AddDbContext<ApplicationDbContext>(options =>
@@ -133,6 +137,26 @@ namespace RollAttendanceServer
 
 
             app.Run();
+        }
+    }
+
+    public static class ServiceExtensions
+    {
+        public static void ConfigureServices(this IServiceCollection services, WebApplicationBuilder builder)
+        {
+            var serviceAssembly = Assembly.GetExecutingAssembly();
+            var serviceTypes = serviceAssembly.GetTypes()
+                .Where(t => t.Name.EndsWith("Service") && t.IsClass && !t.IsAbstract)
+                .ToList();
+
+            foreach (var serviceType in serviceTypes)
+            {
+                var interfaceType = serviceType.GetInterfaces().FirstOrDefault();
+                if (interfaceType != null)
+                {
+                    services.AddTransient(interfaceType, serviceType);
+                }
+            }
         }
     }
 }

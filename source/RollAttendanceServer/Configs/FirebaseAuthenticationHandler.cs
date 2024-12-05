@@ -1,6 +1,8 @@
 ﻿using FirebaseAdmin.Auth;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.Extensions.Options;
+using RollAttendanceServer.Interfaces;
+using RollAttendanceServer.Models;
 using System.Security.Claims;
 using System.Text.Encodings.Web;
 
@@ -8,13 +10,17 @@ namespace RollAttendanceServer.Configs
 {
     public class FirebaseAuthenticationHandler : AuthenticationHandler<AuthenticationSchemeOptions>
     {
+        private readonly IUserService _userService;
+
         public FirebaseAuthenticationHandler(
             IOptionsMonitor<AuthenticationSchemeOptions> options,
             ILoggerFactory logger,
             UrlEncoder encoder,
-            ISystemClock clock)
+            ISystemClock clock,
+            IUserService userService)
             : base(options, logger, encoder, clock)
         {
+            _userService = userService;
         }
 
         protected override async Task<AuthenticateResult> HandleAuthenticateAsync()
@@ -33,14 +39,21 @@ namespace RollAttendanceServer.Configs
                 // Verify Firebase ID token
                 var decodedToken = await FirebaseAuth.DefaultInstance.VerifyIdTokenAsync(idToken);
 
+                var user = await _userService.GetUserByUidAsync(decodedToken.Uid);
+
+                if (user == null)
+                {
+                    return AuthenticateResult.Fail("User not found in the system.");
+                }
+
                 // Create user claims
                 var claims = new List<Claim>
-            {
-                new Claim(ClaimTypes.Name, decodedToken.Uid),
-                new Claim("email", decodedToken.Claims.ContainsKey("email") ? decodedToken.Claims["email"].ToString() : string.Empty)
-            };
+                {
+                    new Claim(ClaimTypes.Name, decodedToken.Uid), // Firebase Uid
+                    new Claim("email", decodedToken.Claims.ContainsKey("email") ? decodedToken.Claims["email"].ToString() : string.Empty),
+                    new Claim(ClaimTypes.NameIdentifier, user.Id) // UserId 
+                };
 
-                // Add additional claims if needed
                 foreach (var claim in decodedToken.Claims)
                 {
                     claims.Add(new Claim(claim.Key, claim.Value.ToString()));
@@ -57,4 +70,5 @@ namespace RollAttendanceServer.Configs
             }
         }
     }
+
 }

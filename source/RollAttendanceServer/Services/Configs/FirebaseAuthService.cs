@@ -6,7 +6,7 @@ using RollAttendanceServer.Data;
 using RollAttendanceServer.Models;
 using System.Security.Claims;
 
-namespace RollAttendanceServer.Services
+namespace RollAttendanceServer.Services.Configs
 {
     public class FirebaseAuthService
     {

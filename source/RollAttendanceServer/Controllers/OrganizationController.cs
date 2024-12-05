@@ -6,7 +6,9 @@ using Microsoft.IdentityModel.Tokens;
 using RollAttendanceServer.Data;
 using RollAttendanceServer.Data.Enum;
 using RollAttendanceServer.DTOs;
+using RollAttendanceServer.Interfaces;
 using RollAttendanceServer.Models;
+using RollAttendanceServer.Requests;
 
 namespace RollAttendanceServer.Controllers
 {
@@ -15,11 +17,11 @@ namespace RollAttendanceServer.Controllers
     [ApiController]
     public class OrganizationController : ControllerBase
     {
-        private readonly ApplicationDbContext _context;
+        private readonly IOrganizationService _organizationService;
 
-        public OrganizationController(ApplicationDbContext context)
+        public OrganizationController(IOrganizationService organizationService)
         {
-            _context = context;
+            _organizationService = organizationService;
         }
 
         [HttpGet("getall/{uid}")]
@@ -27,21 +29,15 @@ namespace RollAttendanceServer.Controllers
         {
             try
             {
-                var organizations = await _context.UserOrganizationRoles
-                    .Where(uor => uor.User.Uid == uid && uor.Role == UserRole.REPRESENTATIVE)
-                    .Select(uor => uor.Organization)
-                    .ToListAsync();
-
-                if (organizations == null || organizations.Count == 0)
-                {
+                var organizations = await _organizationService.GetOrganizationsByUserAsync(uid, UserRole.REPRESENTATIVE);
+                if (organizations == null || !organizations.Any())
                     return NotFound("No organizations found for the specified user.");
-                }
 
                 return Ok(organizations);
             }
             catch (Exception ex)
             {
-                return StatusCode(500, $"Internal server error: {ex.Message}");
+                return StatusCode(500, ex.Message);
             }
         }
 
@@ -50,19 +46,15 @@ namespace RollAttendanceServer.Controllers
         {
             try
             {
-                var organization = await _context.Organizations
-                    .FirstOrDefaultAsync(org => org.Id == id && !org.IsDeleted);
-
+                var organization = await _organizationService.GetOrganizationByIdAsync(id);
                 if (organization == null)
-                {
                     return NotFound($"Organization with ID {id} not found.");
-                }
 
                 return Ok(organization);
             }
             catch (Exception ex)
             {
-                return StatusCode(500, $"Internal server error: {ex.Message}");
+                return StatusCode(500, ex.Message);
             }
         }
 
@@ -71,123 +63,26 @@ namespace RollAttendanceServer.Controllers
         {
             try
             {
-                var organization = new Organization
-                {
-                    Id = Guid.NewGuid().ToString("N").ToUpper(),
-                    Name = dto.Name,
-                    Description = dto.Description,
-                    Address = dto.Address ?? string.Empty,
-                    IsPrivate = (bool)dto.IsPrivate,
-                    IsDeleted = false
-                };
-
-                _context.Organizations.Add(organization);
-                await _context.SaveChangesAsync();
-
-                var user = await _context.Users.FirstOrDefaultAsync(u => u.Uid == dto.UserId);
-                if (user != null)
-                {
-                    var userRole = new UserOrganizationRole
-                    {
-                        UserId = user.Id,
-                        OrganizationId = organization.Id,
-                        Role = UserRole.REPRESENTATIVE
-                    };
-
-                    _context.UserOrganizationRoles.Add(userRole);
-                    await _context.SaveChangesAsync();
-                }
-
+                var organization = await _organizationService.CreateOrganizationAsync(dto);
                 return CreatedAtAction(nameof(CreateOrganization), new { id = organization.Id }, organization);
             }
             catch (Exception ex)
             {
-                return StatusCode(500, $"Internal server error: {ex.Message}");
-            }
-        }
-
-        [HttpPut("{id}")]
-        public async Task<IActionResult> UpdateOrganization(string id, [FromBody] OrganizationDTO dto)
-        {
-            try
-            {
-                var organization = await _context.Organizations
-                    .FirstOrDefaultAsync(o => o.Id == id && !o.IsDeleted);
-
-                if (organization == null)
-                {
-                    return NotFound("Organization not found");
-                }
-
-                organization.Name = dto.Name ?? organization.Name;
-                organization.Description = dto.Description ?? organization.Description;
-                organization.Address = dto.Address ?? organization.Address;
-
-                await _context.SaveChangesAsync();
-
-                return Ok(organization);
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, $"Internal server error: {ex.Message}");
+                return StatusCode(500, ex.Message);
             }
         }
 
         [HttpPost("Add/{organizationId}")]
-        public async Task<IActionResult> AddToRole(string organizationId, [FromQuery] string userId, [FromQuery] UserRole role)
+        public async Task<IActionResult> AddToRole(string organizationId, [FromBody] AddToRoleRequest request)
         {
             try
             {
-                var organization = await _context.Organizations
-                    .FirstOrDefaultAsync(o => o.Id == organizationId && !o.IsDeleted);
-
-                if (organization == null) return NotFound("Organization not found");
-
-                var user = await _context.Users.FirstOrDefaultAsync(u => u.Uid == userId);
-                if (user == null) return NotFound("User not found");
-
-                var existingRole = await _context.UserOrganizationRoles
-                    .FirstOrDefaultAsync(uor => uor.UserId == userId && uor.OrganizationId == organizationId);
-
-                if (existingRole != null)
-                {
-                    return BadRequest("User already has a role in this organization.");
-                }
-
-                var userRole = new UserOrganizationRole
-                {
-                    UserId = user.Id,
-                    OrganizationId = organization.Id,
-                    Role = role
-                };
-
-                _context.UserOrganizationRoles.Add(userRole);
-                await _context.SaveChangesAsync();
-
-                return Ok(new { organizationId = organization.Id, userId = user.Id, role = role });
+                await _organizationService.AddUserToRoleAsync(organizationId, request);
+                return Ok(new { organizationId, request.UserId, request.Role });
             }
             catch (Exception ex)
             {
-                return StatusCode(500, $"Internal server error: {ex.Message}");
-            }
-        }
-
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteOrganization(string id)
-        {
-            try
-            {
-                var organization = await _context.Organizations.FindAsync(id);
-                if (organization == null) return NotFound("Organization not found");
-
-                organization.IsDeleted = true;
-                await _context.SaveChangesAsync();
-
-                return Ok("Organization marked as deleted");
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, $"Internal server error: {ex.Message}");
+                return BadRequest(ex.Message);
             }
         }
     }

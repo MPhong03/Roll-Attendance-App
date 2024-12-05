@@ -12,7 +12,9 @@ namespace RollAttendanceServer.Data
         public virtual DbSet<Admin> Admins { get; set; }
         public virtual DbSet<Organization> Organizations { get; set; }
         public virtual DbSet<Event> Events { get; set; }
-        public DbSet<UserOrganizationRole> UserOrganizationRoles { get; set; }
+        public virtual DbSet<UserOrganizationRole> UserOrganizationRoles { get; set; }
+        public virtual DbSet<History> Histories { get; set; }
+        public virtual DbSet<HistoryDetail> HistoryDetails { get; set; }
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options)
         {
         }

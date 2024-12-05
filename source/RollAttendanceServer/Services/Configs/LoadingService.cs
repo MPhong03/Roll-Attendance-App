@@ -1,4 +1,4 @@
-﻿namespace RollAttendanceServer.Services
+﻿namespace RollAttendanceServer.Services.Configs
 {
     public class LoadingService
     {
