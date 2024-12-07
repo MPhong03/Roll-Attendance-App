@@ -1,4 +1,5 @@
-﻿using FirebaseAdmin.Auth;
+﻿using CloudinaryDotNet;
+using FirebaseAdmin.Auth;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -9,6 +10,7 @@ using RollAttendanceServer.Interfaces;
 using RollAttendanceServer.Models;
 using RollAttendanceServer.Services.Systems;
 using System.Diagnostics;
+using System.Security.Claims;
 
 namespace RollAttendanceServer.Controllers
 {
@@ -109,6 +111,36 @@ namespace RollAttendanceServer.Controllers
             string url = await _cloudinaryService.UploadImageAsync(stream, fileName, uid);
 
             return Ok(new { message = "Profile image uploaded successfully.", url });
+        }
+
+        [HttpPut("facedata")]
+        [Authorize(AuthenticationSchemes = "Firebase")]
+        public async Task<IActionResult> UpdateFaceData([FromBody] FaceVectorDTO dto)
+        {
+            try
+            {
+                var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+                Debug.WriteLine("UserID:", userId);
+
+                if (string.IsNullOrEmpty(userId))
+                {
+                    return Unauthorized("Invalid user.");
+                }
+
+                if (string.IsNullOrEmpty(dto.FaceData))
+                {
+                    return BadRequest("Invalid face data");
+                }
+
+                await _userService.UpdateUserFaceData(userId, dto.FaceData);
+
+                return Ok(new { message = "Face data updated successfully." });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
         }
     }
 }

@@ -34,5 +34,18 @@ namespace RollAttendanceServer.Services.Systems
         {
             return await _context.Users.FirstOrDefaultAsync(u => u.Uid == uid);
         }
+
+        public async Task UpdateUserFaceData(string id, string faceData)
+        {
+            var user = await _context.Users.FirstOrDefaultAsync(u => u.Id == id);
+
+            if (user == null)
+            {
+                throw new Exception("User not found.");
+            }
+
+            user.FaceData = faceData;
+            await _context.SaveChangesAsync();
+        }
     }
 }

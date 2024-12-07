@@ -300,11 +300,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
       ),
       body: RefreshIndicator(
         onRefresh: _getProfile,
-        child: SingleChildScrollView(
-          physics: const AlwaysScrollableScrollPhysics(),
-          child: Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Center(
+        child: ListView(
+          padding: const EdgeInsets.all(16.0),
+          children: [
+            // Profile Image and Name
+            Center(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 crossAxisAlignment: CrossAxisAlignment.center,
@@ -366,7 +366,51 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 ],
               ),
             ),
-          ),
+
+            // Settings List
+            const Divider(),
+            ListTile(
+              leading: const Icon(Icons.account_circle),
+              title: const Text('Account'),
+              onTap: () {
+                // Thực hiện hành động khi người dùng nhấn vào Account
+                // _goToAccountSettings();
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.lock),
+              title: const Text('Privacy'),
+              onTap: () {
+                // Thực hiện hành động khi người dùng nhấn vào Privacy
+                // _goToPrivacySettings();
+                context.push("/update-face-data");
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.notifications),
+              title: const Text('Notifications'),
+              onTap: () {
+                // Thực hiện hành động khi người dùng nhấn vào Notifications
+                // _goToNotificationSettings();
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.language),
+              title: const Text('Language'),
+              onTap: () {
+                // Thực hiện hành động khi người dùng nhấn vào Language
+                // _goToLanguageSettings();
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.help),
+              title: const Text('Help & Support'),
+              onTap: () {
+                // Thực hiện hành động khi người dùng nhấn vào Help & Support
+                // _goToHelpSupport();
+              },
+            ),
+          ],
         ),
       ),
     );

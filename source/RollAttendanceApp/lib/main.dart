@@ -6,9 +6,10 @@ import 'package:itproject/ui/screens/events/create_event.dart';
 import 'package:itproject/ui/screens/home_screen.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:itproject/ui/screens/organizations/modals/create_organization.dart';
+import 'package:itproject/ui/screens/organizations/create_organization.dart';
 import 'package:itproject/ui/screens/organizations/organization_detail.dart';
 import 'package:itproject/ui/screens/profile_screen.dart';
+import 'package:itproject/ui/screens/settings/update_face_data_screen.dart';
 import 'firebase_options.dart';
 import 'package:go_router/go_router.dart';
 
@@ -57,6 +58,10 @@ class MyApp extends StatelessWidget {
         GoRoute(
           path: '/profile',
           builder: (context, state) => const ProfileScreen(),
+        ),
+        GoRoute(
+          path: '/update-face-data',
+          builder: (context, state) => const UpdateFaceDataScreen(),
         ),
         GoRoute(
           path: '/create-organization',
