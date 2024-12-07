@@ -14,5 +14,11 @@
         USER_ABSENTED = 1,
         USER_PERMITTED_ABSENTED = 2,
         USER_LATED = 3,
+
+        // REQUEST
+        REQUEST_WAITING = 0,
+        REQUEST_APPROVED = 1,
+        REQUEST_REJECTED = 2,
+        REQUEST_CANCELLED = 3,
     }
 }
