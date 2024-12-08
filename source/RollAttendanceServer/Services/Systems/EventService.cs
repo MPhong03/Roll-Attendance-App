@@ -53,7 +53,8 @@ namespace RollAttendanceServer.Services.Systems
                 CurrentQR = eventDto.CurrentQR,
                 EventStatus = eventDto.EventStatus,
                 OrganizationId = eventDto.OrganizationId,
-                OrganizerId = organizerId
+                OrganizerId = organizerId,
+                IsPrivate = eventDto.IsPrivate,
             };
 
             _context.Events.Add(newEvent);
@@ -98,6 +99,7 @@ namespace RollAttendanceServer.Services.Systems
             existingEvent.CurrentLocationRadius = eventDto.CurrentLocationRadius != 0 ? eventDto.CurrentLocationRadius : existingEvent.CurrentLocationRadius;
             existingEvent.CurrentQR = eventDto.CurrentQR ?? existingEvent.CurrentQR;
             existingEvent.EventStatus = eventDto.EventStatus != 0 ? eventDto.EventStatus : existingEvent.EventStatus;
+            existingEvent.IsPrivate = eventDto.IsPrivate;
 
             await _context.SaveChangesAsync();
             return existingEvent;
@@ -153,6 +155,114 @@ namespace RollAttendanceServer.Services.Systems
             query = query.Skip((pageIndex - 1) * pageSize).Take(pageSize);
 
             return await query.ToListAsync();
+        }
+
+        // CHECK IN MODULE
+        public async Task<Event> ActivateEventAsync(string eventId)
+        {
+            var eventEntity = await _context.Events.FindAsync(eventId);
+            if (eventEntity == null || eventEntity.EventStatus != (short)Status.EVENT_NOT_STARTED)
+                throw new Exception("Event not found or already started.");
+
+            eventEntity.EventStatus = (short)Status.EVENT_IN_PROGRESS;
+            eventEntity.CurrentQR = GenerateUniqueCode();
+            eventEntity.StartTime = DateTime.UtcNow;
+
+            var history = new History { EventId = eventEntity.Id };
+            _context.Histories.Add(history);
+
+            await _context.SaveChangesAsync();
+            return eventEntity;
+        }
+
+        public async Task CheckInAsync(string eventId, string userId, string qrCode, int attendanceAttempt)
+        {
+            var eventEntity = await _context.Events
+                .Include(e => e.PermitedUser)
+                .Include(e => e.Histories)
+                .ThenInclude(h => h.HistoryDetails)
+                .FirstOrDefaultAsync(e => e.Id == eventId);
+
+            if (eventEntity == null || eventEntity.EventStatus != (short)Status.EVENT_IN_PROGRESS)
+                throw new Exception("Event not found or not active.");
+
+            if (eventEntity.CurrentQR != qrCode)
+                throw new Exception("Invalid QR code.");
+
+            if (eventEntity.IsPrivate && !eventEntity.PermitedUser.Any(u => u.Id == userId))
+                throw new Exception("User not permitted for this event.");
+
+            var history = eventEntity.Histories.FirstOrDefault();
+            if (history == null) throw new Exception("History not found for the event.");
+
+            var userDetail = history.HistoryDetails.FirstOrDefault(d => d.UserId == userId);
+            if (userDetail == null)
+            {
+                userDetail = new HistoryDetail
+                {
+                    UserId = userId,
+                    AttendanceCount = 1,
+                    AbsentTime = DateTime.UtcNow,
+                    AttendanceStatus = attendanceAttempt == 1 ? (short)Status.USER_PRESENTED : (short)Status.USER_LATED
+                };
+                history.HistoryDetails.Add(userDetail);
+            }
+            else
+            {
+                userDetail.AttendanceCount++;
+                userDetail.LeaveTime = DateTime.UtcNow;
+            }
+
+            if (attendanceAttempt == 1)
+                history.PresentCount++;
+
+            await _context.SaveChangesAsync();
+        }
+
+        public async Task AddAttendanceAttemptAsync(string eventId)
+        {
+            var history = await _context.Histories.FirstOrDefaultAsync(h => h.EventId == eventId);
+            if (history == null) throw new Exception("History not found.");
+
+            history.AttendanceTimes++;
+            var eventEntity = await _context.Events.FindAsync(eventId);
+            eventEntity.CurrentQR = GenerateUniqueCode();
+
+            await _context.SaveChangesAsync();
+        }
+
+        public async Task<Event> CompleteEventAsync(string eventId)
+        {
+            var eventEntity = await _context.Events
+                .Include(e => e.Histories)
+                .ThenInclude(h => h.HistoryDetails)
+                .FirstOrDefaultAsync(e => e.Id == eventId);
+
+            if (eventEntity == null || eventEntity.EventStatus != (short)Status.EVENT_IN_PROGRESS)
+                throw new Exception("Event not found or not active.");
+
+            eventEntity.EventStatus = (short)Status.EVENT_COMPLETED;
+            eventEntity.EndTime = DateTime.UtcNow;
+
+            var history = eventEntity.Histories.FirstOrDefault();
+            if (history != null)
+            {
+                history.TotalCount = eventEntity.IsPrivate ? eventEntity.PermitedUser.Count : history.HistoryDetails.Count;
+                history.PresentCount = history.HistoryDetails.Count(d => d.AttendanceStatus == (short)Status.USER_PRESENTED);
+                history.LateCount = history.HistoryDetails.Count(d => d.AttendanceStatus == (short)Status.USER_LATED);
+            }
+
+            await _context.SaveChangesAsync();
+            return eventEntity;
+        }
+
+        private string GenerateUniqueCode()
+        {
+            const string chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+            var random = new Random();
+            return new string(Enumerable.Range(0, 6)
+                .Select(_ => chars[random.Next(chars.Length)])
+                .ToArray());
         }
     }
 }

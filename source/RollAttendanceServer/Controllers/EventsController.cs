@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using RollAttendanceServer.Data;
 using RollAttendanceServer.DTOs;
 using RollAttendanceServer.Interfaces;
+using RollAttendanceServer.Requests;
 using System.Security.Claims;
 
 namespace RollAttendanceServer.Controllers
@@ -119,5 +120,62 @@ namespace RollAttendanceServer.Controllers
                 return BadRequest(new { message = ex.Message });
             }
         }
+
+        [HttpPost("{eventId}/activate")]
+        public async Task<IActionResult> ActivateEvent(string eventId)
+        {
+            try
+            {
+                var result = await _eventService.ActivateEventAsync(eventId);
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+        }
+
+        [HttpPost("{eventId}/check-in")]
+        public async Task<IActionResult> CheckIn(string eventId, [FromBody] CheckInRequest request)
+        {
+            try
+            {
+                await _eventService.CheckInAsync(eventId, request.UserId, request.QrCode, request.AttendanceAttempt);
+                return Ok();
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+        }
+
+        [HttpPost("{eventId}/add-attempt")]
+        public async Task<IActionResult> AddAttendanceAttempt(string eventId)
+        {
+            try
+            {
+                await _eventService.AddAttendanceAttemptAsync(eventId);
+                return Ok();
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+        }
+
+        [HttpPost("{eventId}/complete")]
+        public async Task<IActionResult> CompleteEvent(string eventId)
+        {
+            try
+            {
+                var result = await _eventService.CompleteEventAsync(eventId);
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+        }
+
     }
 }

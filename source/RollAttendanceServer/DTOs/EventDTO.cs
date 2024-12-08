@@ -11,6 +11,7 @@
         public string CurrentQR { get; set; } = string.Empty;
         public short EventStatus { get; set; }
         public string? OrganizationId { get; set; }
+        public bool IsPrivate { get; set; } = false;
     }
 
 }

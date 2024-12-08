@@ -16,5 +16,7 @@ namespace RollAttendanceServer.Models
         public DateTime? LeaveTime { get; set; }
         public int AttendanceCount { get; set; }
         public short AttendanceStatus { get; set; } = (short)Status.USER_PRESENTED;
+        public string? HistoryId { get; set; }
+        public History? History { get; set; }
     }
 }
