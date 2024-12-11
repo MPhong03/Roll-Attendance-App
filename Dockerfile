@@ -4,10 +4,10 @@ EXPOSE 80
 
 FROM mcr.microsoft.com/dotnet/sdk:6.0 AS build
 WORKDIR /src
-COPY ["RollAttendanceServer/RollAttendanceServer.csproj", "RollAttendanceServer/"]
-RUN dotnet restore "RollAttendanceServer/RollAttendanceServer.csproj"
+COPY ["source/RollAttendanceServer/RollAttendanceServer.csproj", "source/RollAttendanceServer/"]
+RUN dotnet restore "source/RollAttendanceServer/RollAttendanceServer.csproj"
 COPY . .
-WORKDIR "/src/RollAttendanceServer"
+WORKDIR "/src/source/RollAttendanceServer"
 RUN dotnet build "RollAttendanceServer.csproj" -c Release -o /app/build
 
 FROM build AS publish
