@@ -37,8 +37,6 @@ yarn-debug.log
 yarn-error.log
 
 ## ASP.NET temporary files
-appsettings.json
-appsettings.Development.json
 
 # Ignore all files created by dotnet publish or dotnet build
 publish/
@@ -46,4 +44,3 @@ publish/
 # Ignore packages from NuGet
 *.nupkg
 
-/AppData/
