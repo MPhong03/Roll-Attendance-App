@@ -226,7 +226,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     const Text(
                       'Log In',
                       style: TextStyle(
-                        color: Color(0xFF755DC1),
+                        color: Color.fromRGBO(197, 240, 200, 1),
                         fontSize: 27,
                         fontFamily: 'Poppins',
                         fontWeight: FontWeight.w500,
@@ -246,7 +246,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       decoration: const InputDecoration(
                         labelText: 'Email',
                         labelStyle: TextStyle(
-                          color: Color(0xFF755DC1),
+                          color: Color.fromRGBO(197, 240, 200, 1),
                           fontSize: 15,
                           fontFamily: 'Poppins',
                           fontWeight: FontWeight.w600,
@@ -262,7 +262,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           borderRadius: BorderRadius.all(Radius.circular(10)),
                           borderSide: BorderSide(
                             width: 1,
-                            color: Color(0xFF9F7BFF),
+                            color: Color.fromRGBO(197, 240, 200, 1),
                           ),
                         ),
                       ),
@@ -282,7 +282,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       decoration: InputDecoration(
                         labelText: 'Password',
                         labelStyle: const TextStyle(
-                          color: Color(0xFF755DC1),
+                          color: Color.fromRGBO(197, 240, 200, 1),
                           fontSize: 15,
                           fontFamily: 'Poppins',
                           fontWeight: FontWeight.w600,
@@ -298,7 +298,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           borderRadius: BorderRadius.all(Radius.circular(10)),
                           borderSide: BorderSide(
                             width: 1,
-                            color: Color(0xFF9F7BFF),
+                            color: Color.fromRGBO(197, 240, 200, 1),
                           ),
                         ),
                         suffixIcon: IconButton(
@@ -369,7 +369,7 @@ class _LoginScreenState extends State<LoginScreen> {
                               const Text(
                                 'Sign In with Google',
                                 style: TextStyle(
-                                  color: Color(0xFF755DC1),
+                                  color: Color.fromRGBO(0, 0, 0, 1),                              
                                   fontSize: 15,
                                   fontFamily: 'Poppins',
                                   fontWeight: FontWeight.w500,
@@ -407,7 +407,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           child: const Text(
                             'Sign Up',
                             style: TextStyle(
-                              color: Color(0xFF755DC1),
+                              color: Color.fromRGBO(196, 240, 200, 1),
                               fontSize: 13,
                               fontFamily: 'Poppins',
                               fontWeight: FontWeight.w500,
@@ -429,7 +429,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         child: const Text(
                           'Forget Password?',
                           style: TextStyle(
-                            color: Color(0xFF755DC1),
+                            color: Color.fromRGBO(197, 240, 200, 1),
                             fontSize: 13,
                             fontFamily: 'Poppins',
                             fontWeight: FontWeight.w500,
