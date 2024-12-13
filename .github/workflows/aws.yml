@@ -33,7 +33,7 @@ on:
 env:
   AWS_REGION: ap-southeast-2
   PROJECT_LOCATION: source/RollAttendanceServer/RollAttendanceServer.csproj
-  ELASTIC_BEANSTALK_NAME: RAAPIServer
+  ELASTIC_BEANSTALK_NAME: "RA API Server"
   ELASTIC_BEANSTALK_ENV_NAME: RAAPIServer-env
 
 permissions:
