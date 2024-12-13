@@ -127,19 +127,19 @@ jobs:
     - name: Create Elastic Beanstalk Application Version
       run: |
         aws elasticbeanstalk create-application-version \
-          --application-name ${{ env.ELASTIC_BEANSTALK_NAME }} \
+          --application-name "${{ env.ELASTIC_BEANSTALK_NAME }}" \
           --version-label ${{ github.run_id }} \
           --source-bundle S3Bucket="elasticbeanstalk-${{ env.AWS_REGION }}-${{ secrets.AWS_ACCOUNT_ID }}",S3Key="artifact/dotnet-app/${{ github.run_id }}.zip"
 
     - name: Update Elastic Beanstalk Environment
       run: |
         aws elasticbeanstalk update-environment \
-          --application-name ${{ env.ELASTIC_BEANSTALK_NAME }} \
+          --application-name "${{ env.ELASTIC_BEANSTALK_NAME }}" \
           --environment-name ${{ env.ELASTIC_BEANSTALK_ENV_NAME }} \
           --version-label ${{ github.run_id }}
 
     - name: Wait for Deployment to Complete
       run: |
         aws elasticbeanstalk wait environment-updated \
-          --application-name ${{ env.ELASTIC_BEANSTALK_NAME }} \
+          --application-name "${{ env.ELASTIC_BEANSTALK_NAME }}" \
           --environment-name ${{ env.ELASTIC_BEANSTALK_ENV_NAME }}
