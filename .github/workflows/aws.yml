@@ -137,7 +137,7 @@ jobs:
         aws elasticbeanstalk update-environment \
           --application-name "${{ env.ELASTIC_BEANSTALK_NAME }}" \
           --environment-name ${{ env.ELASTIC_BEANSTALK_ENV_NAME }} \
-          --version-label ${{ github.run_id }}
+          --version-label "$VERSION_LABEL"
 
     - name: Wait for Deployment to Complete
       run: |
