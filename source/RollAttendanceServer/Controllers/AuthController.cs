@@ -142,5 +142,51 @@ namespace RollAttendanceServer.Controllers
                 return BadRequest(ex.Message);
             }
         }
+
+        [HttpPut("shareProfile")]
+        [Authorize(AuthenticationSchemes = "Firebase")]
+        public async Task<IActionResult> ShareProfile()
+        {
+            try
+            {
+                var identity = User.Identity;
+
+                if (identity == null)
+                {
+                    return Unauthorized("Unauthorized");
+                }
+
+                UserRecord firebaseUser = await FirebaseAuth.DefaultInstance.GetUserAsync(identity?.Name);
+
+                if (firebaseUser == null)
+                {
+                    return NotFound(new { message = "User not found in Firebase." });
+                }
+
+                var user = await _userService.GetUserByUidAsync(firebaseUser.Uid);
+
+                if (user == null)
+                {
+                    return NotFound(new { message = "User not found in the system." });
+                }
+
+                user.DisplayName = firebaseUser.DisplayName ?? user.DisplayName;
+                user.PhoneNumber = firebaseUser.PhoneNumber ?? user.PhoneNumber;
+                user.Avatar = firebaseUser.PhotoUrl ?? user.Avatar;
+
+                await _userService.UpdateUserAsync(user);
+
+                return Ok(new
+                {
+                    message = "User profile updated successfully.",
+                    Profile = user
+                });
+            }
+            catch (FirebaseAuthException ex)
+            {
+                return NotFound(new { message = ex.Message });
+            }
+        }
+
     }
 }

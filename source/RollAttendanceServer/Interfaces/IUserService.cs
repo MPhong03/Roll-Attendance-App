@@ -9,5 +9,6 @@ namespace RollAttendanceServer.Interfaces
         Task<User?> GetUserByEmailAsync(string email);
         Task<User?> GetUserByUidAsync(string uid);
         Task UpdateUserFaceData(string id, string faceData);
+        Task UpdateUserAsync(User user);
     }
 }

@@ -44,3 +44,6 @@ publish/
 # Ignore packages from NuGet
 *.nupkg
 
+appsettings.json
+
+AppData/firebase-service-account.json

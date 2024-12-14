@@ -17,7 +17,7 @@ namespace RollAttendanceServer.Services.Systems
             _context = context;
         }
 
-        public async Task<IEnumerable<Organization>> GetOrganizationsByUserAsync(string uid, UserRole role)
+        public async Task<IEnumerable<Organization?>> GetOrganizationsByUserAsync(string uid, UserRole role)
         {
             return await _context.UserOrganizationRoles
                 .Where(uor => uor.User.Uid == uid && uor.Role == role)
@@ -111,6 +111,22 @@ namespace RollAttendanceServer.Services.Systems
 
             organization.IsDeleted = true;
             await _context.SaveChangesAsync();
+        }
+
+        public async Task<IEnumerable<User?>> GetOrganizationUsersAsync(string id, string keyword, int pageIndex, int pageSize)
+        {
+            var query = _context.UserOrganizationRoles.AsQueryable();
+
+            query = query.Where(e => e.OrganizationId == id);
+
+            if (!string.IsNullOrEmpty(keyword))
+            {
+                query = query.Where(e => e.User.Email.Contains(keyword));
+            }
+
+            query = query.Skip((pageIndex - 1) * pageSize).Take(pageSize);
+
+            return await query.Select(uor => uor.User).ToListAsync();
         }
     }
 }

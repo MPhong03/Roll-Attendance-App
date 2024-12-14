@@ -44,6 +44,11 @@ class ApiService {
           'Content-Type': 'application/json',
         },
       );
+      _logResponse(
+          response: response,
+          url: Uri.parse('$baseUrl/$endpoint').toString(),
+          method: 'GET',
+          requestBody: null);
       return response;
     } catch (e) {
       _logger.severe('Error during GET request to $endpoint: $e');
@@ -63,6 +68,11 @@ class ApiService {
         },
         body: json.encode(data),
       );
+      _logResponse(
+          response: response,
+          url: Uri.parse('$baseUrl/$endpoint').toString(),
+          method: 'POST',
+          requestBody: data);
       return response;
     } catch (e) {
       _logger.severe('Error during POST request to $endpoint: $e');
@@ -82,6 +92,11 @@ class ApiService {
         },
         body: json.encode(data),
       );
+      _logResponse(
+          response: response,
+          url: Uri.parse('$baseUrl/$endpoint').toString(),
+          method: 'PUT',
+          requestBody: data);
       return response;
     } catch (e) {
       _logger.severe('Error during PUT request to $endpoint: $e');
@@ -100,6 +115,11 @@ class ApiService {
           'Content-Type': 'application/json',
         },
       );
+      _logResponse(
+          response: response,
+          url: Uri.parse('$baseUrl/$endpoint').toString(),
+          method: 'DELETE',
+          requestBody: null);
       return response;
     } catch (e) {
       _logger.severe('Error during DELETE request to $endpoint: $e');
@@ -137,10 +157,44 @@ class ApiService {
 
       final response = await request.send();
       final responseData = await http.Response.fromStream(response);
+      _logResponse(
+          response: responseData,
+          url: Uri.parse('$baseUrl/$endpoint').toString(),
+          method: 'POST',
+          requestBody: additionalData);
       return responseData;
     } catch (e) {
       _logger.severe('Error during POST request with file to $endpoint: $e');
       throw Exception('Failed to upload file');
     }
+  }
+
+  void _logResponse({
+    required http.Response response,
+    required String url,
+    required String method,
+    Map<String, dynamic>? requestBody,
+  }) {
+    const maxBodyLength = 500;
+
+    final truncatedBody = response.body.length > maxBodyLength
+        ? '${response.body.substring(0, maxBodyLength)}... [Truncated]'
+        : response.body;
+
+    final logData = {
+      'request': {
+        'url': url,
+        'method': method,
+        if (requestBody != null) 'body': requestBody,
+      },
+      'response': {
+        'status_code': response.statusCode,
+        'headers': response.headers,
+        'body': truncatedBody,
+      }
+    };
+
+    final prettyJson = const JsonEncoder.withIndent('  ').convert(logData);
+    _logger.info(prettyJson);
   }
 }

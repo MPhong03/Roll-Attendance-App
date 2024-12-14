@@ -13,6 +13,11 @@ namespace RollAttendanceServer.Models
         public string Address { get; set; } = string.Empty;
         public string Gender { get; set; } = string.Empty;
 
+        // Firebase Additional
+        public string DisplayName { get; set; } = string.Empty;
+        public string PhoneNumber { get; set; } = string.Empty;
+        public string Avatar { get; set; } = string.Empty;
+
         public ICollection<UserOrganizationRole> UserOrganizationRoles { get; set; } = new List<UserOrganizationRole>();
     }
 }

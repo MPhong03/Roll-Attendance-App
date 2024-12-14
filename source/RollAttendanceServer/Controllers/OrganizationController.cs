@@ -9,6 +9,7 @@ using RollAttendanceServer.DTOs;
 using RollAttendanceServer.Interfaces;
 using RollAttendanceServer.Models;
 using RollAttendanceServer.Requests;
+using RollAttendanceServer.Services.Systems;
 
 namespace RollAttendanceServer.Controllers
 {
@@ -38,6 +39,24 @@ namespace RollAttendanceServer.Controllers
             catch (Exception ex)
             {
                 return StatusCode(500, ex.Message);
+            }
+        }
+
+        [HttpGet("getusers/{organizationId}")]
+        public async Task<IActionResult> GetUsersByOrganization(
+            string organizationId,
+            [FromQuery] string? keyword,
+            [FromQuery] int pageIndex = 1,
+            [FromQuery] int pageSize = 10)
+        {
+            try
+            {
+                var users = await _organizationService.GetOrganizationUsersAsync(organizationId, keyword, pageIndex, pageSize);
+                return Ok(users);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = ex.Message });
             }
         }
 
