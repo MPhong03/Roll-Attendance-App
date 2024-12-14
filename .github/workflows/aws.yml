@@ -27,6 +27,7 @@
 name: Deploy to Amazon Elastic Bean
 
 on:
+  workflow_dispatch:
   push:
     branches: [ "main" ]
   pull_request:
