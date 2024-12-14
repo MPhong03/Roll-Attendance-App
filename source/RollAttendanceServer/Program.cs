@@ -34,7 +34,7 @@ namespace RollAttendanceServer
 
             // DATABASE CONNECTION
             builder.Services.AddDbContext<ApplicationDbContext>(options =>
-                options.UseSqlServer(builder.Configuration.GetConnectionString("ITPDatabase")).EnableSensitiveDataLogging()
+                options.UseSqlServer(builder.Configuration.GetConnectionString("ITPDatabase")).EnableSensitiveDataLogging(false)
             );
 
             builder.Services.AddHttpContextAccessor();
