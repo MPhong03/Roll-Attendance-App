@@ -126,10 +126,11 @@ jobs:
 
     - name: Create Elastic Beanstalk Application Version
       run: |
+        VERSION_LABEL=${{ github.run_id }}-$(date +%s)
         aws elasticbeanstalk create-application-version \
           --application-name "${{ env.ELASTIC_BEANSTALK_NAME }}" \
-          --version-label ${{ github.run_id }} \
-          --source-bundle S3Bucket="elasticbeanstalk-${{ env.AWS_REGION }}-${{ secrets.AWS_ACCOUNT_ID }}",S3Key="artifact/dotnet-app/${{ github.run_id }}.zip"
+          --version-label "$VERSION_LABEL" \
+          --source-bundle S3Bucket="elasticbeanstalk-${{ env.AWS_REGION }}-${{ secrets.AWS_ACCOUNT_ID }}",S3Key="artifact/dotnet-app/${{ github.run_id }}.zip"      
 
     - name: Update Elastic Beanstalk Environment
       run: |
