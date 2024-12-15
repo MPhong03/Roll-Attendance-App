@@ -5,24 +5,40 @@ using RollAttendanceServer.Interfaces;
 using RollAttendanceServer.Models;
 using RollAttendanceServer.Requests;
 using Microsoft.EntityFrameworkCore;
+using Google.Api.Gax.ResourceNames;
 
 namespace RollAttendanceServer.Services.Systems
 {
     public class OrganizationService : IOrganizationService
     {
         private readonly ApplicationDbContext _context;
+        private readonly ICloudinaryService _cloudinaryService;
 
-        public OrganizationService(ApplicationDbContext context)
+        public OrganizationService(ApplicationDbContext context, ICloudinaryService cloudinaryService)
         {
             _context = context;
+            _cloudinaryService = cloudinaryService;
         }
 
-        public async Task<IEnumerable<Organization?>> GetOrganizationsByUserAsync(string uid, UserRole role)
+        public async Task<IEnumerable<Organization?>> GetOrganizationsByUserAsync(string uid, UserRole role, string? keyword, int pageIndex = 0, int pageSize = 10)
         {
-            return await _context.UserOrganizationRoles
-                .Where(uor => uor.User.Uid == uid && uor.Role == role)
-                .Select(uor => uor.Organization)
-                .ToListAsync();
+            var query = _context.UserOrganizationRoles
+                                .Where(uor => uor.User.Uid == uid && uor.Role == role)
+                                .Select(uor => uor.Organization)
+                                .AsQueryable();
+
+            // Tìm kiếm theo tên hoặc mô tả
+            if (!string.IsNullOrEmpty(keyword))
+            {
+                query = query.Where(org => org.Name.Contains(keyword) || org.Description.Contains(keyword));
+            }
+
+            // Phân trang
+            var organizations = await query.Skip(pageIndex * pageSize)
+                                           .Take(pageSize)
+                                           .ToListAsync();
+
+            return organizations;
         }
 
         public async Task<Organization?> GetOrganizationByIdAsync(string id)
@@ -31,7 +47,7 @@ namespace RollAttendanceServer.Services.Systems
                 .FirstOrDefaultAsync(org => org.Id == id && !org.IsDeleted);
         }
 
-        public async Task<Organization> CreateOrganizationAsync(OrganizationDTO dto)
+        public async Task<Organization> CreateOrganizationAsync(OrganizationDTO dto, Stream bannerStream, Stream imageStream)
         {
             var organization = new Organization
             {
@@ -42,6 +58,18 @@ namespace RollAttendanceServer.Services.Systems
                 IsPrivate = dto.IsPrivate ?? false,
                 IsDeleted = false
             };
+
+            string folderName = "organizations";
+
+            if (bannerStream != null)
+            {
+                organization.Banner = await _cloudinaryService.UploadImageAsync(bannerStream, $"{organization.Id}_{DateTime.UtcNow:yyyyMMddHHmmss}_banner.jpg", organization.Id, folderName);
+            }
+
+            if (imageStream != null)
+            {
+                organization.Image = await _cloudinaryService.UploadImageAsync(imageStream, $"{organization.Id}_{DateTime.UtcNow:yyyyMMddHHmmss}_image.jpg", organization.Id, folderName);
+            }
 
             _context.Organizations.Add(organization);
             await _context.SaveChangesAsync();
@@ -63,16 +91,30 @@ namespace RollAttendanceServer.Services.Systems
             return organization;
         }
 
-        public async Task<Organization> UpdateOrganizationAsync(string id, OrganizationDTO dto)
+        public async Task<Organization> UpdateOrganizationAsync(string organizationId, OrganizationDTO dto, Stream? bannerStream = null, Stream? imageStream = null)
         {
-            var organization = await _context.Organizations
-                .FirstOrDefaultAsync(o => o.Id == id && !o.IsDeleted);
+            var organization = await _context.Organizations.FirstOrDefaultAsync(o => o.Id == organizationId);
+            if (organization == null)
+            {
+                throw new Exception("Organization not found");
+            }
 
-            if (organization == null) throw new Exception("Organization not found");
+            string folderName = "organizations";
 
             organization.Name = dto.Name ?? organization.Name;
             organization.Description = dto.Description ?? organization.Description;
             organization.Address = dto.Address ?? organization.Address;
+            organization.IsPrivate = dto.IsPrivate ?? organization.IsPrivate;
+
+            if (bannerStream != null)
+            {
+                organization.Banner = await _cloudinaryService.UploadImageAsync(bannerStream, $"{organization.Id}_{DateTime.UtcNow:yyyyMMddHHmmss}_banner.jpg", organization.Id, folderName);
+            }
+
+            if (imageStream != null)
+            {
+                organization.Image = await _cloudinaryService.UploadImageAsync(imageStream, $"{organization.Id}_{DateTime.UtcNow:yyyyMMddHHmmss}_image.jpg", organization.Id, folderName);
+            }
 
             await _context.SaveChangesAsync();
             return organization;

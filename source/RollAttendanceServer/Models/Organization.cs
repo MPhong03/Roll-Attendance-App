@@ -13,6 +13,9 @@ namespace RollAttendanceServer.Models
         public string Address { get; set; } = string.Empty;
         public bool IsPrivate { get; set; } = false;
 
+        public string? Banner { get; set; }
+        public string? Image { get; set; }
+
         [JsonIgnore]
         public ICollection<UserOrganizationRole> UserOrganizationRoles { get; set; } = new List<UserOrganizationRole>();
 

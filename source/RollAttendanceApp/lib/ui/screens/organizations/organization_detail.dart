@@ -129,11 +129,13 @@ class _OrganizationDetailScreenState extends State<OrganizationDetailScreen> {
                             children: <Widget>[
                               Container(
                                 height: 200.0,
-                                decoration: const BoxDecoration(
+                                decoration: BoxDecoration(
                                   image: DecorationImage(
                                     fit: BoxFit.cover,
-                                    image: NetworkImage(
-                                        'https://th.bing.com/th/id/OIP.agLNnNJWhgFjK8D7AO1VdAHaDt?rs=1&pid=ImgDetMain'),
+                                    image: (organization.banner.isNotEmpty)
+                                        ? NetworkImage(organization.banner)
+                                        : const NetworkImage(
+                                            'https://th.bing.com/th/id/OIP.agLNnNJWhgFjK8D7AO1VdAHaDt?rs=1&pid=ImgDetMain'),
                                   ),
                                 ),
                               ),
@@ -144,10 +146,12 @@ class _OrganizationDetailScreenState extends State<OrganizationDetailScreen> {
                                   width: 190.0,
                                   decoration: BoxDecoration(
                                     shape: BoxShape.circle,
-                                    image: const DecorationImage(
+                                    image: DecorationImage(
                                       fit: BoxFit.cover,
-                                      image: NetworkImage(
-                                          'https://yt3.ggpht.com/a/AGF-l78urB8ASkb0JO2a6AB0UAXeEHe6-pc9UJqxUw=s900-mo-c-c0xffffffff-rj-k-no'),
+                                      image: (organization.image.isNotEmpty)
+                                          ? NetworkImage(organization.image)
+                                          : const NetworkImage(
+                                              'https://yt3.ggpht.com/a/AGF-l78urB8ASkb0JO2a6AB0UAXeEHe6-pc9UJqxUw=s900-mo-c-c0xffffffff-rj-k-no'),
                                     ),
                                     border: Border.all(
                                       color: Colors.white,
@@ -210,6 +214,14 @@ class _OrganizationDetailScreenState extends State<OrganizationDetailScreen> {
                                 .push('/create-event/${widget.organizationId}');
                           },
                           child: const Text('Add Event'),
+                        ),
+                        const SizedBox(height: 10.0),
+                        ElevatedButton(
+                          onPressed: () {
+                            context.push(
+                                '/edit-organization/${widget.organizationId}');
+                          },
+                          child: const Text('Edit'),
                         ),
                       ],
                     ),

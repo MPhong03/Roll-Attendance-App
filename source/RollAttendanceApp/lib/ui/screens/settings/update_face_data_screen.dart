@@ -3,6 +3,7 @@ import 'dart:math';
 
 import 'package:awesome_dialog/awesome_dialog.dart';
 import 'package:blurry_modal_progress_hud/blurry_modal_progress_hud.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
@@ -11,6 +12,8 @@ import 'package:itproject/services/api_service.dart';
 import 'package:camera/camera.dart';
 import 'package:google_mlkit_face_detection/google_mlkit_face_detection.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:google_mediapipe_face_detection/google_mediapipe_face_detection.dart';
+import 'package:image/image.dart' as img;
 
 class UpdateFaceDataScreen extends StatefulWidget {
   const UpdateFaceDataScreen({super.key});
@@ -24,6 +27,7 @@ class _UpdateFaceDataScreenState extends State<UpdateFaceDataScreen> {
   final ApiService _apiService = ApiService();
   late CameraController _cameraController;
   late FaceDetector _faceDetector;
+  late GoogleMediapipeFaceDetection _faceDetectorForWeb;
   bool _isDetecting = false;
   bool _isCameraInitialized = false;
 
@@ -31,12 +35,17 @@ class _UpdateFaceDataScreenState extends State<UpdateFaceDataScreen> {
   void initState() {
     super.initState();
     _initializeCamera();
-    _faceDetector = FaceDetector(
-        options: FaceDetectorOptions(
-      enableLandmarks: false,
-      enableContours: false,
-      enableTracking: false,
-    ));
+    if (kIsWeb) {
+      // Sử dụng Google MediaPipe cho web
+      _faceDetectorForWeb = GoogleMediapipeFaceDetection();
+    } else {
+      _faceDetector = FaceDetector(
+          options: FaceDetectorOptions(
+        enableLandmarks: false,
+        enableContours: false,
+        enableTracking: false,
+      ));
+    }
   }
 
   Future<void> _initializeCamera() async {
@@ -109,13 +118,32 @@ class _UpdateFaceDataScreenState extends State<UpdateFaceDataScreen> {
         InputImage.fromBytes(bytes: bytes, metadata: _buildMetaData(image));
 
     try {
-      final faces = await _faceDetector.processImage(inputImage);
-      if (faces.isNotEmpty) {
-        print("Faces detected: ${faces.length}");
-        final faceData = _extractFaceData(faces);
-        await _updateFaceData(faceData);
+      dynamic faces;
+      // Detect faces based on the platform
+      if (kIsWeb) {
+        // For web, process the image using google_mediapipe_face_detection (Rect list)
+        faces = await _faceDetectorForWeb.processImage(inputImage);
+
+        if (faces != null && faces.isNotEmpty) {
+          print("Faces detected: ${faces.length}");
+          // Handle Rect list (bounding boxes for faces)
+          final faceData = _extractFaceDataFromRect(faces);
+          await _updateFaceData(faceData);
+        } else {
+          print("No faces detected");
+        }
       } else {
-        print("No faces detected");
+        // For mobile, process the image using google_ml_kit (Face list)
+        faces = await _faceDetector.processImage(inputImage);
+
+        if (faces != null && faces.isNotEmpty) {
+          print("Faces detected: ${faces.length}");
+          // Handle Face list (full face data)
+          final faceData = _extractFaceDataFromFace(faces);
+          await _updateFaceData(faceData);
+        } else {
+          print("No faces detected");
+        }
       }
     } catch (e) {
       setState(() {
@@ -144,7 +172,7 @@ class _UpdateFaceDataScreenState extends State<UpdateFaceDataScreen> {
         size: size, rotation: rotation, format: format, bytesPerRow: 8);
   }
 
-  String _extractFaceData(List<Face> faces) {
+  String _extractFaceDataFromFace(List<Face> faces) {
     // Trích xuất dữ liệu từ khuôn mặt
     final faceData = faces.map((face) {
       return {
@@ -161,6 +189,69 @@ class _UpdateFaceDataScreenState extends State<UpdateFaceDataScreen> {
 
     // Chuyển thành chuỗi JSON để dễ dàng gửi qua API
     return json.encode(faceData);
+  }
+
+  String _extractFaceDataFromRect(List<Rect> faces) {
+    final faceData = faces.map((rect) {
+      return {
+        "boundingBox": rect.toString(),
+        "left": rect.left,
+        "top": rect.top,
+        "right": rect.right,
+        "bottom": rect.bottom,
+      };
+    }).toList();
+
+    return json.encode(faceData);
+  }
+
+  Future<void> _takePictureAndDetectFace() async {
+    try {
+      setState(() {
+        _isDetecting = true; // Tạm dừng nhận diện trước khi gọi API
+        _isLoading = true;
+      });
+
+      final XFile imageFile = await _cameraController.takePicture();
+
+      final inputImage = InputImage.fromFilePath(imageFile.path);
+
+      print('FILE: ${imageFile.path}');
+      print('INPUTFILE: ${inputImage.bytes}');
+
+      // Phát hiện khuôn mặt
+      dynamic faces = await _faceDetectorForWeb.processImage(inputImage);
+
+      if (faces != null && faces.isNotEmpty) {
+        final faceData = _extractFaceDataFromRect(faces);
+        await _updateFaceData(faceData);
+      } else {
+        if (mounted) {
+          AwesomeDialog(
+            context: context,
+            dialogType: DialogType.error,
+            title: 'Error',
+            desc: 'No face detected.',
+            btnOkOnPress: () {},
+          ).show();
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        AwesomeDialog(
+          context: context,
+          dialogType: DialogType.error,
+          title: 'Error',
+          desc: 'Error detecting faces: $e.',
+          btnOkOnPress: () {},
+        ).show();
+      }
+    } finally {
+      setState(() {
+        _isDetecting = false;
+        _isLoading = false;
+      });
+    }
   }
 
   Future<void> _updateFaceData(String faceData) async {
@@ -241,14 +332,35 @@ class _UpdateFaceDataScreenState extends State<UpdateFaceDataScreen> {
         body: Padding(
           padding: const EdgeInsets.all(16.0),
           child: Column(
+            mainAxisAlignment: MainAxisAlignment.center, // Căn giữa nội dung
             children: [
-              _isCameraInitialized
-                  ? Transform(
-                      alignment: Alignment.center,
-                      transform: Matrix4.rotationY(pi),
-                      child: CameraPreview(_cameraController),
-                    )
-                  : const Center(child: CircularProgressIndicator()),
+              if (_isCameraInitialized)
+                Transform(
+                  alignment: Alignment.center,
+                  transform: Matrix4.rotationY(pi),
+                  child: CameraPreview(_cameraController),
+                ),
+              const SizedBox(height: 16), // Khoảng cách giữa camera và nút
+              if (_isCameraInitialized && kIsWeb)
+                ElevatedButton(
+                  onPressed: _isLoading
+                      ? null
+                      : _takePictureAndDetectFace, // Disable nếu đang tải
+                  child: _isLoading
+                      ? const SizedBox(
+                          width: 20,
+                          height: 20,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            color: Colors.white, // Màu loading
+                          ),
+                        )
+                      : const Text("Take Picture"),
+                ),
+              if (!_isCameraInitialized)
+                const Center(
+                  child: CircularProgressIndicator(),
+                ), // Hiển thị loading khi camera chưa khởi tạo
             ],
           ),
         ),

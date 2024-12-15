@@ -10,6 +10,7 @@ using RollAttendanceServer.Interfaces;
 using RollAttendanceServer.Models;
 using RollAttendanceServer.Requests;
 using RollAttendanceServer.Services.Systems;
+using System.Diagnostics;
 
 namespace RollAttendanceServer.Controllers
 {
@@ -26,11 +27,12 @@ namespace RollAttendanceServer.Controllers
         }
 
         [HttpGet("getall/{uid}")]
-        public async Task<IActionResult> GetMyOrganizations(string uid)
+        public async Task<IActionResult> GetMyOrganizations(string uid, [FromQuery] string? keyword, [FromQuery] int pageIndex = 0, [FromQuery] int pageSize = 10)
         {
             try
             {
-                var organizations = await _organizationService.GetOrganizationsByUserAsync(uid, UserRole.REPRESENTATIVE);
+                var organizations = await _organizationService.GetOrganizationsByUserAsync(uid, UserRole.REPRESENTATIVE, keyword, pageIndex, pageSize);
+
                 if (organizations == null || !organizations.Any())
                     return NotFound("No organizations found for the specified user.");
 
@@ -78,12 +80,34 @@ namespace RollAttendanceServer.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> CreateOrganization([FromBody] OrganizationDTO dto)
+        public async Task<IActionResult> CreateOrganization([FromForm] OrganizationDTO dto, [FromForm] IFormFile? bannerFile, [FromForm] IFormFile? imageFile)
         {
             try
             {
-                var organization = await _organizationService.CreateOrganizationAsync(dto);
+                Stream? bannerStream = bannerFile?.OpenReadStream();
+                Stream? imageStream = imageFile?.OpenReadStream();
+
+                Debug.WriteLine("FORMFILE:", imageFile, bannerFile);
+
+                var organization = await _organizationService.CreateOrganizationAsync(dto, bannerStream, imageStream);
                 return CreatedAtAction(nameof(CreateOrganization), new { id = organization.Id }, organization);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, ex.Message);
+            }
+        }
+
+        [HttpPut("{organizationId}")]
+        public async Task<IActionResult> UpdateOrganization(string organizationId, [FromForm] OrganizationDTO dto, [FromForm] IFormFile? bannerFile, [FromForm] IFormFile? imageFile)
+        {
+            try
+            {
+                Stream? bannerStream = bannerFile?.OpenReadStream();
+                Stream? imageStream = imageFile?.OpenReadStream();
+
+                var organization = await _organizationService.UpdateOrganizationAsync(organizationId, dto, bannerStream, imageStream);
+                return Ok(organization);
             }
             catch (Exception ex)
             {

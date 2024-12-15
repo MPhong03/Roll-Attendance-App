@@ -121,6 +121,8 @@ class _MainLayoutState extends State<MainLayout> {
   }
 
   SidebarX _buildSidebarX() {
+    final isSmallScreen = MediaQuery.of(context).size.width < 600;
+
     return SidebarX(
       controller: _controller,
       theme: SidebarXTheme(
@@ -140,9 +142,6 @@ class _MainLayoutState extends State<MainLayout> {
         selectedItemDecoration: BoxDecoration(
           borderRadius: BorderRadius.circular(10),
           border: Border.all(color: Colors.blueAccent.withOpacity(0.5)),
-          // gradient: const LinearGradient(
-          //   colors: [Colors.blue, Colors.blueAccent],
-          // ),
         ),
         iconTheme: IconThemeData(
           color: Colors.white.withOpacity(0.7),

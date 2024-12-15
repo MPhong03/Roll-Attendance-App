@@ -108,7 +108,7 @@ namespace RollAttendanceServer.Controllers
             string fileName = $"{uid}_{DateTime.UtcNow:yyyyMMddHHmmss}.jpg";
 
             using var stream = file.OpenReadStream();
-            string url = await _cloudinaryService.UploadImageAsync(stream, fileName, uid);
+            string url = await _cloudinaryService.UploadImageAsync(stream, fileName, uid, "users");
 
             return Ok(new { message = "Profile image uploaded successfully.", url });
         }

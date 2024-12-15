@@ -169,6 +169,130 @@ class ApiService {
     }
   }
 
+  Future<http.Response> postFiles(
+    String endpoint,
+    Map<String, dynamic> files, {
+    Map<String, String>? additionalData,
+  }) async {
+    try {
+      final accessToken = await _getAccessToken();
+      final uri = Uri.parse('$baseUrl/$endpoint');
+      final request = http.MultipartRequest('POST', uri)
+        ..headers['Authorization'] = 'Bearer $accessToken'
+        ..headers['Content-Type'] = 'multipart/form-data';
+
+      for (var entry in files.entries) {
+        final key = entry.key;
+        final value = entry.value;
+
+        if (value is List<dynamic>) {
+          for (int i = 0; i < value.length; i++) {
+            final file = value[i];
+            if (file is Uint8List) {
+              request.files.add(http.MultipartFile.fromBytes('$key[$i]', file,
+                  filename: 'file_$i.jpg'));
+            } else if (file is File) {
+              request.files.add(
+                  await http.MultipartFile.fromPath('$key[$i]', file.path));
+            }
+          }
+        }
+
+        if (value is Uint8List) {
+          request.files.add(
+              http.MultipartFile.fromBytes(key, value, filename: 'file.jpg'));
+        }
+
+        if (value is File) {
+          request.files.add(await http.MultipartFile.fromPath(key, value.path));
+        }
+      }
+
+      if (additionalData != null) {
+        additionalData.forEach((key, value) {
+          request.fields[key] = value;
+        });
+      }
+
+      final response = await request.send();
+      final responseData = await http.Response.fromStream(response);
+
+      _logResponse(
+        response: responseData,
+        url: Uri.parse('$baseUrl/$endpoint').toString(),
+        method: 'POST',
+        requestBody: additionalData,
+      );
+
+      return responseData;
+    } catch (e) {
+      _logger.severe('Error during POST request with files to $endpoint: $e');
+      throw Exception('Failed to upload files');
+    }
+  }
+
+  Future<http.Response> putFiles(
+    String endpoint,
+    Map<String, dynamic> files, {
+    Map<String, String>? additionalData,
+  }) async {
+    try {
+      final accessToken = await _getAccessToken();
+      final uri = Uri.parse('$baseUrl/$endpoint');
+      final request = http.MultipartRequest('PUT', uri)
+        ..headers['Authorization'] = 'Bearer $accessToken'
+        ..headers['Content-Type'] = 'multipart/form-data';
+
+      for (var entry in files.entries) {
+        final key = entry.key;
+        final value = entry.value;
+
+        if (value is List<dynamic>) {
+          for (int i = 0; i < value.length; i++) {
+            final file = value[i];
+            if (file is Uint8List) {
+              request.files.add(http.MultipartFile.fromBytes('$key[$i]', file,
+                  filename: 'file_$i.jpg'));
+            } else if (file is File) {
+              request.files.add(
+                  await http.MultipartFile.fromPath('$key[$i]', file.path));
+            }
+          }
+        }
+
+        if (value is Uint8List) {
+          request.files.add(
+              http.MultipartFile.fromBytes(key, value, filename: 'file.jpg'));
+        }
+
+        if (value is File) {
+          request.files.add(await http.MultipartFile.fromPath(key, value.path));
+        }
+      }
+
+      if (additionalData != null) {
+        additionalData.forEach((key, value) {
+          request.fields[key] = value;
+        });
+      }
+
+      final response = await request.send();
+      final responseData = await http.Response.fromStream(response);
+
+      _logResponse(
+        response: responseData,
+        url: Uri.parse('$baseUrl/$endpoint').toString(),
+        method: 'PUT',
+        requestBody: additionalData,
+      );
+
+      return responseData;
+    } catch (e) {
+      _logger.severe('Error during PUT request with files to $endpoint: $e');
+      throw Exception('Failed to upload files');
+    }
+  }
+
   void _logResponse({
     required http.Response response,
     required String url,

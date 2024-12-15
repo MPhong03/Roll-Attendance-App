@@ -20,23 +20,53 @@ class _HomeScreenState extends State<HomeScreen> {
   bool _isLoading = false;
   List<OrganizationModel> organizations = [];
   final ApiService _apiService = ApiService();
+  int pageIndex = 0;
+  int pageSize = 10;
+  bool hasMoreData = true;
 
-  Future<void> fetchUserOrganizations() async {
+  Future<void> shareProfile() async {
+    try {
+      await _apiService.put('api/auth/shareProfile', {});
+    } catch (e) {
+      Fluttertoast.showToast(
+        msg: "Failed to share profile, $e",
+        toastLength: Toast.LENGTH_SHORT,
+        gravity: ToastGravity.BOTTOM,
+        timeInSecForIosWeb: 1,
+        backgroundColor: Colors.black,
+        textColor: Colors.white,
+        fontSize: 16.0,
+      );
+    }
+  }
+
+  Future<void> fetchUserOrganizations(
+      {int pageIndex = 0, int pageSize = 10}) async {
     try {
       setState(() {
         _isLoading = true;
       });
 
       final response = await _apiService.get(
-          'api/organization/getall/${FirebaseAuth.instance.currentUser?.uid}');
+        'api/organization/getall/${FirebaseAuth.instance.currentUser?.uid}?pageIndex=$pageIndex&pageSize=$pageSize',
+      );
 
       if (response.statusCode == 200) {
         setState(() {
           List<dynamic> responseBody = jsonDecode(response.body);
+          if (pageIndex == 0) {
+            organizations = responseBody
+                .map((orgData) => OrganizationModel.fromMap(orgData))
+                .toList();
+          } else {
+            organizations.addAll(responseBody
+                .map((orgData) => OrganizationModel.fromMap(orgData))
+                .toList());
+          }
 
-          organizations = responseBody
-              .map((orgData) => OrganizationModel.fromMap(orgData))
-              .toList();
+          if (responseBody.length < pageSize) {
+            hasMoreData = false;
+          }
         });
       } else {
         Fluttertoast.showToast(
@@ -66,10 +96,16 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
+  void _loadMore() {
+    pageIndex++;
+    fetchUserOrganizations(pageIndex: pageIndex, pageSize: pageSize);
+  }
+
   @override
   void initState() {
     super.initState();
     fetchUserOrganizations();
+    shareProfile();
   }
 
   @override
@@ -80,12 +116,14 @@ class _HomeScreenState extends State<HomeScreen> {
         opacity: 0.3,
         blurEffectIntensity: 5,
         child: Scaffold(
-          // appBar: AppBar(
-          //   title: const Text('ITP'),
-          //   backgroundColor: Colors.blueAccent,
-          // ),
           body: RefreshIndicator(
-            onRefresh: fetchUserOrganizations,
+            onRefresh: () async {
+              setState(() {
+                pageIndex = 0;
+                hasMoreData = true;
+              });
+              await fetchUserOrganizations(pageIndex: pageIndex);
+            },
             child: ListView(
               padding: const EdgeInsets.all(16.0),
               children: [
@@ -135,6 +173,24 @@ class _HomeScreenState extends State<HomeScreen> {
                     ),
                   );
                 }),
+                if (hasMoreData)
+                  Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 20.0),
+                    child: Center(
+                      child: ElevatedButton(
+                        onPressed: () {
+                          if (!_isLoading) {
+                            setState(() {
+                              _isLoading = true;
+                            });
+                            pageIndex++;
+                            fetchUserOrganizations(pageIndex: pageIndex);
+                          }
+                        },
+                        child: const Text('Load More'),
+                      ),
+                    ),
+                  ),
               ],
             ),
           ),

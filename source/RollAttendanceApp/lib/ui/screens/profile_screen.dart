@@ -6,6 +6,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:go_router/go_router.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:itproject/services/api_service.dart';
 import 'package:itproject/services/user_service.dart';
 import 'package:file_picker/file_picker.dart';
@@ -119,15 +120,15 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     selectedImageFile != null
                         ? Column(
                             children: [
-                              selectedImageFile is File
-                                  ? Image.file(
-                                      selectedImageFile,
+                              kIsWeb
+                                  ? Image.memory(
+                                      selectedImageFile, // Dữ liệu nhị phân trên web
                                       height: 100,
                                       width: 100,
                                       fit: BoxFit.cover,
                                     )
-                                  : Image.memory(
-                                      selectedImageFile,
+                                  : Image.file(
+                                      selectedImageFile, // File vật lý trên mobile
                                       height: 100,
                                       width: 100,
                                       fit: BoxFit.cover,
@@ -138,34 +139,58 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         : const SizedBox(),
                     ElevatedButton.icon(
                       onPressed: () async {
-                        final status = await Permission.photos.status;
-                        if (!status.isGranted) {
-                          final permissionStatus =
-                              await Permission.photos.request();
-                          if (!permissionStatus.isGranted) {
-                            if (mounted) {
+                        if (kIsWeb == false) {
+                          final status = await Permission.photos.status;
+                          if (!status.isGranted) {
+                            final permissionStatus =
+                                await Permission.photos.request();
+                            if (!permissionStatus.isGranted) {
                               Fluttertoast.showToast(
                                 msg: "Permission to access photos denied!",
                                 toastLength: Toast.LENGTH_SHORT,
                                 gravity: ToastGravity.BOTTOM,
-                                timeInSecForIosWeb: 5,
                                 backgroundColor: Colors.red,
                                 textColor: Colors.white,
-                                fontSize: 16.0,
                               );
+                              return;
                             }
-                            return;
                           }
                         }
 
-                        final result = await FilePicker.platform.pickFiles(
-                          type: FileType.image,
-                        );
-                        if (result != null) {
-                          setModalState(() {
-                            selectedImageFile = result.files.first.bytes ??
-                                File(result.files.first.path!);
-                          });
+                        final ImagePicker picker = ImagePicker();
+                        try {
+                          final XFile? image = await picker.pickImage(
+                              source: ImageSource.gallery);
+
+                          if (image != null) {
+                            if (kIsWeb) {
+                              final Uint8List imageBytes =
+                                  await image.readAsBytes();
+                              setModalState(() {
+                                selectedImageFile = imageBytes;
+                              });
+                            } else {
+                              setModalState(() {
+                                selectedImageFile = File(image.path);
+                              });
+                            }
+                          } else {
+                            Fluttertoast.showToast(
+                              msg: "No file selected!",
+                              toastLength: Toast.LENGTH_SHORT,
+                              gravity: ToastGravity.BOTTOM,
+                              backgroundColor: Colors.orange,
+                              textColor: Colors.white,
+                            );
+                          }
+                        } catch (e) {
+                          Fluttertoast.showToast(
+                            msg: "Error selecting image: $e",
+                            toastLength: Toast.LENGTH_SHORT,
+                            gravity: ToastGravity.BOTTOM,
+                            backgroundColor: Colors.red,
+                            textColor: Colors.white,
+                          );
                         }
                       },
                       icon: const Icon(Icons.image),
@@ -215,6 +240,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
     try {
       String? newProfileImageUrl;
 
+      print('Upload: $selectedImageFile');
+
       if (selectedImageFile != null) {
         if (selectedImageFile is Uint8List) {
           final response = await _apiService.postFile(
@@ -254,6 +281,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
           name = updatedName;
         });
       }
+
+      await _apiService.put('api/auth/shareProfile', {});
 
       if (mounted) {
         Fluttertoast.showToast(

@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:blurry_modal_progress_hud/blurry_modal_progress_hud.dart';
 import 'package:flutter/material.dart';
+import 'package:itproject/services/api_service.dart';
 import 'package:itproject/services/user_service.dart';
 import 'package:itproject/ui/screens/home_screen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -18,7 +19,7 @@ class LoginScreen extends StatefulWidget {
 class _LoginScreenState extends State<LoginScreen> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passController = TextEditingController();
-  // final ApiService _apiService = ApiService();
+  final ApiService _apiService = ApiService();
   bool _isLoading = false;
   bool _isPasswordHidden = true;
 
@@ -54,6 +55,8 @@ class _LoginScreenState extends State<LoginScreen> {
       );
 
       if (userCredential.user != null) {
+        print(
+            'TOKEN: ${await FirebaseAuth.instance.currentUser?.getIdToken()}');
         if (mounted) {
           AwesomeDialog(
             context: context,
@@ -141,39 +144,43 @@ class _LoginScreenState extends State<LoginScreen> {
         final uid = userCredential.user!.uid;
         final email = userCredential.user!.email;
 
-        final profileResponse = await _userService.createProfile(email, uid);
+        print(
+            'TOKEN: ${await FirebaseAuth.instance.currentUser?.getIdToken()}');
+        print('TOKEN 2: ${await userCredential.user!.getIdToken(true)}');
 
-        if (profileResponse?.toLowerCase() == 'profile created successfully.') {
-          if (mounted) {
-            AwesomeDialog(
-              context: context,
-              dialogType: DialogType.success,
-              animType: AnimType.bottomSlide,
-              title: 'Success',
-              desc: 'Profile created and logged in successfully!',
-              btnOkOnPress: () {
-                Navigator.pushReplacement(
-                  context,
-                  MaterialPageRoute(builder: (context) => const HomeScreen()),
-                );
-              },
-            ).show();
-          }
-        } else {
-          if (mounted) {
-            AwesomeDialog(
-              context: context,
-              dialogType: DialogType.success,
-              animType: AnimType.bottomSlide,
-              title: 'Success',
-              desc: 'Logged in successfully!',
-              btnOkOnPress: () {
-                Navigator.pushReplacement(
-                  context,
-                  MaterialPageRoute(builder: (context) => const HomeScreen()),
-                );
-              },
-            ).show();
+        // Ensure the ID token is available after Google sign-in
+        final idToken =
+            await userCredential.user!.getIdToken(true); // Forces a refresh
+        if (idToken != null) {
+          final profileResponse = await _userService.createProfile(email, uid);
+
+          if (profileResponse?.toLowerCase() ==
+              'profile created successfully.') {
+            if (mounted) {
+              AwesomeDialog(
+                context: context,
+                dialogType: DialogType.success,
+                animType: AnimType.bottomSlide,
+                title: 'Success',
+                desc: 'Profile created and logged in successfully!',
+                btnOkOnPress: () {
+                  GoRouter.of(context).go('/home');
+                },
+              ).show();
+            }
+          } else {
+            if (mounted) {
+              AwesomeDialog(
+                context: context,
+                dialogType: DialogType.success,
+                animType: AnimType.bottomSlide,
+                title: 'Success',
+                desc: 'Logged in successfully!',
+                btnOkOnPress: () {
+                  GoRouter.of(context).go('/home');
+                },
+              ).show();
+            }
           }
         }
       }
@@ -369,7 +376,7 @@ class _LoginScreenState extends State<LoginScreen> {
                               const Text(
                                 'Sign In with Google',
                                 style: TextStyle(
-                                  color: Color.fromRGBO(0, 0, 0, 1),                              
+                                  color: Color.fromRGBO(0, 0, 0, 1),
                                   fontSize: 15,
                                   fontFamily: 'Poppins',
                                   fontWeight: FontWeight.w500,

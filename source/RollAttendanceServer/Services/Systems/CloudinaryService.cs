@@ -18,13 +18,13 @@ namespace RollAttendanceServer.Services.Systems
             _cloudinary = new Cloudinary(account);
         }
 
-        public async Task<string> UploadImageAsync(Stream imageStream, string fileName, string uid)
+        public async Task<string> UploadImageAsync(Stream imageStream, string fileName, string id, string folder)
         {
             string timestamp = DateTime.UtcNow.Ticks.ToString();
             var uploadParams = new ImageUploadParams
             {
                 File = new FileDescription(fileName, imageStream),
-                PublicId = $"users/{uid}_{timestamp}",
+                PublicId = $"{folder}/{id}_{timestamp}",
                 Overwrite = true
             };
 

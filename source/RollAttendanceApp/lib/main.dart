@@ -7,6 +7,7 @@ import 'package:itproject/ui/screens/home_screen.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:itproject/ui/screens/organizations/create_organization.dart';
+import 'package:itproject/ui/screens/organizations/edit_organization.dart';
 import 'package:itproject/ui/screens/organizations/organization_detail.dart';
 import 'package:itproject/ui/screens/profile_screen.dart';
 import 'package:itproject/ui/screens/settings/update_face_data_screen.dart';
@@ -66,6 +67,13 @@ class MyApp extends StatelessWidget {
         GoRoute(
           path: '/create-organization',
           builder: (context, state) => const CreateOrganizationScreen(),
+        ),
+        GoRoute(
+          path: '/edit-organization/:id',
+          builder: (context, state) {
+            final id = state.pathParameters['id']!;
+            return EditOrganizationScreen(organizationId: id);
+          },
         ),
         GoRoute(
           path: '/organization-detail/:id',

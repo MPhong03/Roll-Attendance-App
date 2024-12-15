@@ -5,6 +5,7 @@ import 'package:awesome_dialog/awesome_dialog.dart';
 import 'package:blurry_modal_progress_hud/blurry_modal_progress_hud.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:itproject/models/organization_model.dart';
 import 'package:itproject/services/api_service.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:permission_handler/permission_handler.dart';
@@ -12,63 +13,132 @@ import 'package:image_picker/image_picker.dart';
 import 'package:flutter/foundation.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 
-class CreateOrganizationScreen extends StatefulWidget {
-  const CreateOrganizationScreen({super.key});
+class EditOrganizationScreen extends StatefulWidget {
+  final String organizationId;
+
+  const EditOrganizationScreen({super.key, required this.organizationId});
 
   @override
-  State<CreateOrganizationScreen> createState() =>
-      _CreateOrganizationScreenState();
+  State<EditOrganizationScreen> createState() => _EditOrganizationScreenState();
 }
 
-class _CreateOrganizationScreenState extends State<CreateOrganizationScreen> {
+class _EditOrganizationScreenState extends State<EditOrganizationScreen> {
   final _formKey = GlobalKey<FormState>();
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _descriptionController = TextEditingController();
   final TextEditingController _addressController = TextEditingController();
   dynamic selectedBannerFile;
   dynamic selectedImageFile;
+  String? selectedImageUrl;
+  String? selectedBannerUrl;
   bool _isPrivate = false;
   bool _isLoading = false;
   final ApiService _apiService = ApiService();
 
-  Future<void> _uploadImageFromGallery(bool isBanner) async {
-    if (kIsWeb == false) {
-      final status = await Permission.photos.status;
-      if (!status.isGranted) {
-        final permissionStatus = await Permission.photos.request();
-        if (!permissionStatus.isGranted) {
-          Fluttertoast.showToast(
-            msg: "Permission to access photos denied!",
-            toastLength: Toast.LENGTH_SHORT,
-            gravity: ToastGravity.BOTTOM,
-            backgroundColor: Colors.red,
-            textColor: Colors.white,
-          );
-          return;
-        }
-      }
+  Widget displayImage(dynamic fileOrUrl) {
+    if (fileOrUrl is String && Uri.tryParse(fileOrUrl)?.isAbsolute == true) {
+      // If it's a URL
+      return Image.network(
+        fileOrUrl,
+        height: 100,
+        width: 100,
+        fit: BoxFit.cover,
+      );
+    } else if (fileOrUrl is Uint8List) {
+      // If it's data for web
+      return Image.memory(
+        fileOrUrl,
+        height: 100,
+        width: 100,
+        fit: BoxFit.cover,
+      );
+    } else if (fileOrUrl is File) {
+      // If it's a file (mobile)
+      return Image.file(
+        fileOrUrl,
+        height: 100,
+        width: 100,
+        fit: BoxFit.cover,
+      );
+    } else {
+      return const SizedBox();
     }
+  }
 
+  Future<OrganizationModel> getDetail(id) async {
+    try {
+      setState(() {
+        _isLoading = true;
+      });
+
+      final response = await _apiService.get('api/organization/detail/$id');
+
+      if (response.statusCode == 200) {
+        return OrganizationModel.fromMap(jsonDecode(response.body));
+      } else {
+        throw Exception('Failed to load organization');
+      }
+    } catch (e) {
+      throw Exception('Failed to load organization: $e');
+    } finally {
+      setState(() {
+        _isLoading = false;
+      });
+    }
+  }
+
+  Future<void> _loadOrganizationDetails() async {
+    setState(() {
+      _isLoading = true;
+    });
+
+    try {
+      final organization = await getDetail(widget.organizationId);
+      _nameController.text = organization.name;
+      _descriptionController.text = organization.description;
+      _addressController.text = organization.address;
+      _isPrivate = organization.isPrivate;
+      selectedImageUrl = organization.image;
+      selectedBannerUrl = organization.banner;
+    } catch (e) {
+      Fluttertoast.showToast(
+        msg: "Error loading organization: $e",
+        toastLength: Toast.LENGTH_SHORT,
+        gravity: ToastGravity.BOTTOM,
+        backgroundColor: Colors.red,
+        textColor: Colors.white,
+      );
+    } finally {
+      setState(() {
+        _isLoading = false;
+      });
+    }
+  }
+
+  Future<void> _uploadImageFromGallery(bool isBanner) async {
     final ImagePicker picker = ImagePicker();
     try {
       final XFile? image = await picker.pickImage(source: ImageSource.gallery);
-
       if (image != null) {
         if (kIsWeb) {
           final Uint8List imageBytes = await image.readAsBytes();
           setState(() {
             if (isBanner) {
               selectedBannerFile = imageBytes;
+              selectedBannerUrl = null;
             } else {
               selectedImageFile = imageBytes;
+              selectedImageUrl = null;
             }
           });
         } else {
           setState(() {
             if (isBanner) {
               selectedBannerFile = File(image.path);
+              selectedBannerUrl = null;
             } else {
               selectedImageFile = File(image.path);
+              selectedImageUrl = null;
             }
           });
         }
@@ -92,7 +162,7 @@ class _CreateOrganizationScreenState extends State<CreateOrganizationScreen> {
     }
   }
 
-  Future<void> _createOrganization() async {
+  Future<void> _editOrganization() async {
     if (!_formKey.currentState!.validate()) return;
 
     setState(() {
@@ -117,11 +187,12 @@ class _CreateOrganizationScreenState extends State<CreateOrganizationScreen> {
         images['bannerFile'] = selectedBannerFile;
       }
 
-      final response = await _apiService.postFiles('api/organization', images,
+      final response = await _apiService.putFiles(
+          'api/organization/${widget.organizationId}', images,
           additionalData: data);
 
-      if (response.statusCode == 201) {
-        final organizationId = jsonDecode(response.body)['id'];
+      if (response.statusCode == 200) {
+        final orgId = jsonDecode(response.body)['id'];
 
         if (mounted) {
           AwesomeDialog(
@@ -131,7 +202,7 @@ class _CreateOrganizationScreenState extends State<CreateOrganizationScreen> {
             title: 'Success',
             desc: 'Organization created successfully',
             btnOkOnPress: () {
-              context.push('/organization-detail/$organizationId');
+              context.push('/organization-detail/$orgId');
             },
           ).show();
         }
@@ -142,7 +213,7 @@ class _CreateOrganizationScreenState extends State<CreateOrganizationScreen> {
             dialogType: DialogType.error,
             animType: AnimType.scale,
             title: 'Error',
-            desc: 'Failed to create organization',
+            desc: 'Failed to update organization',
             btnCancelOnPress: () {},
           ).show();
         }
@@ -166,6 +237,12 @@ class _CreateOrganizationScreenState extends State<CreateOrganizationScreen> {
   }
 
   @override
+  void initState() {
+    super.initState();
+    _loadOrganizationDetails();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return BlurryModalProgressHUD(
       inAsyncCall: _isLoading,
@@ -184,25 +261,8 @@ class _CreateOrganizationScreenState extends State<CreateOrganizationScreen> {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   const SizedBox(height: 16),
-                  selectedImageFile != null
-                      ? Column(
-                          children: [
-                            kIsWeb
-                                ? Image.memory(
-                                    selectedImageFile, // Dữ liệu nhị phân trên web
-                                    height: 100,
-                                    width: 100,
-                                    fit: BoxFit.cover,
-                                  )
-                                : Image.file(
-                                    selectedImageFile, // File vật lý trên mobile
-                                    height: 100,
-                                    width: 100,
-                                    fit: BoxFit.cover,
-                                  ),
-                            const SizedBox(height: 10),
-                          ],
-                        )
+                  selectedImageFile != null || selectedImageUrl != null
+                      ? displayImage(selectedImageFile ?? selectedImageUrl)
                       : const SizedBox(),
                   ElevatedButton.icon(
                     onPressed: () => _uploadImageFromGallery(false),
@@ -210,25 +270,8 @@ class _CreateOrganizationScreenState extends State<CreateOrganizationScreen> {
                     label: const Text('Choose Image'),
                   ),
                   const SizedBox(height: 16),
-                  selectedBannerFile != null
-                      ? Column(
-                          children: [
-                            kIsWeb
-                                ? Image.memory(
-                                    selectedBannerFile, // Dữ liệu nhị phân trên web
-                                    height: 100,
-                                    width: 100,
-                                    fit: BoxFit.cover,
-                                  )
-                                : Image.file(
-                                    selectedBannerFile, // File vật lý trên mobile
-                                    height: 100,
-                                    width: 100,
-                                    fit: BoxFit.cover,
-                                  ),
-                            const SizedBox(height: 10),
-                          ],
-                        )
+                  selectedBannerFile != null || selectedBannerUrl != null
+                      ? displayImage(selectedBannerFile ?? selectedBannerUrl)
                       : const SizedBox(),
                   ElevatedButton.icon(
                     onPressed: () => _uploadImageFromGallery(true),
@@ -289,8 +332,8 @@ class _CreateOrganizationScreenState extends State<CreateOrganizationScreen> {
                   ),
                   const SizedBox(height: 16),
                   ElevatedButton(
-                    onPressed: _isLoading ? null : _createOrganization,
-                    child: const Text('Create'),
+                    onPressed: _isLoading ? null : _editOrganization,
+                    child: const Text('Update'),
                   ),
                 ],
               ),
