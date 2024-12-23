@@ -4,13 +4,16 @@ import 'package:flutter/material.dart';
 // import 'package:itproject/services/api_service.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:itproject/services/user_service.dart';
+import 'package:itproject/ui/screens/login_screen.dart';
 
 class SignUpScreen extends StatefulWidget {
   const SignUpScreen({super.key, required this.controller});
   final PageController controller;
+
   @override
   State<SignUpScreen> createState() => _SignUpScreenState();
 }
+
 
 class _SignUpScreenState extends State<SignUpScreen> {
   final TextEditingController _emailController = TextEditingController();
@@ -156,16 +159,19 @@ class _SignUpScreenState extends State<SignUpScreen> {
       opacity: 0.3,
       blurEffectIntensity: 5,
       child: Scaffold(
+        backgroundColor: Color.fromRGBO(197, 240, 200, 1),
         body: SingleChildScrollView(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Padding(
-                padding: const EdgeInsets.only(top: 15),
-                child: Image.asset(
-                  "assets/images/vector-2.png",
-                  width: MediaQuery.of(context).size.width,
-                  fit: BoxFit.cover,
+              Center(
+                child: Padding(
+                  padding: EdgeInsets.only(top: MediaQuery.of(context).size.height * 0.05),
+                  child: Image.asset(
+                    "assets/images/logo.png",
+                    width: MediaQuery.of(context).size.width * 0.7,
+                    fit: BoxFit.cover,
+                  ),
                 ),
               ),
               const SizedBox(
@@ -174,249 +180,266 @@ class _SignUpScreenState extends State<SignUpScreen> {
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 30),
                 child: Column(
-                  textDirection: TextDirection.ltr,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text(
-                      'Sign up',
-                      style: TextStyle(
-                        color: Color(0xFF755DC1),
-                        fontSize: 27,
-                        fontFamily: 'Poppins',
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                    const SizedBox(
-                      height: 25,
-                    ),
-                    SizedBox(
-                      height: 56,
-                      child: TextField(
-                        controller: _emailController,
-                        textAlign: TextAlign.left,
-                        style: const TextStyle(
-                          fontSize: 13,
-                          fontFamily: 'Poppins',
-                          fontWeight: FontWeight.w400,
-                        ),
-                        decoration: const InputDecoration(
-                          labelText: 'Email',
-                          labelStyle: TextStyle(
-                            color: Color(0xFF755DC1),
-                            fontSize: 15,
-                            fontFamily: 'Poppins',
-                            fontWeight: FontWeight.w600,
-                          ),
-                          enabledBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.all(Radius.circular(10)),
-                            borderSide: BorderSide(
-                              width: 1,
-                              color: Color(0xFF837E93),
-                            ),
-                          ),
-                          focusedBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.all(Radius.circular(10)),
-                            borderSide: BorderSide(
-                              width: 1,
-                              color: Color(0xFF9F7BFF),
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(
-                      height: 17,
-                    ),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    const SizedBox(height: 20),
+                    // Email TextBox
+                    Stack(
+                      clipBehavior: Clip.none,
                       children: [
-                        Expanded(
-                          child: Padding(
-                            padding: const EdgeInsets.only(
-                                right: 8.0), // Thêm khoảng cách giữa hai ô
-                            child: TextField(
+                        TextField(
+                          controller: _emailController,
+                          style: const TextStyle(
+                            fontSize: 15,
+                            fontFamily: 'Baloo',
+                            fontWeight: FontWeight.w400,
+                          ),
+                          decoration: const InputDecoration(
+                            hintText: 'Email',
+                            hintStyle: TextStyle(
+                              color: Color(0xFFDBDBDB),
+                              fontSize: 15,
+                              fontFamily: 'Baloo',
+                              fontWeight: FontWeight.w600,
+                            ),
+                            filled: true,
+                            fillColor: Colors.white,
+                            enabledBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.all(Radius.circular(10)),
+                              borderSide: BorderSide(
+                                width: 1,
+                                color: Color(0xFF48B02C),
+                              ),
+                            ),
+                            focusedBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.all(Radius.circular(10)),
+                              borderSide: BorderSide(
+                                width: 1,
+                                color: Color(0xFF48B02C),
+                              ),
+                            ),
+                            contentPadding: EdgeInsets.only(left: 60),
+                          ),
+                        ),
+                        Positioned(
+                          left: -25,
+                          top: 0,
+                          bottom: 0,
+                          child: Container(
+                            width: 70,
+                            height: 60,
+                            decoration: const BoxDecoration(
+                              color: Color(0xFF48B02C),
+                              shape: BoxShape.circle,
+                            ),
+                            child: const Icon(
+                              Icons.email,
+                              color: Colors.white,
+                              size: 24,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(
+                      height: 30,
+                    ),
+                    Stack(
+                          clipBehavior: Clip.none,
+                          children: [
+                            TextField(
                               controller: _passController,
-                              textAlign: TextAlign.left,
+                              obscureText: _isPasswordHidden,
                               style: const TextStyle(
-                                fontSize: 13,
-                                fontFamily: 'Poppins',
+                                fontSize: 15,
+                                fontFamily: 'Baloo',
                                 fontWeight: FontWeight.w400,
                               ),
-                              obscureText: _isPasswordHidden,
                               decoration: InputDecoration(
-                                labelText: 'Password',
-                                hintText: 'Create Password',
+                                hintText: 'Password',
                                 hintStyle: const TextStyle(
-                                  color: Color(0xFF837E93),
-                                  fontSize: 10,
-                                  fontFamily: 'Poppins',
-                                  fontWeight: FontWeight.w400,
-                                ),
-                                labelStyle: const TextStyle(
-                                  color: Color(0xFF755DC1),
+                                  color: Color(0xFFDBDBDB),
                                   fontSize: 15,
-                                  fontFamily: 'Poppins',
+                                  fontFamily: 'Baloo',
                                   fontWeight: FontWeight.w600,
                                 ),
-                                enabledBorder: const OutlineInputBorder(
-                                  borderRadius:
-                                      BorderRadius.all(Radius.circular(10)),
+                                filled: true,
+                                fillColor: Colors.white,
+                                enabledBorder: OutlineInputBorder(
+                                  borderRadius: BorderRadius.all(Radius.circular(10)),
                                   borderSide: BorderSide(
                                     width: 1,
-                                    color: Color(0xFF837E93),
+                                    color: Color(0xFF48B02C),
                                   ),
                                 ),
-                                focusedBorder: const OutlineInputBorder(
-                                  borderRadius:
-                                      BorderRadius.all(Radius.circular(10)),
+                                focusedBorder: OutlineInputBorder(
+                                  borderRadius: BorderRadius.all(Radius.circular(10)),
                                   borderSide: BorderSide(
                                     width: 1,
-                                    color: Color(0xFF9F7BFF),
+                                    color: Color(0xFF48B02C),
                                   ),
                                 ),
+                                contentPadding: const EdgeInsets.only(left: 60),
                                 suffixIcon: IconButton(
                                   icon: Icon(
                                     _isPasswordHidden
                                         ? Icons.visibility_off
                                         : Icons.visibility,
-                                    color: const Color(0xFF755DC1),
+                                    color: const Color(0xFF48B02C),
                                   ),
                                   onPressed: () {
                                     setState(() {
-                                      _isPasswordHidden =
-                                          !_isPasswordHidden; // Toggle visibility
+                                      _isPasswordHidden = !_isPasswordHidden;
                                     });
                                   },
                                 ),
                               ),
                             ),
-                          ),
+                            Positioned(
+                              left: -25,
+                              top: 0,
+                              bottom: 0,
+                              child: Container(
+                                width: 70,
+                                height: 60,
+                                decoration: const BoxDecoration(
+                                  color: Color(0xFF48B02C),
+                                  shape: BoxShape.circle,
+                                ),
+                                child: const Icon(
+                                  Icons.lock,
+                                  color: Colors.white,
+                                  size: 24,
+                                ),
+                              ),
+                            ),
+                          ],
                         ),
-                        Expanded(
-                          child: Padding(
-                            padding: const EdgeInsets.only(
-                                left: 8.0), // Thêm khoảng cách giữa hai ô
-                            child: TextField(
-                              controller: _repassController,
-                              textAlign: TextAlign.left,
+                    const SizedBox(
+                      height: 30,
+                    ),
+                    Stack(
+                          clipBehavior: Clip.none,
+                          children: [
+                            TextField(
+                              controller: _passController,
+                              obscureText: _isPasswordHidden,
                               style: const TextStyle(
-                                fontSize: 13,
-                                fontFamily: 'Poppins',
+                                fontSize: 15,
+                                fontFamily: 'Baloo',
                                 fontWeight: FontWeight.w400,
                               ),
-                              obscureText: _isConfirmPasswordHidden,
                               decoration: InputDecoration(
-                                labelText: 'Confirm Password',
-                                hintText: 'Confirm Password',
+                                hintText: 'Password',
                                 hintStyle: const TextStyle(
-                                  color: Color(0xFF837E93),
-                                  fontSize: 10,
-                                  fontFamily: 'Poppins',
-                                  fontWeight: FontWeight.w400,
-                                ),
-                                labelStyle: const TextStyle(
-                                  color: Color(0xFF755DC1),
+                                  color: Color(0xFFDBDBDB),
                                   fontSize: 15,
-                                  fontFamily: 'Poppins',
+                                  fontFamily: 'Baloo',
                                   fontWeight: FontWeight.w600,
                                 ),
-                                enabledBorder: const OutlineInputBorder(
-                                  borderRadius:
-                                      BorderRadius.all(Radius.circular(10)),
+                                filled: true,
+                                fillColor: Colors.white,
+                                enabledBorder: OutlineInputBorder(
+                                  borderRadius: BorderRadius.all(Radius.circular(10)),
                                   borderSide: BorderSide(
                                     width: 1,
-                                    color: Color(0xFF837E93),
+                                    color: Color(0xFF48B02C),
                                   ),
                                 ),
-                                focusedBorder: const OutlineInputBorder(
-                                  borderRadius:
-                                      BorderRadius.all(Radius.circular(10)),
+                                focusedBorder: OutlineInputBorder(
+                                  borderRadius: BorderRadius.all(Radius.circular(10)),
                                   borderSide: BorderSide(
                                     width: 1,
-                                    color: Color(0xFF9F7BFF),
+                                    color: Color(0xFF48B02C),
                                   ),
                                 ),
+                                contentPadding: const EdgeInsets.only(left: 60),
                                 suffixIcon: IconButton(
                                   icon: Icon(
-                                    _isConfirmPasswordHidden
+                                    _isPasswordHidden
                                         ? Icons.visibility_off
                                         : Icons.visibility,
-                                    color: const Color(0xFF755DC1),
+                                    color: const Color(0xFF48B02C),
                                   ),
                                   onPressed: () {
                                     setState(() {
-                                      _isConfirmPasswordHidden =
-                                          !_isConfirmPasswordHidden; // Toggle visibility
+                                      _isPasswordHidden = !_isPasswordHidden;
                                     });
                                   },
                                 ),
                               ),
                             ),
-                          ),
+                            Positioned(
+                              left: -25,
+                              top: 0,
+                              bottom: 0,
+                              child: Container(
+                                width: 70,
+                                height: 60,
+                                decoration: const BoxDecoration(
+                                  color: Color(0xFF48B02C),
+                                  shape: BoxShape.circle,
+                                ),
+                                child: const Icon(
+                                  Icons.lock,
+                                  color: Colors.white,
+                                  size: 24,
+                                ),
+                              ),
+                            ),
+                          ],
                         ),
-                      ],
-                    ),
                     const SizedBox(
-                      height: 25,
+                      height: 60,
                     ),
-                    ClipRRect(
-                      borderRadius: const BorderRadius.all(Radius.circular(10)),
-                      child: SizedBox(
-                        width: double.infinity,
-                        height: 35,
-                        child: ElevatedButton(
-                          onPressed: _register,
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: const Color(0xFF9F7BFF),
-                          ),
-                          child: const Text(
-                            'Create account',
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 15,
-                              fontFamily: 'Poppins',
-                              fontWeight: FontWeight.w500,
+                    Center(
+                      child: ClipRRect(
+                        borderRadius: const BorderRadius.all(Radius.circular(10)),
+                        child: SizedBox(
+                          width: MediaQuery.of(context).size.width * 0.5,
+                          height: 60,
+                          child: ElevatedButton(
+                            onPressed: _register,
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: const Color(0xFF1E8925),
+                            ),
+                            child: const Text(
+                              'SIGN UP',
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 25,
+                                fontFamily: 'Baloo',
+                                fontWeight: FontWeight.w700,
+                              ),
                             ),
                           ),
                         ),
                       ),
                     ),
                     const SizedBox(
-                      height: 15,
+                      height: 80,
                     ),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        const Text(
-                          'Already have an account?',
-                          textAlign: TextAlign.center,
-                          style: TextStyle(
-                            color: Color(0xFF837E93),
-                            fontSize: 13,
-                            fontFamily: 'Poppins',
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
-                        const SizedBox(
-                          width: 2.5,
-                        ),
-                        InkWell(
-                          onTap: () {
-                            widget.controller.animateToPage(0,
-                                duration: const Duration(milliseconds: 500),
-                                curve: Curves.ease);
-                          },
-                          child: const Text(
-                            'Log In ',
-                            style: TextStyle(
-                              color: Color(0xFF755DC1),
-                              fontSize: 13,
-                              fontFamily: 'Poppins',
-                              fontWeight: FontWeight.w500,
+                    Center(
+                      child: GestureDetector(
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => LoginScreen(controller: PageController()),
                             ),
+                          );
+                        },
+                        child: const Text(
+                          'Already have an account? Log in now',
+                          style: TextStyle(
+                            color: Color(0xFF000000),
+                            fontSize: 16,
+                            fontFamily: 'Baloo',
+                            fontWeight: FontWeight.w700,
+                            decoration: TextDecoration.none,
                           ),
                         ),
-                      ],
+                      ),
                     ),
                   ],
                 ),

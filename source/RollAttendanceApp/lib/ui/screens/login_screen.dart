@@ -8,6 +8,7 @@ import 'package:itproject/services/user_service.dart';
 import 'package:itproject/ui/screens/home_screen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:itproject/services/google_sign_in_service.dart';
+import 'package:itproject/ui/screens/sign_up_screen.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key, required this.controller});
@@ -364,16 +365,15 @@ class _LoginScreenState extends State<LoginScreen> {
                     ],
                   ),
 
-                  const SizedBox(height: 20), // Thêm khoảng cách giữa TextBox và chữ "Forgot Password?"
+                  const SizedBox(height: 20),
                   Align(
                       alignment: Alignment.centerRight,
                       child: GestureDetector(
                         onTap: () {
-                          // Chuyển hướng đến trang SignUpScreen
                           Navigator.push(
                             context,
                             MaterialPageRoute(
-                              builder: (context) => const HomeScreen(), // Thay bằng màn hình bạn muốn
+                              builder: (context) => SignUpScreen(controller: PageController()),
                             ),
                           );
                         },
@@ -384,7 +384,7 @@ class _LoginScreenState extends State<LoginScreen> {
                             fontSize: 15,
                             fontFamily: 'Baloo',
                             fontWeight: FontWeight.w600,
-                            decoration: TextDecoration.underline, // Gạch chân chữ
+                            decoration: TextDecoration.underline,
                           ),
                         ),
                       ),
@@ -491,14 +491,14 @@ class _LoginScreenState extends State<LoginScreen> {
                           Navigator.push(
                             context,
                             MaterialPageRoute(
-                              builder: (context) => const HomeScreen(),
+                              builder: (context) => SignUpScreen(controller: PageController()),
                             ),
                           );
                         },
                         child: const Text(
                           'CREATE AN ACCOUNT',
                           style: TextStyle(
-                            color: Color(0xFF1E8925),
+                            color: Color(0xFF000000),
                             fontSize: 16,
                             fontFamily: 'Baloo',
                             fontWeight: FontWeight.w700,

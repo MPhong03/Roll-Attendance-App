@@ -11,6 +11,7 @@ import 'package:itproject/ui/screens/organizations/edit_organization.dart';
 import 'package:itproject/ui/screens/organizations/organization_detail.dart';
 import 'package:itproject/ui/screens/profile_screen.dart';
 import 'package:itproject/ui/screens/settings/update_face_data_screen.dart';
+import 'package:itproject/ui/screens/sign_up_screen.dart';
 import 'firebase_options.dart';
 import 'package:go_router/go_router.dart';
 
@@ -46,7 +47,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final GoRouter router = GoRouter(
-      initialLocation: isLoggedIn ? '/home' : '/',
+      initialLocation: isLoggedIn ? '/home' : '/signup',
       routes: [
         GoRoute(
           path: '/',
@@ -55,6 +56,12 @@ class MyApp extends StatelessWidget {
         GoRoute(
           path: '/home',
           builder: (context, state) => const HomeScreen(),
+        ),
+        GoRoute(
+          path: '/signup',
+          builder: (context, state) => SignUpScreen(
+            controller: PageController(),
+          ),
         ),
         GoRoute(
           path: '/profile',
