@@ -2,6 +2,7 @@
 
 namespace RollAttendanceServer.Middlewares
 {
+    // NO USE
     public class FirebaseAuthMiddlewares
     {
         private readonly RequestDelegate _next;

@@ -19,7 +19,7 @@ namespace RollAttendanceServer.Controllers
         }
 
         [HttpGet("{email}")]
-        public async Task<IActionResult> GetEventDetail(string email)
+        public async Task<IActionResult> GetUserByEmail(string email)
         {
             try
             {

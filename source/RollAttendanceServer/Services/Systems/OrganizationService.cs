@@ -155,7 +155,7 @@ namespace RollAttendanceServer.Services.Systems
             await _context.SaveChangesAsync();
         }
 
-        public async Task<IEnumerable<User?>> GetOrganizationUsersAsync(string id, string keyword, int pageIndex, int pageSize)
+        public async Task<IEnumerable<UserOrganizationDTO?>> GetOrganizationUsersAsync(string id, string keyword, int pageIndex, int pageSize)
         {
             var query = _context.UserOrganizationRoles.AsQueryable();
 
@@ -168,7 +168,16 @@ namespace RollAttendanceServer.Services.Systems
 
             query = query.Skip((pageIndex - 1) * pageSize).Take(pageSize);
 
-            return await query.Select(uor => uor.User).ToListAsync();
+            return await query.Select(uor => new UserOrganizationDTO
+            {
+                Id = uor.User.Id,
+                Uid = uor.User.Uid,
+                Email = uor.User.Email,
+                DisplayName = uor.User.DisplayName,
+                PhoneNumber = uor.User.PhoneNumber,
+                Avatar = uor.User.Avatar,
+                Role = (int)uor.Role
+            }).ToListAsync();
         }
     }
 }
