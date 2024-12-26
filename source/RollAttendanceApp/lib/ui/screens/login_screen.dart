@@ -5,6 +5,7 @@ import 'package:blurry_modal_progress_hud/blurry_modal_progress_hud.dart';
 import 'package:flutter/material.dart';
 import 'package:itproject/services/api_service.dart';
 import 'package:itproject/services/user_service.dart';
+import 'package:itproject/ui/screens/forgot_password_screen.dart';
 import 'package:itproject/ui/screens/home_screen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:itproject/services/google_sign_in_service.dart';
@@ -216,7 +217,8 @@ class _LoginScreenState extends State<LoginScreen> {
             children: [
               Center(
                 child: Padding(
-                  padding: EdgeInsets.only(top: MediaQuery.of(context).size.height * 0.05),
+                  padding: EdgeInsets.only(
+                      top: MediaQuery.of(context).size.height * 0.05),
                   child: Image.asset(
                     "assets/images/logo.png",
                     width: MediaQuery.of(context).size.width * 0.7,
@@ -227,155 +229,156 @@ class _LoginScreenState extends State<LoginScreen> {
               const SizedBox(
                 height: 5,
               ),
-             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 30),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const SizedBox(height: 20),
-                  // Email TextBox
-                  Stack(
-                    clipBehavior: Clip.none,
-                    children: [
-                      TextField(
-                        controller: _emailController,
-                        style: const TextStyle(
-                          fontSize: 15,
-                          fontFamily: 'Baloo',
-                          fontWeight: FontWeight.w400,
-                        ),
-                        decoration: const InputDecoration(
-                          hintText: 'Email',
-                          hintStyle: TextStyle(
-                            color: Color(0xFFDBDBDB),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 30),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const SizedBox(height: 20),
+                    // Email TextBox
+                    Stack(
+                      clipBehavior: Clip.none,
+                      children: [
+                        TextField(
+                          controller: _emailController,
+                          style: const TextStyle(
                             fontSize: 15,
                             fontFamily: 'Baloo',
-                            fontWeight: FontWeight.w600,
+                            fontWeight: FontWeight.w400,
                           ),
-                          filled: true,
-                          fillColor: Colors.white,
-                          enabledBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.all(Radius.circular(10)),
-                            borderSide: BorderSide(
-                              width: 1,
+                          decoration: const InputDecoration(
+                            hintText: 'Email',
+                            hintStyle: TextStyle(
+                              color: Color(0xFFDBDBDB),
+                              fontSize: 15,
+                              fontFamily: 'Baloo',
+                              fontWeight: FontWeight.w600,
+                            ),
+                            filled: true,
+                            fillColor: Colors.white,
+                            enabledBorder: OutlineInputBorder(
+                              borderRadius:
+                                  BorderRadius.all(Radius.circular(10)),
+                              borderSide: BorderSide(
+                                width: 1,
+                                color: Color(0xFF48B02C),
+                              ),
+                            ),
+                            focusedBorder: OutlineInputBorder(
+                              borderRadius:
+                                  BorderRadius.all(Radius.circular(10)),
+                              borderSide: BorderSide(
+                                width: 1,
+                                color: Color(0xFF48B02C),
+                              ),
+                            ),
+                            contentPadding: EdgeInsets.only(left: 60),
+                          ),
+                        ),
+                        Positioned(
+                          left: -25,
+                          top: 0,
+                          bottom: 0,
+                          child: Container(
+                            width: 70,
+                            height: 60,
+                            decoration: const BoxDecoration(
                               color: Color(0xFF48B02C),
+                              shape: BoxShape.circle,
+                            ),
+                            child: const Icon(
+                              Icons.email,
+                              color: Colors.white,
+                              size: 24,
                             ),
                           ),
-                          focusedBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.all(Radius.circular(10)),
-                            borderSide: BorderSide(
-                              width: 1,
-                              color: Color(0xFF48B02C),
-                            ),
-                          ),
-                          contentPadding: EdgeInsets.only(left: 60),
                         ),
-                      ),
-                      Positioned(
-                        left: -25,
-                        top: 0,
-                        bottom: 0,
-                        child: Container(
-                          width: 70,
-                          height: 60,
-                          decoration: const BoxDecoration(
-                            color: Color(0xFF48B02C),
-                            shape: BoxShape.circle,
-                          ),
-                          child: const Icon(
-                            Icons.email,
-                            color: Colors.white,
-                            size: 24,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 30),
-                  // Password TextBox
-                  Stack(
-                    clipBehavior: Clip.none,
-                    children: [
-                      TextField(
-                        controller: _passController,
-                        obscureText: _isPasswordHidden,
-                        style: const TextStyle(
-                          fontSize: 15,
-                          fontFamily: 'Baloo',
-                          fontWeight: FontWeight.w400,
-                        ),
-                        decoration: InputDecoration(
-                          hintText: 'Password',
-                          hintStyle: const TextStyle(
-                            color: Color(0xFFDBDBDB),
+                      ],
+                    ),
+                    const SizedBox(height: 30),
+                    // Password TextBox
+                    Stack(
+                      clipBehavior: Clip.none,
+                      children: [
+                        TextField(
+                          controller: _passController,
+                          obscureText: _isPasswordHidden,
+                          style: const TextStyle(
                             fontSize: 15,
                             fontFamily: 'Baloo',
-                            fontWeight: FontWeight.w600,
+                            fontWeight: FontWeight.w400,
                           ),
-                          filled: true,
-                          fillColor: Colors.white,
-                          enabledBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.all(Radius.circular(10)),
-                            borderSide: BorderSide(
-                              width: 1,
-                              color: Color(0xFF48B02C),
+                          decoration: InputDecoration(
+                            hintText: 'Password',
+                            hintStyle: const TextStyle(
+                              color: Color(0xFFDBDBDB),
+                              fontSize: 15,
+                              fontFamily: 'Baloo',
+                              fontWeight: FontWeight.w600,
                             ),
-                          ),
-                          focusedBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.all(Radius.circular(10)),
-                            borderSide: BorderSide(
-                              width: 1,
-                              color: Color(0xFF48B02C),
+                            filled: true,
+                            fillColor: Colors.white,
+                            enabledBorder: OutlineInputBorder(
+                              borderRadius:
+                                  BorderRadius.all(Radius.circular(10)),
+                              borderSide: BorderSide(
+                                width: 1,
+                                color: Color(0xFF48B02C),
+                              ),
                             ),
-                          ),
-                          contentPadding: const EdgeInsets.only(left: 60),
-                          suffixIcon: IconButton(
-                            icon: Icon(
-                              _isPasswordHidden
-                                  ? Icons.visibility_off
-                                  : Icons.visibility,
-                              color: const Color(0xFF48B02C),
+                            focusedBorder: OutlineInputBorder(
+                              borderRadius:
+                                  BorderRadius.all(Radius.circular(10)),
+                              borderSide: BorderSide(
+                                width: 1,
+                                color: Color(0xFF48B02C),
+                              ),
                             ),
-                            onPressed: () {
-                              setState(() {
-                                _isPasswordHidden = !_isPasswordHidden;
-                              });
-                            },
+                            contentPadding: const EdgeInsets.only(left: 60),
+                            suffixIcon: IconButton(
+                              icon: Icon(
+                                _isPasswordHidden
+                                    ? Icons.visibility_off
+                                    : Icons.visibility,
+                                color: const Color(0xFF48B02C),
+                              ),
+                              onPressed: () {
+                                setState(() {
+                                  _isPasswordHidden = !_isPasswordHidden;
+                                });
+                              },
+                            ),
                           ),
                         ),
-                      ),
-                      Positioned(
-                        left: -25,
-                        top: 0,
-                        bottom: 0,
-                        child: Container(
-                          width: 70,
-                          height: 60,
-                          decoration: const BoxDecoration(
-                            color: Color(0xFF48B02C),
-                            shape: BoxShape.circle,
-                          ),
-                          child: const Icon(
-                            Icons.lock,
-                            color: Colors.white,
-                            size: 24,
+                        Positioned(
+                          left: -25,
+                          top: 0,
+                          bottom: 0,
+                          child: Container(
+                            width: 70,
+                            height: 60,
+                            decoration: const BoxDecoration(
+                              color: Color(0xFF48B02C),
+                              shape: BoxShape.circle,
+                            ),
+                            child: const Icon(
+                              Icons.lock,
+                              color: Colors.white,
+                              size: 24,
+                            ),
                           ),
                         ),
-                      ),
-                    ],
-                  ),
+                      ],
+                    ),
 
-                  const SizedBox(height: 20),
-                  Align(
+                    const SizedBox(height: 20),
+                    Align(
                       alignment: Alignment.centerRight,
                       child: GestureDetector(
                         onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => SignUpScreen(controller: PageController()),
-                            ),
-                          );
+                          widget.controller.animateToPage(2,
+                              duration: const Duration(milliseconds: 500),
+                              curve: Curves.ease);
                         },
                         child: const Text(
                           'Forgot Password?',
@@ -394,7 +397,8 @@ class _LoginScreenState extends State<LoginScreen> {
                     ),
                     Center(
                       child: ClipRRect(
-                        borderRadius: const BorderRadius.all(Radius.circular(10)),
+                        borderRadius:
+                            const BorderRadius.all(Radius.circular(10)),
                         child: SizedBox(
                           width: MediaQuery.of(context).size.width * 0.5,
                           height: 60,
@@ -416,7 +420,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         ),
                       ),
                     ),
-                    const SizedBox(height: 30), 
+                    const SizedBox(height: 30),
                     Row(
                       children: [
                         const Expanded(
@@ -441,7 +445,7 @@ class _LoginScreenState extends State<LoginScreen> {
                             color: Color(0xFF1E8925),
                             thickness: 1,
                             indent: 10,
-                            endIndent: 20, 
+                            endIndent: 20,
                           ),
                         ),
                       ],
@@ -488,12 +492,9 @@ class _LoginScreenState extends State<LoginScreen> {
                     Center(
                       child: GestureDetector(
                         onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => SignUpScreen(controller: PageController()),
-                            ),
-                          );
+                          widget.controller.animateToPage(1,
+                              duration: const Duration(milliseconds: 500),
+                              curve: Curves.ease);
                         },
                         child: const Text(
                           'CREATE AN ACCOUNT',

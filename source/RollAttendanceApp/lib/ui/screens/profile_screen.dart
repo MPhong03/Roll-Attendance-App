@@ -93,6 +93,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   Future<void> _showEditProfileBottomSheet() {
+    TextEditingController nameController = TextEditingController(text: name);
+    dynamic selectedImageFile;
+
     return showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -100,8 +103,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
         borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
       ),
       builder: (BuildContext context) {
-        String updatedName = name;
-        dynamic selectedImageFile;
         return Padding(
           padding: MediaQuery.of(context).viewInsets,
           child: StatefulBuilder(
@@ -113,8 +114,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   children: [
                     const Text(
                       'Edit Profile',
-                      style:
-                          TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                     const SizedBox(height: 10),
                     selectedImageFile != null
@@ -122,13 +125,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             children: [
                               kIsWeb
                                   ? Image.memory(
-                                      selectedImageFile, // Dữ liệu nhị phân trên web
+                                      selectedImageFile,
                                       height: 100,
                                       width: 100,
                                       fit: BoxFit.cover,
                                     )
                                   : Image.file(
-                                      selectedImageFile, // File vật lý trên mobile
+                                      selectedImageFile,
                                       height: 100,
                                       width: 100,
                                       fit: BoxFit.cover,
@@ -139,24 +142,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         : const SizedBox(),
                     ElevatedButton.icon(
                       onPressed: () async {
-                        if (kIsWeb == false) {
-                          final status = await Permission.photos.status;
-                          if (!status.isGranted) {
-                            final permissionStatus =
-                                await Permission.photos.request();
-                            if (!permissionStatus.isGranted) {
-                              Fluttertoast.showToast(
-                                msg: "Permission to access photos denied!",
-                                toastLength: Toast.LENGTH_SHORT,
-                                gravity: ToastGravity.BOTTOM,
-                                backgroundColor: Colors.red,
-                                textColor: Colors.white,
-                              );
-                              return;
-                            }
-                          }
-                        }
-
                         final ImagePicker picker = ImagePicker();
                         try {
                           final XFile? image = await picker.pickImage(
@@ -198,8 +183,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     ),
                     const SizedBox(height: 10),
                     TextField(
-                      onChanged: (value) => updatedName = value,
-                      controller: TextEditingController(text: name),
+                      controller: nameController,
                       decoration: const InputDecoration(labelText: 'Name'),
                     ),
                     const SizedBox(height: 20),
@@ -208,7 +192,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       children: [
                         ElevatedButton(
                           onPressed: () async {
-                            _updateProfile(updatedName, selectedImageFile);
+                            _updateProfile(
+                                nameController.text, selectedImageFile);
                           },
                           child: const Text('Update'),
                         ),

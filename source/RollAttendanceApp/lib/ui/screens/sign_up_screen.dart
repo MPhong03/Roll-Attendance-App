@@ -14,7 +14,6 @@ class SignUpScreen extends StatefulWidget {
   State<SignUpScreen> createState() => _SignUpScreenState();
 }
 
-
 class _SignUpScreenState extends State<SignUpScreen> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passController = TextEditingController();
@@ -166,7 +165,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
             children: [
               Center(
                 child: Padding(
-                  padding: EdgeInsets.only(top: MediaQuery.of(context).size.height * 0.05),
+                  padding: EdgeInsets.only(
+                      top: MediaQuery.of(context).size.height * 0.05),
                   child: Image.asset(
                     "assets/images/logo.png",
                     width: MediaQuery.of(context).size.width * 0.7,
@@ -205,14 +205,16 @@ class _SignUpScreenState extends State<SignUpScreen> {
                             filled: true,
                             fillColor: Colors.white,
                             enabledBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.all(Radius.circular(10)),
+                              borderRadius:
+                                  BorderRadius.all(Radius.circular(10)),
                               borderSide: BorderSide(
                                 width: 1,
                                 color: Color(0xFF48B02C),
                               ),
                             ),
                             focusedBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.all(Radius.circular(10)),
+                              borderRadius:
+                                  BorderRadius.all(Radius.circular(10)),
                               borderSide: BorderSide(
                                 width: 1,
                                 color: Color(0xFF48B02C),
@@ -245,156 +247,161 @@ class _SignUpScreenState extends State<SignUpScreen> {
                       height: 30,
                     ),
                     Stack(
-                          clipBehavior: Clip.none,
-                          children: [
-                            TextField(
-                              controller: _passController,
-                              obscureText: _isPasswordHidden,
-                              style: const TextStyle(
-                                fontSize: 15,
-                                fontFamily: 'Baloo',
-                                fontWeight: FontWeight.w400,
-                              ),
-                              decoration: InputDecoration(
-                                hintText: 'Password',
-                                hintStyle: const TextStyle(
-                                  color: Color(0xFFDBDBDB),
-                                  fontSize: 15,
-                                  fontFamily: 'Baloo',
-                                  fontWeight: FontWeight.w600,
-                                ),
-                                filled: true,
-                                fillColor: Colors.white,
-                                enabledBorder: OutlineInputBorder(
-                                  borderRadius: BorderRadius.all(Radius.circular(10)),
-                                  borderSide: BorderSide(
-                                    width: 1,
-                                    color: Color(0xFF48B02C),
-                                  ),
-                                ),
-                                focusedBorder: OutlineInputBorder(
-                                  borderRadius: BorderRadius.all(Radius.circular(10)),
-                                  borderSide: BorderSide(
-                                    width: 1,
-                                    color: Color(0xFF48B02C),
-                                  ),
-                                ),
-                                contentPadding: const EdgeInsets.only(left: 60),
-                                suffixIcon: IconButton(
-                                  icon: Icon(
-                                    _isPasswordHidden
-                                        ? Icons.visibility_off
-                                        : Icons.visibility,
-                                    color: const Color(0xFF48B02C),
-                                  ),
-                                  onPressed: () {
-                                    setState(() {
-                                      _isPasswordHidden = !_isPasswordHidden;
-                                    });
-                                  },
-                                ),
+                      clipBehavior: Clip.none,
+                      children: [
+                        TextField(
+                          controller: _passController,
+                          obscureText: _isPasswordHidden,
+                          style: const TextStyle(
+                            fontSize: 15,
+                            fontFamily: 'Baloo',
+                            fontWeight: FontWeight.w400,
+                          ),
+                          decoration: InputDecoration(
+                            hintText: 'Password',
+                            hintStyle: const TextStyle(
+                              color: Color(0xFFDBDBDB),
+                              fontSize: 15,
+                              fontFamily: 'Baloo',
+                              fontWeight: FontWeight.w600,
+                            ),
+                            filled: true,
+                            fillColor: Colors.white,
+                            enabledBorder: OutlineInputBorder(
+                              borderRadius:
+                                  BorderRadius.all(Radius.circular(10)),
+                              borderSide: BorderSide(
+                                width: 1,
+                                color: Color(0xFF48B02C),
                               ),
                             ),
-                            Positioned(
-                              left: -25,
-                              top: 0,
-                              bottom: 0,
-                              child: Container(
-                                width: 70,
-                                height: 60,
-                                decoration: const BoxDecoration(
-                                  color: Color(0xFF48B02C),
-                                  shape: BoxShape.circle,
-                                ),
-                                child: const Icon(
-                                  Icons.lock,
-                                  color: Colors.white,
-                                  size: 24,
-                                ),
+                            focusedBorder: OutlineInputBorder(
+                              borderRadius:
+                                  BorderRadius.all(Radius.circular(10)),
+                              borderSide: BorderSide(
+                                width: 1,
+                                color: Color(0xFF48B02C),
                               ),
                             ),
-                          ],
+                            contentPadding: const EdgeInsets.only(left: 60),
+                            suffixIcon: IconButton(
+                              icon: Icon(
+                                _isPasswordHidden
+                                    ? Icons.visibility_off
+                                    : Icons.visibility,
+                                color: const Color(0xFF48B02C),
+                              ),
+                              onPressed: () {
+                                setState(() {
+                                  _isPasswordHidden = !_isPasswordHidden;
+                                });
+                              },
+                            ),
+                          ),
                         ),
+                        Positioned(
+                          left: -25,
+                          top: 0,
+                          bottom: 0,
+                          child: Container(
+                            width: 70,
+                            height: 60,
+                            decoration: const BoxDecoration(
+                              color: Color(0xFF48B02C),
+                              shape: BoxShape.circle,
+                            ),
+                            child: const Icon(
+                              Icons.lock,
+                              color: Colors.white,
+                              size: 24,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
                     const SizedBox(
                       height: 30,
                     ),
                     Stack(
-                          clipBehavior: Clip.none,
-                          children: [
-                            TextField(
-                              controller: _passController,
-                              obscureText: _isPasswordHidden,
-                              style: const TextStyle(
-                                fontSize: 15,
-                                fontFamily: 'Baloo',
-                                fontWeight: FontWeight.w400,
-                              ),
-                              decoration: InputDecoration(
-                                hintText: 'Password',
-                                hintStyle: const TextStyle(
-                                  color: Color(0xFFDBDBDB),
-                                  fontSize: 15,
-                                  fontFamily: 'Baloo',
-                                  fontWeight: FontWeight.w600,
-                                ),
-                                filled: true,
-                                fillColor: Colors.white,
-                                enabledBorder: OutlineInputBorder(
-                                  borderRadius: BorderRadius.all(Radius.circular(10)),
-                                  borderSide: BorderSide(
-                                    width: 1,
-                                    color: Color(0xFF48B02C),
-                                  ),
-                                ),
-                                focusedBorder: OutlineInputBorder(
-                                  borderRadius: BorderRadius.all(Radius.circular(10)),
-                                  borderSide: BorderSide(
-                                    width: 1,
-                                    color: Color(0xFF48B02C),
-                                  ),
-                                ),
-                                contentPadding: const EdgeInsets.only(left: 60),
-                                suffixIcon: IconButton(
-                                  icon: Icon(
-                                    _isPasswordHidden
-                                        ? Icons.visibility_off
-                                        : Icons.visibility,
-                                    color: const Color(0xFF48B02C),
-                                  ),
-                                  onPressed: () {
-                                    setState(() {
-                                      _isPasswordHidden = !_isPasswordHidden;
-                                    });
-                                  },
-                                ),
+                      clipBehavior: Clip.none,
+                      children: [
+                        TextField(
+                          controller: _repassController,
+                          obscureText: _isPasswordHidden,
+                          style: const TextStyle(
+                            fontSize: 15,
+                            fontFamily: 'Baloo',
+                            fontWeight: FontWeight.w400,
+                          ),
+                          decoration: InputDecoration(
+                            hintText: 'Confirm Password',
+                            hintStyle: const TextStyle(
+                              color: Color(0xFFDBDBDB),
+                              fontSize: 15,
+                              fontFamily: 'Baloo',
+                              fontWeight: FontWeight.w600,
+                            ),
+                            filled: true,
+                            fillColor: Colors.white,
+                            enabledBorder: OutlineInputBorder(
+                              borderRadius:
+                                  BorderRadius.all(Radius.circular(10)),
+                              borderSide: BorderSide(
+                                width: 1,
+                                color: Color(0xFF48B02C),
                               ),
                             ),
-                            Positioned(
-                              left: -25,
-                              top: 0,
-                              bottom: 0,
-                              child: Container(
-                                width: 70,
-                                height: 60,
-                                decoration: const BoxDecoration(
-                                  color: Color(0xFF48B02C),
-                                  shape: BoxShape.circle,
-                                ),
-                                child: const Icon(
-                                  Icons.lock,
-                                  color: Colors.white,
-                                  size: 24,
-                                ),
+                            focusedBorder: OutlineInputBorder(
+                              borderRadius:
+                                  BorderRadius.all(Radius.circular(10)),
+                              borderSide: BorderSide(
+                                width: 1,
+                                color: Color(0xFF48B02C),
                               ),
                             ),
-                          ],
+                            contentPadding: const EdgeInsets.only(left: 60),
+                            suffixIcon: IconButton(
+                              icon: Icon(
+                                _isPasswordHidden
+                                    ? Icons.visibility_off
+                                    : Icons.visibility,
+                                color: const Color(0xFF48B02C),
+                              ),
+                              onPressed: () {
+                                setState(() {
+                                  _isPasswordHidden = !_isPasswordHidden;
+                                });
+                              },
+                            ),
+                          ),
                         ),
+                        Positioned(
+                          left: -25,
+                          top: 0,
+                          bottom: 0,
+                          child: Container(
+                            width: 70,
+                            height: 60,
+                            decoration: const BoxDecoration(
+                              color: Color(0xFF48B02C),
+                              shape: BoxShape.circle,
+                            ),
+                            child: const Icon(
+                              Icons.lock,
+                              color: Colors.white,
+                              size: 24,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
                     const SizedBox(
                       height: 60,
                     ),
                     Center(
                       child: ClipRRect(
-                        borderRadius: const BorderRadius.all(Radius.circular(10)),
+                        borderRadius:
+                            const BorderRadius.all(Radius.circular(10)),
                         child: SizedBox(
                           width: MediaQuery.of(context).size.width * 0.5,
                           height: 60,
@@ -422,12 +429,9 @@ class _SignUpScreenState extends State<SignUpScreen> {
                     Center(
                       child: GestureDetector(
                         onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => LoginScreen(controller: PageController()),
-                            ),
-                          );
+                          widget.controller.animateToPage(0,
+                              duration: const Duration(milliseconds: 500),
+                              curve: Curves.ease);
                         },
                         child: const Text(
                           'Already have an account? Log in now',

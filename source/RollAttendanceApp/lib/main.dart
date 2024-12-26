@@ -6,6 +6,8 @@ import 'package:itproject/ui/screens/events/create_event.dart';
 import 'package:itproject/ui/screens/home_screen.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:itproject/ui/screens/login_screen.dart';
+import 'package:itproject/ui/screens/organizations/add_user_to_organization.dart';
 import 'package:itproject/ui/screens/organizations/create_organization.dart';
 import 'package:itproject/ui/screens/organizations/edit_organization.dart';
 import 'package:itproject/ui/screens/organizations/organization_detail.dart';
@@ -34,79 +36,89 @@ Future<void> main() async {
     options: DefaultFirebaseOptions.currentPlatform,
   );
 
-  final user = FirebaseAuth.instance.currentUser;
-
-  runApp(MyApp(isLoggedIn: user != null));
+  runApp(const MyApp());
 }
 
 class MyApp extends StatelessWidget {
-  final bool isLoggedIn;
-
-  const MyApp({super.key, required this.isLoggedIn});
+  const MyApp({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final GoRouter router = GoRouter(
-      initialLocation: isLoggedIn ? '/home' : '/signup',
-      routes: [
-        GoRoute(
-          path: '/',
-          builder: (context, state) => const MainView(),
-        ),
-        GoRoute(
-          path: '/home',
-          builder: (context, state) => const HomeScreen(),
-        ),
-        GoRoute(
-          path: '/signup',
-          builder: (context, state) => SignUpScreen(
-            controller: PageController(),
-          ),
-        ),
-        GoRoute(
-          path: '/profile',
-          builder: (context, state) => const ProfileScreen(),
-        ),
-        GoRoute(
-          path: '/update-face-data',
-          builder: (context, state) => const UpdateFaceDataScreen(),
-        ),
-        GoRoute(
-          path: '/create-organization',
-          builder: (context, state) => const CreateOrganizationScreen(),
-        ),
-        GoRoute(
-          path: '/edit-organization/:id',
-          builder: (context, state) {
-            final id = state.pathParameters['id']!;
-            return EditOrganizationScreen(organizationId: id);
-          },
-        ),
-        GoRoute(
-          path: '/organization-detail/:id',
-          builder: (context, state) {
-            final id = state.pathParameters['id']!;
-            return OrganizationDetailScreen(organizationId: id);
-          },
-        ),
-        GoRoute(
-          path: '/create-event/:id',
-          builder: (context, state) {
-            final id = state.pathParameters['id']!;
-            return CreateEventScreen(organizationId: id);
-          },
-        ),
-      ],
-      errorPageBuilder: (context, state) => const MaterialPage(
-        child: NotFoundScreen(),
-      ),
-    );
+    return StreamBuilder<User?>(
+      stream: FirebaseAuth.instance.authStateChanges(),
+      builder: (context, snapshot) {
+        final isLoggedIn = snapshot.hasData;
 
-    return MaterialApp.router(
-      routerConfig: router,
-      debugShowCheckedModeBanner: false,
-      theme: ThemeData.light(),
-      darkTheme: ThemeData.dark(),
+        final GoRouter router = GoRouter(
+          initialLocation: isLoggedIn ? '/home' : '/signin',
+          routes: [
+            GoRoute(
+              path: '/',
+              builder: (context, state) => const MainView(),
+            ),
+            GoRoute(
+              path: '/home',
+              builder: (context, state) => const HomeScreen(),
+            ),
+            GoRoute(
+              path: '/signin',
+              builder: (context, state) => LoginScreen(
+                controller: PageController(),
+              ),
+            ),
+            GoRoute(
+              path: '/profile',
+              builder: (context, state) => const ProfileScreen(),
+            ),
+            GoRoute(
+              path: '/update-face-data',
+              builder: (context, state) => const UpdateFaceDataScreen(),
+            ),
+            GoRoute(
+              path: '/create-organization',
+              builder: (context, state) => const CreateOrganizationScreen(),
+            ),
+            GoRoute(
+              path: '/edit-organization/:id',
+              builder: (context, state) {
+                final id = state.pathParameters['id']!;
+                return EditOrganizationScreen(organizationId: id);
+              },
+            ),
+            GoRoute(
+              path: '/organization-detail/:id',
+              builder: (context, state) {
+                final id = state.pathParameters['id']!;
+                return OrganizationDetailScreen(organizationId: id);
+              },
+            ),
+            GoRoute(
+              path: '/create-event/:id',
+              builder: (context, state) {
+                final id = state.pathParameters['id']!;
+                return CreateEventScreen(organizationId: id);
+              },
+            ),
+            GoRoute(
+              path: '/add-to-organization/:id',
+              builder: (context, state) {
+                final id = state.pathParameters['id']!;
+                return AddUserToOrganizationScreen(organizationId: id);
+              },
+            ),
+          ],
+          errorPageBuilder: (context, state) => const MaterialPage(
+            child: NotFoundScreen(),
+          ),
+        );
+
+        return MaterialApp.router(
+          routerConfig: router,
+          debugShowCheckedModeBanner: false,
+          theme: ThemeData.light(),
+          darkTheme: ThemeData.dark(),
+        );
+      },
     );
   }
 }

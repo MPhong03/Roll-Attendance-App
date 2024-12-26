@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:itproject/models/profile_model.dart';
+import 'package:itproject/models/user_model.dart';
 import 'package:itproject/services/api_service.dart';
 
 class UserService {
@@ -59,6 +60,15 @@ class UserService {
       }
     } catch (e) {
       return 'Error in createProfile: $e';
+    }
+  }
+
+  Future<UserModel> getUserByEmail(String email) async {
+    final response = await _apiService.get('api/users/$email');
+    if (response.statusCode == 200) {
+      return UserModel.fromJson(jsonDecode(response.body));
+    } else {
+      throw Exception('Failed to load user');
     }
   }
 }

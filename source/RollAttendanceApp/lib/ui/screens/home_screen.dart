@@ -24,6 +24,9 @@ class _HomeScreenState extends State<HomeScreen> {
   int pageSize = 10;
   bool hasMoreData = true;
 
+  String imagePlaceHolder =
+      'https://yt3.ggpht.com/a/AGF-l78urB8ASkb0JO2a6AB0UAXeEHe6-pc9UJqxUw=s900-mo-c-c0xffffffff-rj-k-no';
+
   Future<void> shareProfile() async {
     try {
       await _apiService.put('api/auth/shareProfile', {});
@@ -140,40 +143,76 @@ class _HomeScreenState extends State<HomeScreen> {
                   return Card(
                     margin: const EdgeInsets.symmetric(vertical: 8.0),
                     elevation: 5,
-                    child: ListTile(
-                      contentPadding: const EdgeInsets.all(16.0),
-                      title: Text(
-                        org.name,
-                        style: const TextStyle(
-                            fontSize: 18, fontWeight: FontWeight.bold),
-                      ),
-                      subtitle: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            org.description,
-                            maxLines: 2,
-                            overflow: TextOverflow.ellipsis,
-                            style: const TextStyle(color: Colors.grey),
-                          ),
-                          const SizedBox(height: 4),
-                          Text(
-                            org.address,
-                            style: const TextStyle(color: Colors.black54),
-                          ),
-                        ],
-                      ),
-                      trailing: Icon(
-                        org.isPrivate ? Icons.lock : Icons.lock_open,
-                        color: org.isPrivate ? Colors.red : Colors.blue,
-                      ),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: InkWell(
                       onTap: () {
                         context.push('/organization-detail/${org.id}');
                       },
+                      child: Column(
+                        children: [
+                          Stack(
+                            children: [
+                              ClipRRect(
+                                borderRadius: const BorderRadius.only(
+                                  topLeft: Radius.circular(12),
+                                  topRight: Radius.circular(12),
+                                ),
+                                child: Image.network(
+                                  org.image.isNotEmpty
+                                      ? org.image
+                                      : 'your_placeholder_image_url',
+                                  height: 150.0,
+                                  width: double.infinity,
+                                  fit: BoxFit.cover,
+                                ),
+                              ),
+                              Positioned(
+                                top: 8.0,
+                                right: 8.0,
+                                child: Icon(
+                                  org.isPrivate ? Icons.lock : Icons.lock_open,
+                                  color:
+                                      org.isPrivate ? Colors.red : Colors.blue,
+                                  size: 30.0,
+                                ),
+                              ),
+                            ],
+                          ),
+                          Padding(
+                            padding: const EdgeInsets.all(12.0),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  org.name,
+                                  style: const TextStyle(
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                                const SizedBox(height: 8),
+                                Text(
+                                  org.description,
+                                  maxLines: 2,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: const TextStyle(color: Colors.grey),
+                                ),
+                                const SizedBox(height: 6),
+                                Text(
+                                  org.address,
+                                  style: const TextStyle(color: Colors.black54),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
                   );
                 }),
-                if (hasMoreData)
+                if (hasMoreData && organizations.isNotEmpty)
                   Padding(
                     padding: const EdgeInsets.symmetric(vertical: 20.0),
                     child: Center(
