@@ -8,7 +8,6 @@ import 'package:go_router/go_router.dart';
 import 'package:itproject/models/organization_model.dart';
 import 'package:itproject/services/api_service.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:permission_handler/permission_handler.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:flutter/foundation.dart';
 import 'package:fluttertoast/fluttertoast.dart';

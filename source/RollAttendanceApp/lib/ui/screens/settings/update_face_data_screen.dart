@@ -13,7 +13,6 @@ import 'package:camera/camera.dart';
 import 'package:google_mlkit_face_detection/google_mlkit_face_detection.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:google_mediapipe_face_detection/google_mediapipe_face_detection.dart';
-import 'package:image/image.dart' as img;
 
 class UpdateFaceDataScreen extends StatefulWidget {
   const UpdateFaceDataScreen({super.key});

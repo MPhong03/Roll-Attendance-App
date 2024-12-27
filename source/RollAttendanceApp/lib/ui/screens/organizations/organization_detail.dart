@@ -8,7 +8,6 @@ import 'package:itproject/models/event_model.dart';
 import 'package:itproject/models/organization_model.dart';
 import 'package:itproject/models/user_model.dart';
 import 'package:itproject/services/api_service.dart';
-import 'package:itproject/services/user_service.dart';
 
 class OrganizationDetailScreen extends StatefulWidget {
   final String organizationId;
@@ -22,7 +21,6 @@ class OrganizationDetailScreen extends StatefulWidget {
 
 class _OrganizationDetailScreenState extends State<OrganizationDetailScreen> {
   final ApiService _apiService = ApiService();
-  final UserService _userService = UserService();
   bool _isLoading = false;
   late Future<OrganizationModel> _organizationFuture;
   late Future<List<EventModel>> _eventListFuture;

@@ -3,13 +3,9 @@ import 'package:go_router/go_router.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:blurry_modal_progress_hud/blurry_modal_progress_hud.dart';
 import 'package:flutter/material.dart';
-import 'package:itproject/services/api_service.dart';
 import 'package:itproject/services/user_service.dart';
-import 'package:itproject/ui/screens/forgot_password_screen.dart';
-import 'package:itproject/ui/screens/home_screen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:itproject/services/google_sign_in_service.dart';
-import 'package:itproject/ui/screens/sign_up_screen.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key, required this.controller});
@@ -21,7 +17,7 @@ class LoginScreen extends StatefulWidget {
 class _LoginScreenState extends State<LoginScreen> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passController = TextEditingController();
-  final ApiService _apiService = ApiService();
+  final ScrollController _scrollController = ScrollController();
   bool _isLoading = false;
   bool _isPasswordHidden = true;
 
@@ -204,14 +200,21 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return BlurryModalProgressHUD(
       inAsyncCall: _isLoading,
       opacity: 0.3,
       blurEffectIntensity: 5,
       child: Scaffold(
-        backgroundColor: Color.fromRGBO(197, 240, 200, 1),
+        backgroundColor: const Color.fromRGBO(197, 240, 200, 1),
         body: SingleChildScrollView(
+          controller: _scrollController,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -318,7 +321,7 @@ class _LoginScreenState extends State<LoginScreen> {
                             ),
                             filled: true,
                             fillColor: Colors.white,
-                            enabledBorder: OutlineInputBorder(
+                            enabledBorder: const OutlineInputBorder(
                               borderRadius:
                                   BorderRadius.all(Radius.circular(10)),
                               borderSide: BorderSide(
@@ -326,7 +329,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                 color: Color(0xFF48B02C),
                               ),
                             ),
-                            focusedBorder: OutlineInputBorder(
+                            focusedBorder: const OutlineInputBorder(
                               borderRadius:
                                   BorderRadius.all(Radius.circular(10)),
                               borderSide: BorderSide(
@@ -374,12 +377,8 @@ class _LoginScreenState extends State<LoginScreen> {
                     const SizedBox(height: 20),
                     Align(
                       alignment: Alignment.centerRight,
-                      child: GestureDetector(
-                        onTap: () {
-                          widget.controller.animateToPage(2,
-                              duration: const Duration(milliseconds: 500),
-                              curve: Curves.ease);
-                        },
+                      child: InkWell(
+                        onTap: () {},
                         child: const Text(
                           'Forgot Password?',
                           style: TextStyle(
@@ -421,9 +420,9 @@ class _LoginScreenState extends State<LoginScreen> {
                       ),
                     ),
                     const SizedBox(height: 30),
-                    Row(
+                    const Row(
                       children: [
-                        const Expanded(
+                        Expanded(
                           child: Divider(
                             color: Color(0xFF1E8925),
                             thickness: 1,
@@ -431,7 +430,7 @@ class _LoginScreenState extends State<LoginScreen> {
                             endIndent: 10,
                           ),
                         ),
-                        const Text(
+                        Text(
                           'Or Login With',
                           style: TextStyle(
                             color: Color(0xFF1E8925),
@@ -440,7 +439,7 @@ class _LoginScreenState extends State<LoginScreen> {
                             fontWeight: FontWeight.w600,
                           ),
                         ),
-                        const Expanded(
+                        Expanded(
                           child: Divider(
                             color: Color(0xFF1E8925),
                             thickness: 1,
@@ -490,7 +489,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     ),
                     const SizedBox(height: 50),
                     Center(
-                      child: GestureDetector(
+                      child: InkWell(
                         onTap: () {
                           widget.controller.animateToPage(1,
                               duration: const Duration(milliseconds: 500),

@@ -13,7 +13,6 @@ import 'package:itproject/ui/screens/organizations/edit_organization.dart';
 import 'package:itproject/ui/screens/organizations/organization_detail.dart';
 import 'package:itproject/ui/screens/profile_screen.dart';
 import 'package:itproject/ui/screens/settings/update_face_data_screen.dart';
-import 'package:itproject/ui/screens/sign_up_screen.dart';
 import 'firebase_options.dart';
 import 'package:go_router/go_router.dart';
 
@@ -50,7 +49,7 @@ class MyApp extends StatelessWidget {
         final isLoggedIn = snapshot.hasData;
 
         final GoRouter router = GoRouter(
-          initialLocation: isLoggedIn ? '/home' : '/signin',
+          initialLocation: isLoggedIn ? '/home' : '/',
           routes: [
             GoRoute(
               path: '/',

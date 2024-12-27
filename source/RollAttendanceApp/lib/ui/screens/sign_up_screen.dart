@@ -1,10 +1,8 @@
 import 'package:awesome_dialog/awesome_dialog.dart';
 import 'package:blurry_modal_progress_hud/blurry_modal_progress_hud.dart';
 import 'package:flutter/material.dart';
-// import 'package:itproject/services/api_service.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:itproject/services/user_service.dart';
-import 'package:itproject/ui/screens/login_screen.dart';
 
 class SignUpScreen extends StatefulWidget {
   const SignUpScreen({super.key, required this.controller});
@@ -158,7 +156,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
       opacity: 0.3,
       blurEffectIntensity: 5,
       child: Scaffold(
-        backgroundColor: Color.fromRGBO(197, 240, 200, 1),
+        backgroundColor: const Color.fromRGBO(197, 240, 200, 1),
         body: SingleChildScrollView(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -267,7 +265,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                             ),
                             filled: true,
                             fillColor: Colors.white,
-                            enabledBorder: OutlineInputBorder(
+                            enabledBorder: const OutlineInputBorder(
                               borderRadius:
                                   BorderRadius.all(Radius.circular(10)),
                               borderSide: BorderSide(
@@ -275,7 +273,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                 color: Color(0xFF48B02C),
                               ),
                             ),
-                            focusedBorder: OutlineInputBorder(
+                            focusedBorder: const OutlineInputBorder(
                               borderRadius:
                                   BorderRadius.all(Radius.circular(10)),
                               borderSide: BorderSide(
@@ -327,7 +325,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                       children: [
                         TextField(
                           controller: _repassController,
-                          obscureText: _isPasswordHidden,
+                          obscureText: _isConfirmPasswordHidden,
                           style: const TextStyle(
                             fontSize: 15,
                             fontFamily: 'Baloo',
@@ -343,7 +341,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                             ),
                             filled: true,
                             fillColor: Colors.white,
-                            enabledBorder: OutlineInputBorder(
+                            enabledBorder: const OutlineInputBorder(
                               borderRadius:
                                   BorderRadius.all(Radius.circular(10)),
                               borderSide: BorderSide(
@@ -351,7 +349,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                 color: Color(0xFF48B02C),
                               ),
                             ),
-                            focusedBorder: OutlineInputBorder(
+                            focusedBorder: const OutlineInputBorder(
                               borderRadius:
                                   BorderRadius.all(Radius.circular(10)),
                               borderSide: BorderSide(
@@ -362,14 +360,15 @@ class _SignUpScreenState extends State<SignUpScreen> {
                             contentPadding: const EdgeInsets.only(left: 60),
                             suffixIcon: IconButton(
                               icon: Icon(
-                                _isPasswordHidden
+                                _isConfirmPasswordHidden
                                     ? Icons.visibility_off
                                     : Icons.visibility,
                                 color: const Color(0xFF48B02C),
                               ),
                               onPressed: () {
                                 setState(() {
-                                  _isPasswordHidden = !_isPasswordHidden;
+                                  _isConfirmPasswordHidden =
+                                      !_isConfirmPasswordHidden;
                                 });
                               },
                             ),

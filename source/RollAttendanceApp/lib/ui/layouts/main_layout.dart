@@ -121,8 +121,6 @@ class _MainLayoutState extends State<MainLayout> {
   }
 
   SidebarX _buildSidebarX() {
-    final isSmallScreen = MediaQuery.of(context).size.width < 600;
-
     return SidebarX(
       controller: _controller,
       theme: SidebarXTheme(

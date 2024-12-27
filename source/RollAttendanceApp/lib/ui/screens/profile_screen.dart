@@ -9,8 +9,6 @@ import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:itproject/services/api_service.dart';
 import 'package:itproject/services/user_service.dart';
-import 'package:file_picker/file_picker.dart';
-import 'package:permission_handler/permission_handler.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -224,8 +222,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
     try {
       String? newProfileImageUrl;
-
-      print('Upload: $selectedImageFile');
 
       if (selectedImageFile != null) {
         if (selectedImageFile is Uint8List) {
