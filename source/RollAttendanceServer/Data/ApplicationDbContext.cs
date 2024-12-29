@@ -16,6 +16,7 @@ namespace RollAttendanceServer.Data
         public virtual DbSet<History> Histories { get; set; }
         public virtual DbSet<HistoryDetail> HistoryDetails { get; set; }
         public virtual DbSet<ParticipationRequest> ParticipationRequests { get; set; }
+        public virtual DbSet<EventUser> EventUsers { get; set; }
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options)
         {
         }

@@ -18,6 +18,7 @@ namespace RollAttendanceServer.Models
         public string PhoneNumber { get; set; } = string.Empty;
         public string Avatar { get; set; } = string.Empty;
 
+        public ICollection<EventUser> EventUsers { get; set; } = new List<EventUser>();
         public ICollection<UserOrganizationRole> UserOrganizationRoles { get; set; } = new List<UserOrganizationRole>();
     }
 }

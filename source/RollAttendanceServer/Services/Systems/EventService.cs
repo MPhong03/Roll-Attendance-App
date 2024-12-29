@@ -108,11 +108,13 @@ namespace RollAttendanceServer.Services.Systems
         public async Task<bool> AddUsersToPermitedUserAsync(string eventId, List<string> userIds)
         {
             var @event = await _context.Events
-                .Include(e => e.PermitedUser)
+                .Include(e => e.EventUsers)
                 .FirstOrDefaultAsync(e => e.Id == eventId);
 
             if (@event == null)
                 throw new Exception("Event not found.");
+
+            var existingUserIds = @event.EventUsers.Select(eu => eu.UserId).ToList();
 
             var users = await _context.Users
                 .Where(u => userIds.Contains(u.Id))
@@ -123,8 +125,14 @@ namespace RollAttendanceServer.Services.Systems
 
             foreach (var user in users)
             {
-                if (!@event.PermitedUser.Contains(user))
-                    @event.PermitedUser.Add(user);
+                if (!existingUserIds.Contains(user.Id))
+                {
+                    @event.EventUsers.Add(new EventUser
+                    {
+                        EventId = eventId,
+                        UserId = user.Id
+                    });
+                }
             }
 
             await _context.SaveChangesAsync();
@@ -178,7 +186,7 @@ namespace RollAttendanceServer.Services.Systems
         public async Task CheckInAsync(string eventId, string userId, string qrCode, int attendanceAttempt)
         {
             var eventEntity = await _context.Events
-                .Include(e => e.PermitedUser)
+                .Include(e => e.EventUsers)
                 .Include(e => e.Histories)
                 .ThenInclude(h => h.HistoryDetails)
                 .FirstOrDefaultAsync(e => e.Id == eventId);
@@ -189,7 +197,7 @@ namespace RollAttendanceServer.Services.Systems
             if (eventEntity.CurrentQR != qrCode)
                 throw new Exception("Invalid QR code.");
 
-            if (eventEntity.IsPrivate && !eventEntity.PermitedUser.Any(u => u.Id == userId))
+            if (eventEntity.IsPrivate && !eventEntity.EventUsers.Any(eu => eu.UserId == userId))
                 throw new Exception("User not permitted for this event.");
 
             var history = eventEntity.Histories.FirstOrDefault();
@@ -234,6 +242,7 @@ namespace RollAttendanceServer.Services.Systems
         public async Task<Event> CompleteEventAsync(string eventId)
         {
             var eventEntity = await _context.Events
+                .Include(e => e.EventUsers)
                 .Include(e => e.Histories)
                 .ThenInclude(h => h.HistoryDetails)
                 .FirstOrDefaultAsync(e => e.Id == eventId);
@@ -247,7 +256,10 @@ namespace RollAttendanceServer.Services.Systems
             var history = eventEntity.Histories.FirstOrDefault();
             if (history != null)
             {
-                history.TotalCount = eventEntity.IsPrivate ? eventEntity.PermitedUser.Count : history.HistoryDetails.Count;
+                history.TotalCount = eventEntity.IsPrivate
+                    ? eventEntity.EventUsers.Count
+                    : history.HistoryDetails.Count;
+
                 history.PresentCount = history.HistoryDetails.Count(d => d.AttendanceStatus == (short)Status.USER_PRESENTED);
                 history.LateCount = history.HistoryDetails.Count(d => d.AttendanceStatus == (short)Status.USER_LATED);
             }

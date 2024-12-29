@@ -22,7 +22,7 @@ namespace RollAttendanceServer.Models
         public Organization? Organization { get; set; }
         public bool IsPrivate { get; set; } = false;
         [JsonIgnore]
-        public ICollection<User> PermitedUser { get; set; } = new List<User>();
+        public ICollection<EventUser> EventUsers { get; set; } = new List<EventUser>();
         [JsonIgnore]
         public ICollection<History> Histories { get; set; } = new List<History>();
     }
