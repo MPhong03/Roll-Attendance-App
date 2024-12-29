@@ -190,6 +190,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                           style: const TextStyle(
                             fontSize: 15,
                             fontFamily: 'Baloo',
+                            color: Color(0xFF000000),
                             fontWeight: FontWeight.w400,
                           ),
                           decoration: const InputDecoration(
@@ -253,6 +254,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                           style: const TextStyle(
                             fontSize: 15,
                             fontFamily: 'Baloo',
+                            color: Color(0xFF000000),
                             fontWeight: FontWeight.w400,
                           ),
                           decoration: InputDecoration(
@@ -329,6 +331,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                           style: const TextStyle(
                             fontSize: 15,
                             fontFamily: 'Baloo',
+                            color: Color(0xFF000000),
                             fontWeight: FontWeight.w400,
                           ),
                           decoration: InputDecoration(
@@ -413,7 +416,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                               'SIGN UP',
                               style: TextStyle(
                                 color: Colors.white,
-                                fontSize: 25,
+                                fontSize: 18,
                                 fontFamily: 'Baloo',
                                 fontWeight: FontWeight.w700,
                               ),
@@ -436,7 +439,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                           'Already have an account? Log in now',
                           style: TextStyle(
                             color: Color(0xFF000000),
-                            fontSize: 16,
+                            fontSize: 14,
                             fontFamily: 'Baloo',
                             fontWeight: FontWeight.w700,
                             decoration: TextDecoration.none,

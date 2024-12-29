@@ -247,6 +247,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           style: const TextStyle(
                             fontSize: 15,
                             fontFamily: 'Baloo',
+                            color: Color(0xFF000000),
                             fontWeight: FontWeight.w400,
                           ),
                           decoration: const InputDecoration(
@@ -309,6 +310,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           style: const TextStyle(
                             fontSize: 15,
                             fontFamily: 'Baloo',
+                            color: Color(0xFF000000),
                             fontWeight: FontWeight.w400,
                           ),
                           decoration: InputDecoration(
@@ -392,7 +394,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       ),
                     ),
                     const SizedBox(
-                      height: 60,
+                      height: 50,
                     ),
                     Center(
                       child: ClipRRect(
@@ -410,7 +412,7 @@ class _LoginScreenState extends State<LoginScreen> {
                               'LOG IN',
                               style: TextStyle(
                                 color: Colors.white,
-                                fontSize: 25,
+                                fontSize: 18,
                                 fontFamily: 'Baloo',
                                 fontWeight: FontWeight.w700,
                               ),
@@ -499,7 +501,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           'CREATE AN ACCOUNT',
                           style: TextStyle(
                             color: Color(0xFF000000),
-                            fontSize: 16,
+                            fontSize: 14,
                             fontFamily: 'Baloo',
                             fontWeight: FontWeight.w700,
                             decoration: TextDecoration.none,
