@@ -343,23 +343,25 @@ class _OrganizationDetailScreenState extends State<OrganizationDetailScreen> {
                                                         contentPadding:
                                                             const EdgeInsets
                                                                 .all(16),
-                                                        title: Text(event.name,
-                                                            style: const TextStyle(
-                                                                fontWeight:
-                                                                    FontWeight
-                                                                        .bold)),
+                                                        title: Text(
+                                                          event.name,
+                                                          style: const TextStyle(
+                                                              fontWeight:
+                                                                  FontWeight
+                                                                      .bold),
+                                                        ),
                                                         subtitle: Column(
                                                           crossAxisAlignment:
                                                               CrossAxisAlignment
                                                                   .start,
                                                           children: [
                                                             Text(
-                                                                event
-                                                                    .description,
-                                                                maxLines: 2,
-                                                                overflow:
-                                                                    TextOverflow
-                                                                        .ellipsis),
+                                                              event.description,
+                                                              maxLines: 2,
+                                                              overflow:
+                                                                  TextOverflow
+                                                                      .ellipsis,
+                                                            ),
                                                             const SizedBox(
                                                                 height: 5),
                                                             Text(
@@ -378,6 +380,10 @@ class _OrganizationDetailScreenState extends State<OrganizationDetailScreen> {
                                                             ),
                                                           ],
                                                         ),
+                                                        onTap: () {
+                                                          context.push(
+                                                              '/event-detail/${event.id}');
+                                                        },
                                                       ),
                                                     );
                                                   },

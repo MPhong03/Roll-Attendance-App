@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:itproject/ui/main_view.dart';
 import 'package:itproject/ui/screens/events/create_event.dart';
+import 'package:itproject/ui/screens/events/edit_event.dart';
+import 'package:itproject/ui/screens/events/event_detail.dart';
 import 'package:itproject/ui/screens/home_screen.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -99,6 +101,20 @@ class MyApp extends StatelessWidget {
               },
             ),
             GoRoute(
+              path: '/edit-event/:id',
+              builder: (context, state) {
+                final id = state.pathParameters['id']!;
+                return EditEventScreen(eventId: id);
+              },
+            ),
+            GoRoute(
+              path: '/event-detail/:id',
+              builder: (context, state) {
+                final id = state.pathParameters['id']!;
+                return EventDetailScreen(eventId: id);
+              },
+            ),
+            GoRoute(
               path: '/add-to-organization/:id',
               builder: (context, state) {
                 final id = state.pathParameters['id']!;
@@ -131,26 +147,14 @@ class NotFoundScreen extends StatelessWidget {
       appBar: AppBar(
         title: const Text('Page not found'),
       ),
-      body: Center(
+      body: const Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Text(
+            Text(
               '404 - Page not found',
               style: TextStyle(fontSize: 18),
-            ),
-            const SizedBox(height: 16),
-            ElevatedButton(
-              onPressed: () {
-                // Quay lại trang trước đó
-                if (Navigator.canPop(context)) {
-                  Navigator.pop(context);
-                } else {
-                  context.go('/home');
-                }
-              },
-              child: const Text('Go Back'),
-            ),
+            )
           ],
         ),
       ),

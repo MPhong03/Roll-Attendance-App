@@ -8,6 +8,7 @@ class CreateEventScreen extends StatefulWidget {
   final String organizationId;
 
   const CreateEventScreen({super.key, required this.organizationId});
+
   @override
   State<CreateEventScreen> createState() => _CreateEventScreenState();
 }
@@ -16,6 +17,7 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
   final _formKey = GlobalKey<FormState>();
   final ApiService _apiService = ApiService();
   bool _isLoading = false;
+  bool _isPrivate = false;
 
   // Controllers for text fields
   final TextEditingController _eventNameController = TextEditingController();
@@ -25,6 +27,8 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
   final TextEditingController _endTimeController = TextEditingController();
 
   Future<void> _createEvent() async {
+    if (!_validateTime()) return;
+
     setState(() {
       _isLoading = true;
     });
@@ -36,6 +40,7 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
         'startTime': _startTimeController.text,
         'endTime': _endTimeController.text,
         'organizationId': widget.organizationId,
+        'isPrivate': _isPrivate, // Gửi giá trị isPrivate
       });
       if (response.statusCode == 201) {
         if (mounted) {
@@ -51,30 +56,10 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
           ).show();
         }
       } else {
-        if (mounted) {
-          AwesomeDialog(
-            context: context,
-            dialogType: DialogType.error,
-            animType: AnimType.scale,
-            title: 'Error',
-            desc: 'Failed to create event ${response.body}',
-            btnCancelOnPress: () {},
-          ).show();
-
-          print(response.body);
-        }
+        _showErrorDialog('Failed to create event: ${response.body}');
       }
     } catch (e) {
-      if (mounted) {
-        AwesomeDialog(
-          context: context,
-          dialogType: DialogType.error,
-          animType: AnimType.bottomSlide,
-          title: 'Error',
-          desc: e.toString(),
-          btnCancelOnPress: () {},
-        ).show();
-      }
+      _showErrorDialog('Error: $e');
     } finally {
       setState(() {
         _isLoading = false;
@@ -82,42 +67,34 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
     }
   }
 
-  Future<void> _selectStartTime(BuildContext context) async {
-    // Show date picker
-    final DateTime? pickedDate = await showDatePicker(
-      context: context,
-      initialDate: DateTime.now(),
-      firstDate: DateTime(2020),
-      lastDate: DateTime(2101),
-    );
-
-    if (pickedDate != null) {
-      // Show time picker
-      final TimeOfDay? pickedTime = await showTimePicker(
-        context: context,
-        initialTime: TimeOfDay.fromDateTime(pickedDate),
-      );
-
-      if (pickedTime != null) {
-        final DateTime finalStartTime = DateTime(
-          pickedDate.year,
-          pickedDate.month,
-          pickedDate.day,
-          pickedTime.hour,
-          pickedTime.minute,
-        );
-
-        setState(() {
-          _startTimeController.text = finalStartTime
-              .toLocal()
-              .toIso8601String(); // Format the date and time
-        });
+  bool _validateTime() {
+    try {
+      final startTime = DateTime.parse(_startTimeController.text);
+      final endTime = DateTime.parse(_endTimeController.text);
+      if (endTime.isBefore(startTime)) {
+        _showErrorDialog('End time must be after start time.');
+        return false;
       }
+      return true;
+    } catch (_) {
+      _showErrorDialog('Invalid time format.');
+      return false;
     }
   }
 
-  Future<void> _selectEndTime(BuildContext context) async {
-    // Show date picker
+  void _showErrorDialog(String message) {
+    AwesomeDialog(
+      context: context,
+      dialogType: DialogType.error,
+      animType: AnimType.bottomSlide,
+      title: 'Error',
+      desc: message,
+      btnCancelOnPress: () {},
+    ).show();
+  }
+
+  Future<void> _selectTime(
+      BuildContext context, TextEditingController controller) async {
     final DateTime? pickedDate = await showDatePicker(
       context: context,
       initialDate: DateTime.now(),
@@ -126,14 +103,13 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
     );
 
     if (pickedDate != null) {
-      // Show time picker
       final TimeOfDay? pickedTime = await showTimePicker(
         context: context,
-        initialTime: TimeOfDay.fromDateTime(pickedDate),
+        initialTime: TimeOfDay.now(),
       );
 
       if (pickedTime != null) {
-        final DateTime finalEndTime = DateTime(
+        final DateTime finalTime = DateTime(
           pickedDate.year,
           pickedDate.month,
           pickedDate.day,
@@ -142,9 +118,7 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
         );
 
         setState(() {
-          _endTimeController.text = finalEndTime
-              .toLocal()
-              .toIso8601String(); // Format the date and time
+          controller.text = finalTime.toLocal().toIso8601String();
         });
       }
     }
@@ -159,82 +133,115 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
       child: Scaffold(
         appBar: AppBar(
           title: const Text('Create Event'),
+          centerTitle: true,
         ),
         body: Padding(
           padding: const EdgeInsets.all(16.0),
           child: Form(
             key: _formKey,
-            child: ListView(
-              children: [
-                TextFormField(
-                  controller: _eventNameController,
-                  decoration: const InputDecoration(
-                    labelText: 'Event Name',
-                    border: OutlineInputBorder(),
-                    prefixIcon: Icon(Icons.event),
+            child: SingleChildScrollView(
+              child: Column(
+                children: [
+                  TextFormField(
+                    controller: _eventNameController,
+                    decoration: InputDecoration(
+                      labelText: 'Event Name',
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(10.0),
+                      ),
+                      prefixIcon: const Icon(Icons.event),
+                    ),
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'Please enter event name';
+                      }
+                      return null;
+                    },
                   ),
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Please enter event name';
-                    }
-                    return null;
-                  },
-                ),
-                const SizedBox(height: 16),
-                TextFormField(
-                  controller: _eventDescriptionController,
-                  decoration: const InputDecoration(
-                    labelText: 'Event Description',
-                    border: OutlineInputBorder(),
-                    prefixIcon: Icon(Icons.description),
+                  const SizedBox(height: 16),
+                  TextFormField(
+                    controller: _eventDescriptionController,
+                    decoration: InputDecoration(
+                      labelText: 'Event Description',
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(10.0),
+                      ),
+                      prefixIcon: const Icon(Icons.description),
+                    ),
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'Please enter event description';
+                      }
+                      return null;
+                    },
                   ),
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Please enter event description';
-                    }
-                    return null;
-                  },
-                ),
-                const SizedBox(height: 16),
-                GestureDetector(
-                  onTap: () => _selectStartTime(context),
-                  child: AbsorbPointer(
-                    child: TextFormField(
-                      controller: _startTimeController,
-                      decoration: const InputDecoration(
-                        labelText: 'Start Time',
-                        border: OutlineInputBorder(),
-                        hintText: 'Select start time',
-                        prefixIcon: Icon(Icons.access_time),
+                  const SizedBox(height: 16),
+                  GestureDetector(
+                    onTap: () => _selectTime(context, _startTimeController),
+                    child: AbsorbPointer(
+                      child: TextFormField(
+                        controller: _startTimeController,
+                        decoration: InputDecoration(
+                          labelText: 'Start Time',
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(10.0),
+                          ),
+                          hintText: 'Select start time',
+                          prefixIcon: const Icon(Icons.access_time),
+                        ),
                       ),
                     ),
                   ),
-                ),
-                const SizedBox(height: 16),
-                GestureDetector(
-                  onTap: () => _selectEndTime(context),
-                  child: AbsorbPointer(
-                    child: TextFormField(
-                      controller: _endTimeController,
-                      decoration: const InputDecoration(
-                        labelText: 'End Time',
-                        border: OutlineInputBorder(),
-                        hintText: 'Select end time',
-                        prefixIcon: Icon(Icons.access_time),
+                  const SizedBox(height: 16),
+                  GestureDetector(
+                    onTap: () => _selectTime(context, _endTimeController),
+                    child: AbsorbPointer(
+                      child: TextFormField(
+                        controller: _endTimeController,
+                        decoration: InputDecoration(
+                          labelText: 'End Time',
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(10.0),
+                          ),
+                          hintText: 'Select end time',
+                          prefixIcon: const Icon(Icons.access_time),
+                        ),
                       ),
                     ),
                   ),
-                ),
-                const SizedBox(height: 20),
-                ElevatedButton(
-                  onPressed: () {
-                    if (_formKey.currentState?.validate() ?? false) {
-                      _createEvent();
-                    }
-                  },
-                  child: const Text('Create Event'),
-                ),
-              ],
+                  const SizedBox(height: 16),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      const Text(
+                        'Private Event',
+                        style: TextStyle(fontSize: 16),
+                      ),
+                      Switch(
+                        value: _isPrivate,
+                        onChanged: (value) {
+                          setState(() {
+                            _isPrivate = value;
+                          });
+                        },
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 20),
+                  ElevatedButton.icon(
+                    onPressed: () {
+                      if (_formKey.currentState?.validate() ?? false) {
+                        _createEvent();
+                      }
+                    },
+                    icon: const Icon(Icons.save),
+                    label: const Text('Create Event'),
+                    style: ElevatedButton.styleFrom(
+                      minimumSize: const Size(double.infinity, 50),
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
         ),
