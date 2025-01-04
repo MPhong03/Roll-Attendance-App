@@ -115,6 +115,8 @@ namespace RollAttendanceServer.Services.Systems
             if (@event == null)
                 throw new Exception("Event not found.");
 
+            _context.EventUsers.RemoveRange(@event.EventUsers);
+
             var existingUserIds = @event.EventUsers.Select(eu => eu.UserId).ToList();
 
             var users = await _context.Users
@@ -126,14 +128,11 @@ namespace RollAttendanceServer.Services.Systems
 
             foreach (var user in users)
             {
-                if (!existingUserIds.Contains(user.Id))
+                @event.EventUsers.Add(new EventUser
                 {
-                    @event.EventUsers.Add(new EventUser
-                    {
-                        EventId = eventId,
-                        UserId = user.Id
-                    });
-                }
+                    EventId = eventId,
+                    UserId = user.Id
+                });
             }
 
             await _context.SaveChangesAsync();
