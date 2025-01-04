@@ -268,5 +268,29 @@ namespace RollAttendanceServer.Services.Systems
             await _context.SaveChangesAsync();
             return eventEntity;
         }
+
+        public async Task<IEnumerable<UserDTO>> GetEventUsersAsync(string eventId)
+        {
+            var eventEntity = await _context.Events
+                .Include(e => e.EventUsers)
+                .ThenInclude(eu => eu.User)
+                .FirstOrDefaultAsync(e => e.Id == eventId);
+
+            if (eventEntity == null)
+            {
+                throw new Exception("Event not found.");
+            }
+
+            return eventEntity.EventUsers.Select(eu => new UserDTO
+            {
+                Id = eu.User.Id,
+                Uid = eu.User.Uid,
+                DisplayName = eu.User.DisplayName,
+                Email = eu.User.Email,
+                PhoneNumber = eu.User.PhoneNumber,
+                Avatar = eu.User.Avatar,
+            }).ToList();
+        }
+
     }
 }

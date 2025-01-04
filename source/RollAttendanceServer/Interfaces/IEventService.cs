@@ -16,5 +16,6 @@ namespace RollAttendanceServer.Interfaces
         Task CheckInAsync(string eventId, string userId, string qrCode, int attendanceAttempt);
         Task AddAttendanceAttemptAsync(string eventId);
         Task<Event> CompleteEventAsync(string eventId);
+        Task<IEnumerable<UserDTO>> GetEventUsersAsync(string eventId);
     }
 }

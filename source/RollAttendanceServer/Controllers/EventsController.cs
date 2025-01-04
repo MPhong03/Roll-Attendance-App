@@ -100,6 +100,25 @@ namespace RollAttendanceServer.Controllers
             }
         }
 
+        [HttpGet("users/{eventId}")]
+        public async Task<IActionResult> GetPermittedUserEvent(string eventId)
+        {
+            try
+            {
+                var users = await _eventService.GetEventUsersAsync(eventId);
+                if (users == null)
+                {
+                    return NotFound("Event not found.");
+                }
+
+                return Ok(users);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+        }
+
         [HttpPost("{eventId}/add-users")]
         public async Task<IActionResult> AddUsersToEvent(string eventId, [FromBody] List<string> userIds)
         {
