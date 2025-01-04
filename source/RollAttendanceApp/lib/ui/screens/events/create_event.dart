@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:awesome_dialog/awesome_dialog.dart';
 import 'package:blurry_modal_progress_hud/blurry_modal_progress_hud.dart';
 import 'package:flutter/material.dart';
@@ -43,6 +45,8 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
         'isPrivate': _isPrivate, // Gửi giá trị isPrivate
       });
       if (response.statusCode == 201) {
+        final eventId = jsonDecode(response.body)['id'];
+
         if (mounted) {
           AwesomeDialog(
             context: context,
@@ -51,7 +55,8 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
             title: 'Success',
             desc: 'Event created successfully',
             btnOkOnPress: () {
-              context.pop();
+              // context.pop();
+              context.push('/event-detail/$eventId');
             },
           ).show();
         }

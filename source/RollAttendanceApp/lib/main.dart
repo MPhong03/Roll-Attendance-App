@@ -4,6 +4,7 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:itproject/ui/main_view.dart';
 import 'package:itproject/ui/screens/events/create_event.dart';
 import 'package:itproject/ui/screens/events/edit_event.dart';
+import 'package:itproject/ui/screens/events/event_access_list.dart';
 import 'package:itproject/ui/screens/events/event_detail.dart';
 import 'package:itproject/ui/screens/home_screen.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -17,6 +18,7 @@ import 'package:itproject/ui/screens/profile_screen.dart';
 import 'package:itproject/ui/screens/settings/update_face_data_screen.dart';
 import 'firebase_options.dart';
 import 'package:go_router/go_router.dart';
+import 'package:logging/logging.dart';
 
 class MyHttpOverrides extends HttpOverrides {
   @override
@@ -25,6 +27,13 @@ class MyHttpOverrides extends HttpOverrides {
       ..badCertificateCallback =
           (X509Certificate cert, String host, int port) => true;
   }
+}
+
+void setupLogging() {
+  Logger.root.level = Level.ALL;
+  Logger.root.onRecord.listen((record) {
+    print('${record.level.name}: ${record.time}: ${record.message}');
+  });
 }
 
 Future<void> main() async {
@@ -37,6 +46,7 @@ Future<void> main() async {
     options: DefaultFirebaseOptions.currentPlatform,
   );
 
+  setupLogging();
   runApp(const MyApp());
 }
 
@@ -112,6 +122,13 @@ class MyApp extends StatelessWidget {
               builder: (context, state) {
                 final id = state.pathParameters['id']!;
                 return EventDetailScreen(eventId: id);
+              },
+            ),
+            GoRoute(
+              path: '/event-access-list/:id',
+              builder: (context, state) {
+                final id = state.pathParameters['id']!;
+                return EventAccessListScreen(eventId: id);
               },
             ),
             GoRoute(

@@ -4,22 +4,12 @@ import 'dart:typed_data';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'package:logging/logging.dart';
-
-final Logger _logger = Logger('ApiService');
-
-void setupLogging() {
-  Logger.root.level = Level.ALL;
-  Logger.root.onRecord.listen((record) {
-    print('${record.level.name}: ${record.time}: ${record.message}');
-  });
-}
 
 class ApiService {
   final String baseUrl = dotenv.env['SERVER_URL'] ?? "https://api.mphong.com";
 
   ApiService() {
-    setupLogging();
+    // setupLogging();
   }
 
   /// GET ACCESS TOKEN FOR HEADERS ///
@@ -28,7 +18,7 @@ class ApiService {
       User? user = FirebaseAuth.instance.currentUser;
       return await user?.getIdToken();
     } catch (e) {
-      _logger.severe('Error fetching access token: $e');
+      print('Error fetching access token: $e');
       return null;
     }
   }
@@ -51,13 +41,13 @@ class ApiService {
           requestBody: null);
       return response;
     } catch (e) {
-      _logger.severe('Error during GET request to $endpoint: $e');
+      print('Error during GET request to $endpoint: $e');
       throw Exception('Failed to load data');
     }
   }
 
   // POST METHOD
-  Future<http.Response> post(String endpoint, Map<String, dynamic> data) async {
+  Future<http.Response> post(String endpoint, [dynamic data]) async {
     try {
       final accessToken = await _getAccessToken();
       final response = await http.post(
@@ -66,22 +56,24 @@ class ApiService {
           'Authorization': 'Bearer $accessToken',
           'Content-Type': 'application/json',
         },
-        body: json.encode(data),
+        body: data != null ? json.encode(data) : null, // mã hóa dữ liệu
       );
       _logResponse(
-          response: response,
-          url: Uri.parse('$baseUrl/$endpoint').toString(),
-          method: 'POST',
-          requestBody: data);
+        response: response,
+        url: Uri.parse('$baseUrl/$endpoint').toString(),
+        method: 'POST',
+        requestBody: data ?? {},
+      );
       return response;
     } catch (e) {
-      _logger.severe('Error during POST request to $endpoint: $e');
+      print('Error during POST request to $endpoint: $e');
       throw Exception('Failed to post data');
     }
   }
 
   // PUT METHOD
-  Future<http.Response> put(String endpoint, Map<String, dynamic> data) async {
+  Future<http.Response> put(String endpoint,
+      [Map<String, dynamic>? data]) async {
     try {
       final accessToken = await _getAccessToken();
       final response = await http.put(
@@ -90,16 +82,19 @@ class ApiService {
           'Authorization': 'Bearer $accessToken',
           'Content-Type': 'application/json',
         },
-        body: json.encode(data),
+        body: data != null
+            ? json.encode(data)
+            : null, // Xử lý nếu data không được truyền
       );
       _logResponse(
-          response: response,
-          url: Uri.parse('$baseUrl/$endpoint').toString(),
-          method: 'PUT',
-          requestBody: data);
+        response: response,
+        url: Uri.parse('$baseUrl/$endpoint').toString(),
+        method: 'PUT',
+        requestBody: data ?? {}, // Log dữ liệu nếu có, ngược lại log Map rỗng
+      );
       return response;
     } catch (e) {
-      _logger.severe('Error during PUT request to $endpoint: $e');
+      print('Error during PUT request to $endpoint: $e');
       throw Exception('Failed to update data');
     }
   }
@@ -122,7 +117,7 @@ class ApiService {
           requestBody: null);
       return response;
     } catch (e) {
-      _logger.severe('Error during DELETE request to $endpoint: $e');
+      print('Error during DELETE request to $endpoint: $e');
       throw Exception('Failed to delete data');
     }
   }
@@ -164,7 +159,7 @@ class ApiService {
           requestBody: additionalData);
       return responseData;
     } catch (e) {
-      _logger.severe('Error during POST request with file to $endpoint: $e');
+      print('Error during POST request with file to $endpoint: $e');
       throw Exception('Failed to upload file');
     }
   }
@@ -226,7 +221,7 @@ class ApiService {
 
       return responseData;
     } catch (e) {
-      _logger.severe('Error during POST request with files to $endpoint: $e');
+      print('Error during POST request with files to $endpoint: $e');
       throw Exception('Failed to upload files');
     }
   }
@@ -288,7 +283,7 @@ class ApiService {
 
       return responseData;
     } catch (e) {
-      _logger.severe('Error during PUT request with files to $endpoint: $e');
+      print('Error during PUT request with files to $endpoint: $e');
       throw Exception('Failed to upload files');
     }
   }
@@ -319,6 +314,6 @@ class ApiService {
     };
 
     final prettyJson = const JsonEncoder.withIndent('  ').convert(logData);
-    _logger.info(prettyJson);
+    print(prettyJson);
   }
 }

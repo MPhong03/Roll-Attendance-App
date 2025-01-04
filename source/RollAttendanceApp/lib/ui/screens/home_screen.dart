@@ -28,6 +28,7 @@ class _HomeScreenState extends State<HomeScreen> {
       'https://yt3.ggpht.com/a/AGF-l78urB8ASkb0JO2a6AB0UAXeEHe6-pc9UJqxUw=s900-mo-c-c0xffffffff-rj-k-no';
 
   Future<void> shareProfile() async {
+    if (_isLoading) return;
     try {
       await _apiService.put('api/auth/shareProfile', {});
     } catch (e) {
@@ -45,32 +46,37 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Future<void> fetchUserOrganizations(
       {int pageIndex = 0, int pageSize = 10}) async {
+    if (_isLoading) return;
     try {
       setState(() {
         _isLoading = true;
       });
+
+      print("REPEATTTTTTTTTTTTTTTTT");
 
       final response = await _apiService.get(
         'api/organization/getall/${FirebaseAuth.instance.currentUser?.uid}?pageIndex=$pageIndex&pageSize=$pageSize',
       );
 
       if (response.statusCode == 200) {
-        setState(() {
-          List<dynamic> responseBody = jsonDecode(response.body);
-          if (pageIndex == 0) {
-            organizations = responseBody
-                .map((orgData) => OrganizationModel.fromMap(orgData))
-                .toList();
-          } else {
-            organizations.addAll(responseBody
-                .map((orgData) => OrganizationModel.fromMap(orgData))
-                .toList());
-          }
+        if (mounted) {
+          setState(() {
+            List<dynamic> responseBody = jsonDecode(response.body);
+            if (pageIndex == 0) {
+              organizations = responseBody
+                  .map((orgData) => OrganizationModel.fromMap(orgData))
+                  .toList();
+            } else {
+              organizations.addAll(responseBody
+                  .map((orgData) => OrganizationModel.fromMap(orgData))
+                  .toList());
+            }
 
-          if (responseBody.length < pageSize) {
-            hasMoreData = false;
-          }
-        });
+            if (responseBody.length < pageSize) {
+              hasMoreData = false;
+            }
+          });
+        }
       } else {
         Fluttertoast.showToast(
           msg: "No organizations found",

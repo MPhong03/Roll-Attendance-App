@@ -6,6 +6,8 @@ import 'package:go_router/go_router.dart';
 import 'package:itproject/enums/event_status.dart';
 import 'package:itproject/models/event_model.dart';
 import 'package:itproject/services/api_service.dart';
+import 'package:itproject/ui/components/events/preview_event_modal.dart';
+import 'package:qr_flutter/qr_flutter.dart';
 
 class EventDetailScreen extends StatefulWidget {
   final String eventId;
@@ -21,6 +23,7 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
   bool _isLoading = false;
   late Future<EventModel> _eventFuture;
 
+  // ASYNCHRONOUS METHODS
   Future<EventModel> getDetail(id) async {
     try {
       setState(() {
@@ -43,10 +46,80 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
     }
   }
 
+  Future<void> _onActivateEvent(String id) async {
+    try {
+      setState(() {
+        _isLoading = true;
+      });
+
+      final response = await _apiService.post('api/events/$id/activate');
+
+      if (response.statusCode == 200) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("Event activated")),
+        );
+      } else {
+        throw Exception('Failed to activate event');
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Error: $e")),
+      );
+    } finally {
+      setState(() {
+        _isLoading = false;
+      });
+    }
+  }
+
+  Future<void> _onDeleteEvent() async {
+    // TODO:
+  }
+
   Future<void> _onRefresh() async {
     setState(() {
       _eventFuture = getDetail(widget.eventId);
     });
+  }
+
+  // METHOD
+  void _showQrCodeDialog(BuildContext context, EventModel event) {
+    final qrData = {
+      'eventId': event.id,
+      'qr': event.currentQR,
+    };
+    final qrDataString = jsonEncode(qrData);
+    showDialog(
+      context: context,
+      builder: (_) => AlertDialog(
+        title: const Text("QR Code"),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            QrImageView(
+              data: qrDataString,
+              backgroundColor: Colors.white,
+              version: QrVersions.auto,
+              size: 200.0,
+            ),
+            // const SizedBox(height: 16),
+            // Text(
+            //   'Event ID: ${event.id}\nQR Code: ${event.currentQR}',
+            //   textAlign: TextAlign.center,
+            //   style: const TextStyle(fontSize: 16),
+            // ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.of(context).pop();
+            },
+            child: const Text('Close'),
+          ),
+        ],
+      ),
+    );
   }
 
   @override
@@ -171,6 +244,7 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
                         Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
+                            // ACTIONS
                             Text(
                               "Actions",
                               style: Theme.of(context)
@@ -197,6 +271,7 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
                               title: const Text("Access List"),
                               onTap: () {
                                 // Navigate to access list screen
+                                context.push('/event-access-list/${event.id}');
                               },
                             ),
                             const Divider(),
@@ -205,7 +280,22 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
                                   color: Colors.blue),
                               title: const Text("Activate"),
                               onTap: () {
-                                // Handle activation
+                                showDialog(
+                                  context: context,
+                                  builder: (_) => EventPreviewModal(
+                                    eventName: event.name,
+                                    startTime: event.startTime,
+                                    endTime: event.endTime,
+                                    onCancel: () {
+                                      Navigator.of(context).pop();
+                                    },
+                                    onConfirm: () async {
+                                      Navigator.of(context).pop();
+                                      await _onActivateEvent(event.id);
+                                      _onRefresh();
+                                    },
+                                  ),
+                                );
                               },
                             ),
                             const Divider(),
@@ -217,6 +307,75 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
                                 // Handle deletion
                               },
                             ),
+                            const SizedBox(height: 20),
+
+                            // "CHECK IN
+                            if (event.eventStatus ==
+                                EventStatus.inProgress) ...[
+                              Text(
+                                "Check In",
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .headlineSmall
+                                    ?.copyWith(
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                              ),
+                              const SizedBox(height: 16),
+                              ListTile(
+                                leading: const Icon(Icons.qr_code,
+                                    color: Colors.blue),
+                                title: const Text("QR"),
+                                onTap: () {
+                                  _showQrCodeDialog(context, event);
+                                },
+                              ),
+                              const Divider(),
+                              ListTile(
+                                leading: const Icon(Icons.location_on,
+                                    color: Colors.blue),
+                                title: const Text("Location"),
+                                onTap: () {
+                                  // Handle location action (Develop later)
+                                },
+                              ),
+                              const Divider(),
+                              ListTile(
+                                leading: const Icon(Icons.fingerprint,
+                                    color: Colors.blue),
+                                title: const Text("Biometrics"),
+                                onTap: () {
+                                  // Handle biometrics action (Develop later)
+                                },
+                              ),
+                              const Divider(),
+                              ListTile(
+                                leading: const Icon(Icons.history,
+                                    color: Colors.blue),
+                                title: const Text("History"),
+                                onTap: () {
+                                  // Handle history action (Develop later)
+                                },
+                              ),
+                              const Divider(),
+                              ListTile(
+                                leading:
+                                    const Icon(Icons.add, color: Colors.blue),
+                                title: const Text("Attempt"),
+                                onTap: () {
+                                  // Handle attempt action (Develop later)
+                                },
+                              ),
+                              const Divider(),
+                              ListTile(
+                                leading: const Icon(Icons.check,
+                                    color: Colors.green),
+                                title: const Text("Complete"),
+                                onTap: () {
+                                  // Handle attempt action (Develop later)
+                                },
+                              ),
+                            ],
                           ],
                         ),
                       ],

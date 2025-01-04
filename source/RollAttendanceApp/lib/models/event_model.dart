@@ -8,7 +8,10 @@ class EventModel {
   final String description;
   final String organizationId;
   final bool isPrivate;
-  final EventStatus eventStatus; // Now using an enum for event status
+  final EventStatus eventStatus;
+  final String? currentLocation;
+  final double? currentLocationRadius;
+  final String? currentQR;
 
   EventModel({
     required this.id,
@@ -18,7 +21,10 @@ class EventModel {
     required this.description,
     required this.organizationId,
     required this.isPrivate,
-    required this.eventStatus, // Changed to use EventStatus
+    required this.eventStatus,
+    this.currentLocation,
+    this.currentLocationRadius,
+    this.currentQR,
   });
 
   factory EventModel.fromMap(Map<String, dynamic> map) {
@@ -32,6 +38,9 @@ class EventModel {
       organizationId: map['organizationId'] ?? '',
       eventStatus: _mapEventStatus(map['eventStatus']),
       isPrivate: map['isPrivate'] ?? false,
+      currentLocation: map['currentLocation'],
+      currentLocationRadius: map['currentLocationRadius']?.toDouble(),
+      currentQR: map['currentQR'],
     );
   }
 
@@ -44,7 +53,10 @@ class EventModel {
       'description': description,
       'organizationId': organizationId,
       'isPrivate': isPrivate,
-      'eventStatus': eventStatus.index, // Store the eventStatus as an integer
+      'eventStatus': eventStatus.index,
+      'currentLocation': currentLocation,
+      'currentLocationRadius': currentLocationRadius,
+      'currentQR': currentQR,
     };
   }
 

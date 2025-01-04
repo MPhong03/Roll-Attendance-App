@@ -132,52 +132,84 @@ class _AddUserToOrganizationScreenState
         padding: const EdgeInsets.all(16.0),
         child: SingleChildScrollView(
           child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              TextField(
-                controller: _emailController,
-                decoration: const InputDecoration(
-                  labelText: 'Email',
-                  hintText: 'Enter email to search',
-                ),
+              Row(
+                children: [
+                  Expanded(
+                    child: TextField(
+                      controller: _emailController,
+                      decoration: const InputDecoration(
+                        labelText: 'Email',
+                        hintText: 'Enter email',
+                        border: OutlineInputBorder(),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  ElevatedButton(
+                    onPressed: _searchUserByEmail,
+                    child: _isLoading
+                        ? const CircularProgressIndicator(
+                            strokeWidth: 2,
+                            color: Colors.white,
+                          )
+                        : const Text("Search"),
+                  ),
+                ],
               ),
-              const SizedBox(height: 10),
-              ElevatedButton(
-                onPressed: _searchUserByEmail, // Tìm kiếm khi nhấn nút
-                child: _isLoading
-                    ? const CircularProgressIndicator() // Hiển thị loading khi tìm kiếm
-                    : const Text("Search"),
-              ),
-              const SizedBox(height: 10),
+              const SizedBox(height: 16),
 
               // Hiển thị kết quả tìm kiếm
               if (_searchResults.isNotEmpty) ...[
+                const Text(
+                  'Search Results:',
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                ),
+                const SizedBox(height: 8),
                 Column(
                   children: _searchResults.map((user) {
-                    return ListTile(
-                      leading: CircleAvatar(
-                        backgroundImage: NetworkImage(user.avatar),
-                        radius: 20,
+                    return Card(
+                      elevation: 2,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10),
                       ),
-                      title: Text(user.displayName),
-                      subtitle: Text(user.email),
-                      trailing: _selectedUsers.contains(user)
-                          ? const Icon(Icons.check_circle, color: Colors.green)
-                          : const Icon(Icons.check_circle_outline),
-                      onTap: () => _toggleSelectUser(user),
+                      child: ListTile(
+                        leading: CircleAvatar(
+                          backgroundImage: NetworkImage(user.avatar),
+                          radius: 20,
+                        ),
+                        title: Text(user.displayName),
+                        subtitle: Text(user.email),
+                        trailing: IconButton(
+                          icon: _selectedUsers.contains(user)
+                              ? const Icon(Icons.check_circle,
+                                  color: Colors.green)
+                              : const Icon(Icons.add_circle_outline),
+                          onPressed: () => _toggleSelectUser(user),
+                        ),
+                      ),
                     );
                   }).toList(),
                 ),
               ],
 
-              // Hiển thị thông báo nếu không tìm thấy người dùng
+              // Thông báo không tìm thấy người dùng
               if (_searchResults.isEmpty && !_isLoading) ...[
-                const Text("No user found."),
+                const Text(
+                  "No user found.",
+                  style: TextStyle(color: Colors.grey),
+                ),
               ],
-              const SizedBox(height: 10),
+              const SizedBox(height: 16),
 
               // Dropdown để chọn vai trò người dùng
               if (_selectedUsers.isNotEmpty) ...[
-                const Text('Select Role:'),
+                const Text(
+                  'Select Role:',
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                ),
+                const SizedBox(height: 8),
                 DropdownButton<UserRole>(
                   value: _selectedRole,
                   onChanged: (UserRole? newRole) {
@@ -196,35 +228,58 @@ class _AddUserToOrganizationScreenState
 
               // Hiển thị danh sách người dùng đã chọn
               if (_selectedUsers.isNotEmpty) ...[
-                const Text('Selected Users:'),
+                const SizedBox(height: 16),
+                const Text(
+                  'Selected Users:',
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                ),
+                const SizedBox(height: 8),
                 Column(
                   children: _selectedUsers.map((user) {
-                    return ListTile(
-                      leading: CircleAvatar(
-                        backgroundImage: NetworkImage(user.avatar),
-                        radius: 20,
+                    return Card(
+                      elevation: 2,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10),
                       ),
-                      title: Text(user.displayName),
-                      subtitle: Text(user.email),
+                      child: ListTile(
+                        leading: CircleAvatar(
+                          backgroundImage: NetworkImage(user.avatar),
+                          radius: 20,
+                        ),
+                        title: Text(user.displayName),
+                        subtitle: Text(user.email),
+                        trailing: IconButton(
+                          icon: const Icon(Icons.remove_circle_outline,
+                              color: Colors.red),
+                          onPressed: () => _toggleSelectUser(user),
+                        ),
+                      ),
                     );
                   }).toList(),
                 ),
               ],
 
-              const SizedBox(height: 20),
+              const SizedBox(height: 24),
+
               // Nút thêm người dùng
-              ElevatedButton(
-                onPressed: () {
-                  if (_selectedUsers.isNotEmpty) {
-                    _addToOrganization();
-                  } else {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                          content: Text('Please select at least one user')),
-                    );
-                  }
-                },
-                child: const Text('Add User(s)'),
+              Center(
+                child: ElevatedButton(
+                  onPressed: () {
+                    if (_selectedUsers.isNotEmpty) {
+                      _addToOrganization();
+                    } else {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                            content: Text('Please select at least one user')),
+                      );
+                    }
+                  },
+                  style: ElevatedButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 32, vertical: 12),
+                  ),
+                  child: const Text('Add User(s)'),
+                ),
               ),
             ],
           ),
