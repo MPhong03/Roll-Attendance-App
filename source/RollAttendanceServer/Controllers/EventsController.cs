@@ -120,14 +120,14 @@ namespace RollAttendanceServer.Controllers
         }
 
         [HttpPost("{eventId}/add-users")]
-        public async Task<IActionResult> AddUsersToEvent(string eventId, [FromBody] List<string> userIds)
+        public async Task<IActionResult> AddUsersToEvent(string eventId, [FromBody] UserListDTO dto)
         {
             try
             {
-                if (userIds == null || userIds.Count == 0)
+                if (dto.UserIds == null || dto.UserIds.Count == 0)
                     return BadRequest("User list is empty.");
 
-                var result = await _eventService.AddUsersToPermitedUserAsync(eventId, userIds);
+                var result = await _eventService.AddUsersToPermitedUserAsync(eventId, dto.UserIds);
 
                 if (result)
                     return Ok("Users added to PermitedUser successfully.");
