@@ -2,6 +2,7 @@
 using RollAttendanceServer.Data;
 using RollAttendanceServer.Data.Enum;
 using RollAttendanceServer.DTOs;
+using RollAttendanceServer.Helpers;
 using RollAttendanceServer.Interfaces;
 using RollAttendanceServer.Models;
 
@@ -173,7 +174,7 @@ namespace RollAttendanceServer.Services.Systems
                 throw new Exception("Event not found or already started.");
 
             eventEntity.EventStatus = (short)Status.EVENT_IN_PROGRESS;
-            eventEntity.CurrentQR = GenerateUniqueCode();
+            eventEntity.CurrentQR = Tools.GenerateUniqueCode();
             eventEntity.StartTime = DateTime.UtcNow;
 
             var history = new History { EventId = eventEntity.Id };
@@ -234,7 +235,7 @@ namespace RollAttendanceServer.Services.Systems
 
             history.AttendanceTimes++;
             var eventEntity = await _context.Events.FindAsync(eventId);
-            eventEntity.CurrentQR = GenerateUniqueCode();
+            eventEntity.CurrentQR = Tools.GenerateUniqueCode();
 
             await _context.SaveChangesAsync();
         }
@@ -266,15 +267,6 @@ namespace RollAttendanceServer.Services.Systems
 
             await _context.SaveChangesAsync();
             return eventEntity;
-        }
-
-        private string GenerateUniqueCode()
-        {
-            const string chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
-            var random = new Random();
-            return new string(Enumerable.Range(0, 6)
-                .Select(_ => chars[random.Next(chars.Length)])
-                .ToArray());
         }
     }
 }
