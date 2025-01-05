@@ -11,6 +11,8 @@ import 'package:permission_handler/permission_handler.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:flutter/foundation.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:photo_view/photo_view.dart';
+import 'package:photo_view/photo_view_gallery.dart';
 
 class CreateOrganizationScreen extends StatefulWidget {
   const CreateOrganizationScreen({super.key});
@@ -165,6 +167,29 @@ class _CreateOrganizationScreenState extends State<CreateOrganizationScreen> {
     }
   }
 
+  void previewImage(dynamic imageFile) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return Dialog(
+          child: PhotoViewGallery.builder(
+            itemCount: 1,
+            builder: (context, index) {
+              return PhotoViewGalleryPageOptions(
+                imageProvider:
+                    kIsWeb ? MemoryImage(imageFile) : FileImage(imageFile),
+                minScale: PhotoViewComputedScale.contained,
+                maxScale: PhotoViewComputedScale.covered,
+              );
+            },
+            scrollPhysics: const BouncingScrollPhysics(),
+            backgroundDecoration: const BoxDecoration(color: Colors.black),
+          ),
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return BlurryModalProgressHUD(
@@ -183,58 +208,81 @@ class _CreateOrganizationScreenState extends State<CreateOrganizationScreen> {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
+                  Align(
+                    alignment: Alignment.centerLeft,
+                    child: Container(
+                      width: double.infinity, // Ensures full width
+                      child: ElevatedButton.icon(
+                        onPressed: () => _uploadImageFromGallery(false),
+                        icon: const Icon(Icons.image),
+                        label: const Text('Choose Image'),
+                        style: ElevatedButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 20, vertical: 10),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
                   const SizedBox(height: 16),
                   selectedImageFile != null
-                      ? Column(
-                          children: [
-                            kIsWeb
-                                ? Image.memory(
-                                    selectedImageFile, // Dữ liệu nhị phân trên web
-                                    height: 100,
-                                    width: 100,
-                                    fit: BoxFit.cover,
-                                  )
-                                : Image.file(
-                                    selectedImageFile, // File vật lý trên mobile
-                                    height: 100,
-                                    width: 100,
-                                    fit: BoxFit.cover,
-                                  ),
-                            const SizedBox(height: 10),
-                          ],
+                      ? GestureDetector(
+                          onTap: () => previewImage(selectedImageFile),
+                          child: kIsWeb
+                              ? Image.memory(
+                                  selectedImageFile,
+                                  height: 200,
+                                  width: double.infinity,
+                                  fit: BoxFit.cover,
+                                )
+                              : Image.file(
+                                  selectedImageFile,
+                                  height: 200,
+                                  width: double.infinity,
+                                  fit: BoxFit.cover,
+                                ),
                         )
                       : const SizedBox(),
-                  ElevatedButton.icon(
-                    onPressed: () => _uploadImageFromGallery(false),
-                    icon: const Icon(Icons.image),
-                    label: const Text('Choose Image'),
+                  const SizedBox(height: 16),
+                  Align(
+                    alignment: Alignment.centerLeft,
+                    child: Container(
+                      width: double.infinity, // Ensures full width
+                      child: ElevatedButton.icon(
+                        onPressed: () => _uploadImageFromGallery(true),
+                        icon: const Icon(Icons.image),
+                        label: const Text('Choose Banner'),
+                        style: ElevatedButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 20, vertical: 10),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ),
+                      ),
+                    ),
                   ),
                   const SizedBox(height: 16),
                   selectedBannerFile != null
-                      ? Column(
-                          children: [
-                            kIsWeb
-                                ? Image.memory(
-                                    selectedBannerFile, // Dữ liệu nhị phân trên web
-                                    height: 100,
-                                    width: 100,
-                                    fit: BoxFit.cover,
-                                  )
-                                : Image.file(
-                                    selectedBannerFile, // File vật lý trên mobile
-                                    height: 100,
-                                    width: 100,
-                                    fit: BoxFit.cover,
-                                  ),
-                            const SizedBox(height: 10),
-                          ],
+                      ? GestureDetector(
+                          onTap: () => previewImage(selectedBannerFile),
+                          child: kIsWeb
+                              ? Image.memory(
+                                  selectedBannerFile,
+                                  height: 200,
+                                  width: double.infinity,
+                                  fit: BoxFit.cover,
+                                )
+                              : Image.file(
+                                  selectedBannerFile,
+                                  height: 200,
+                                  width: double.infinity,
+                                  fit: BoxFit.cover,
+                                ),
                         )
                       : const SizedBox(),
-                  ElevatedButton.icon(
-                    onPressed: () => _uploadImageFromGallery(true),
-                    icon: const Icon(Icons.image),
-                    label: const Text('Choose Banner'),
-                  ),
                   const SizedBox(height: 16),
                   TextFormField(
                     controller: _nameController,

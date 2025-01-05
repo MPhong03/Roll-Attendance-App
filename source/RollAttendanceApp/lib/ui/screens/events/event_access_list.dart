@@ -3,7 +3,6 @@ import 'dart:convert';
 import 'package:awesome_dialog/awesome_dialog.dart';
 import 'package:blurry_modal_progress_hud/blurry_modal_progress_hud.dart';
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
 import 'package:itproject/models/event_model.dart';
 import 'package:itproject/models/user_model.dart';
 import 'package:itproject/services/api_service.dart';
@@ -25,7 +24,7 @@ class _EventAccessListScreenState extends State<EventAccessListScreen> {
   String _organizationId = "";
   bool _isLoading = false;
 
-  late Future<EventModel> _eventFuture;
+  // late Future<EventModel> _eventFuture;
   late Future<List<UserModel>> _usersFuture;
 
   Future<EventModel> getDetail(id) async {
@@ -119,7 +118,7 @@ class _EventAccessListScreenState extends State<EventAccessListScreen> {
 
   Future<void> _onRefresh() async {
     setState(() {
-      _eventFuture = getDetail(widget.eventId);
+      // _eventFuture = getDetail(widget.eventId);
       _usersFuture = fetchEventUsers(widget.eventId);
     });
   }
@@ -127,7 +126,7 @@ class _EventAccessListScreenState extends State<EventAccessListScreen> {
   @override
   void initState() {
     super.initState();
-    _eventFuture = getDetail(widget.eventId);
+    // _eventFuture = getDetail(widget.eventId);
     _usersFuture = fetchEventUsers(widget.eventId);
   }
 

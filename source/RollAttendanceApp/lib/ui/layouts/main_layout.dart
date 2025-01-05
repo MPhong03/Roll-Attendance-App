@@ -23,6 +23,9 @@ class _MainLayoutState extends State<MainLayout> {
   final ApiService _apiService = ApiService();
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
+  Map<String, dynamic>? _userProfile;
+  bool _isLoading = true;
+
   void _showLoadingOverlay() {
     if (_overlayEntry != null) return;
     _overlayEntry = OverlayEntry(
@@ -42,16 +45,6 @@ class _MainLayoutState extends State<MainLayout> {
     if (_overlayEntry != null) {
       _overlayEntry!.remove();
       _overlayEntry = null;
-    }
-  }
-
-  Future<Map<String, dynamic>> _getUserProfile() async {
-    final response = await _apiService.get('api/auth/profile');
-
-    if (response.statusCode == 200) {
-      return jsonDecode(response.body);
-    } else {
-      throw Exception('Failed to load profile');
     }
   }
 
@@ -90,21 +83,47 @@ class _MainLayoutState extends State<MainLayout> {
     }
   }
 
+  Future<void> _loadUserProfile() async {
+    try {
+      final response = await _apiService.get('api/auth/profile');
+      if (response.statusCode == 200) {
+        setState(() {
+          _userProfile = jsonDecode(response.body);
+          _isLoading = false;
+        });
+      } else {
+        throw Exception('Failed to load profile');
+      }
+    } catch (e) {
+      setState(() {
+        _isLoading = false;
+      });
+      Fluttertoast.showToast(msg: 'Error loading profile');
+    }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _loadUserProfile();
+  }
+
   @override
   Widget build(BuildContext context) {
     final isSmallScreen = MediaQuery.of(context).size.width < 600;
+    final theme = Theme.of(context);
 
     return Scaffold(
       key: _scaffoldKey,
       appBar: isSmallScreen
           ? AppBar(
-              backgroundColor: Colors.blueAccent,
-              title: const Text('Dashboard'),
+              backgroundColor: theme.primaryColor,
+              title: const Text('ITP'),
               leading: IconButton(
                 onPressed: () {
                   _scaffoldKey.currentState?.openDrawer();
                 },
-                icon: const Icon(Icons.menu),
+                icon: Icon(Icons.menu, color: theme.iconTheme.color),
               ),
             )
           : null,
@@ -126,10 +145,10 @@ class _MainLayoutState extends State<MainLayout> {
       theme: SidebarXTheme(
         margin: const EdgeInsets.all(10),
         decoration: BoxDecoration(
-          color: Colors.blueAccent,
+          color: Theme.of(context).primaryColor,
           borderRadius: BorderRadius.circular(10),
         ),
-        hoverColor: Colors.blue.withOpacity(0.1),
+        hoverColor: Theme.of(context).primaryColor.withOpacity(0.1),
         textStyle: TextStyle(color: Colors.white.withOpacity(0.7)),
         selectedTextStyle: const TextStyle(color: Colors.white),
         itemTextPadding: const EdgeInsets.only(left: 30),
@@ -139,7 +158,8 @@ class _MainLayoutState extends State<MainLayout> {
         ),
         selectedItemDecoration: BoxDecoration(
           borderRadius: BorderRadius.circular(10),
-          border: Border.all(color: Colors.blueAccent.withOpacity(0.5)),
+          border: Border.all(
+              color: Theme.of(context).primaryColor.withOpacity(0.5)),
         ),
         iconTheme: IconThemeData(
           color: Colors.white.withOpacity(0.7),
@@ -152,46 +172,36 @@ class _MainLayoutState extends State<MainLayout> {
       ),
       extendedTheme: const SidebarXTheme(
         width: 200,
-        decoration: BoxDecoration(
-          color: Colors.blueAccent,
-        ),
       ),
       footerDivider: Divider(color: Colors.white.withOpacity(0.3), height: 1),
       headerBuilder: (context, extended) {
-        return FutureBuilder<Map<String, dynamic>>(
-          future: _getUserProfile(),
-          builder: (context, snapshot) {
-            if (snapshot.connectionState == ConnectionState.waiting) {
-              return const Center(child: CircularProgressIndicator());
-            }
+        if (_isLoading) {
+          return const Center(child: CircularProgressIndicator());
+        }
 
-            if (snapshot.hasError) {
-              return Center(child: Text('Error: ${snapshot.error}'));
-            }
+        if (_userProfile == null) {
+          return const Center(child: Text('Error loading profile'));
+        }
 
-            final user = snapshot.data!;
-            return Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Column(
-                children: [
-                  CircleAvatar(
-                    backgroundImage: NetworkImage(user['photoUrl'] ?? ''),
-                    radius: 40,
-                  ),
-                  if (extended) ...[
-                    const SizedBox(height: 8),
-                    Text(user['displayName'] ?? 'No Name',
-                        style:
-                            const TextStyle(fontSize: 18, color: Colors.white)),
-                    const SizedBox(height: 4),
-                    Text(user['email'] ?? 'No Email',
-                        style:
-                            const TextStyle(fontSize: 14, color: Colors.white)),
-                  ],
-                ],
+        final user = _userProfile!;
+        return Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            children: [
+              CircleAvatar(
+                backgroundImage: NetworkImage(user['photoUrl'] ?? ''),
+                radius: 40,
               ),
-            );
-          },
+              if (extended) ...[
+                const SizedBox(height: 8),
+                Text(user['displayName'] ?? 'No Name',
+                    style: const TextStyle(fontSize: 18, color: Colors.white)),
+                const SizedBox(height: 4),
+                Text(user['email'] ?? 'No Email',
+                    style: const TextStyle(fontSize: 14, color: Colors.white)),
+              ],
+            ],
+          ),
         );
       },
       items: [

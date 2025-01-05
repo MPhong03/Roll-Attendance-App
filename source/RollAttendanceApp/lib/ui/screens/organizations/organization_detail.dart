@@ -3,11 +3,12 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:blurry_modal_progress_hud/blurry_modal_progress_hud.dart';
 import 'package:go_router/go_router.dart';
-import 'package:itproject/enums/user_role.dart';
 import 'package:itproject/models/event_model.dart';
 import 'package:itproject/models/organization_model.dart';
 import 'package:itproject/models/user_model.dart';
 import 'package:itproject/services/api_service.dart';
+import 'package:itproject/ui/components/organizations/org_event_card.dart';
+import 'package:itproject/ui/components/organizations/org_user_card.dart';
 
 class OrganizationDetailScreen extends StatefulWidget {
   final String organizationId;
@@ -265,7 +266,7 @@ class _OrganizationDetailScreenState extends State<OrganizationDetailScreen> {
                       ),
                       // const Divider(thickness: 1, height: 40),
                       DefaultTabController(
-                        length: 2, // Number of tabs
+                        length: 2,
                         child: Column(
                           children: [
                             const TabBar(
@@ -278,11 +279,10 @@ class _OrganizationDetailScreenState extends State<OrganizationDetailScreen> {
                               height: 400.0,
                               child: TabBarView(
                                 children: [
-                                  // Events Tab
+                                  // Tab Events
                                   Padding(
                                     padding: const EdgeInsets.all(16.0),
                                     child: SingleChildScrollView(
-                                      // Wrap with SingleChildScrollView
                                       child: Column(
                                         crossAxisAlignment:
                                             CrossAxisAlignment.stretch,
@@ -314,12 +314,11 @@ class _OrganizationDetailScreenState extends State<OrganizationDetailScreen> {
                                                         CircularProgressIndicator());
                                               } else if (snapshot.hasError) {
                                                 return Center(
-                                                  child: Text(
-                                                    'Error: ${snapshot.error}',
-                                                    style: const TextStyle(
-                                                        color: Colors.red),
-                                                  ),
-                                                );
+                                                    child: Text(
+                                                        'Error: ${snapshot.error}',
+                                                        style: const TextStyle(
+                                                            color:
+                                                                Colors.red)));
                                               } else if (!snapshot.hasData ||
                                                   snapshot.data!.isEmpty) {
                                                 return const Center(
@@ -335,57 +334,8 @@ class _OrganizationDetailScreenState extends State<OrganizationDetailScreen> {
                                                   itemBuilder:
                                                       (context, index) {
                                                     final event = events[index];
-                                                    return Card(
-                                                      margin: const EdgeInsets
-                                                          .symmetric(
-                                                          vertical: 8),
-                                                      child: ListTile(
-                                                        contentPadding:
-                                                            const EdgeInsets
-                                                                .all(16),
-                                                        title: Text(
-                                                          event.name,
-                                                          style: const TextStyle(
-                                                              fontWeight:
-                                                                  FontWeight
-                                                                      .bold),
-                                                        ),
-                                                        subtitle: Column(
-                                                          crossAxisAlignment:
-                                                              CrossAxisAlignment
-                                                                  .start,
-                                                          children: [
-                                                            Text(
-                                                              event.description,
-                                                              maxLines: 2,
-                                                              overflow:
-                                                                  TextOverflow
-                                                                      .ellipsis,
-                                                            ),
-                                                            const SizedBox(
-                                                                height: 5),
-                                                            Text(
-                                                              'Start: ${event.startTime?.toLocal().toString() ?? 'N/A'}',
-                                                              style: const TextStyle(
-                                                                  fontSize: 12,
-                                                                  color: Colors
-                                                                      .grey),
-                                                            ),
-                                                            Text(
-                                                              'End: ${event.endTime?.toLocal().toString() ?? 'N/A'}',
-                                                              style: const TextStyle(
-                                                                  fontSize: 12,
-                                                                  color: Colors
-                                                                      .grey),
-                                                            ),
-                                                          ],
-                                                        ),
-                                                        onTap: () {
-                                                          context.push(
-                                                              '/event-detail/${event.id}');
-                                                        },
-                                                      ),
-                                                    );
+                                                    return OrgEventCard(
+                                                        event: event);
                                                   },
                                                 );
                                               }
@@ -396,11 +346,10 @@ class _OrganizationDetailScreenState extends State<OrganizationDetailScreen> {
                                     ),
                                   ),
 
-                                  // Users Tab
+                                  // Tab Users
                                   Padding(
                                     padding: const EdgeInsets.all(16.0),
                                     child: SingleChildScrollView(
-                                      // Wrap with SingleChildScrollView
                                       child: Column(
                                         crossAxisAlignment:
                                             CrossAxisAlignment.stretch,
@@ -432,12 +381,11 @@ class _OrganizationDetailScreenState extends State<OrganizationDetailScreen> {
                                                         CircularProgressIndicator());
                                               } else if (snapshot.hasError) {
                                                 return Center(
-                                                  child: Text(
-                                                    'Error: ${snapshot.error}',
-                                                    style: const TextStyle(
-                                                        color: Colors.red),
-                                                  ),
-                                                );
+                                                    child: Text(
+                                                        'Error: ${snapshot.error}',
+                                                        style: const TextStyle(
+                                                            color:
+                                                                Colors.red)));
                                               } else if (!snapshot.hasData ||
                                                   snapshot.data!.isEmpty) {
                                                 return const Center(
@@ -453,52 +401,8 @@ class _OrganizationDetailScreenState extends State<OrganizationDetailScreen> {
                                                   itemBuilder:
                                                       (context, index) {
                                                     final user = users[index];
-                                                    final role =
-                                                        getRoleFromValue(
-                                                            user.role ?? 0);
-                                                    return Card(
-                                                      margin: const EdgeInsets
-                                                          .symmetric(
-                                                          vertical: 8),
-                                                      child: ListTile(
-                                                        contentPadding:
-                                                            const EdgeInsets
-                                                                .all(16),
-                                                        leading: CircleAvatar(
-                                                          backgroundImage:
-                                                              NetworkImage(
-                                                                  user.avatar),
-                                                          radius: 25,
-                                                        ),
-                                                        title: Text(
-                                                            user.displayName,
-                                                            style: const TextStyle(
-                                                                fontWeight:
-                                                                    FontWeight
-                                                                        .bold)),
-                                                        subtitle: Column(
-                                                          crossAxisAlignment:
-                                                              CrossAxisAlignment
-                                                                  .start,
-                                                          children: [
-                                                            Text(user.email,
-                                                                maxLines: 2,
-                                                                overflow:
-                                                                    TextOverflow
-                                                                        .ellipsis),
-                                                            const SizedBox(
-                                                                height: 5),
-                                                            Text(
-                                                              'Role: $role',
-                                                              style: const TextStyle(
-                                                                  fontStyle:
-                                                                      FontStyle
-                                                                          .italic),
-                                                            ),
-                                                          ],
-                                                        ),
-                                                      ),
-                                                    );
+                                                    return OrgUserCard(
+                                                        user: user);
                                                   },
                                                 );
                                               }

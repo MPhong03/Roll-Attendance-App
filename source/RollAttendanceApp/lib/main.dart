@@ -1,10 +1,12 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:itproject/themes.dart';
 import 'package:itproject/ui/main_view.dart';
 import 'package:itproject/ui/screens/events/create_event.dart';
 import 'package:itproject/ui/screens/events/edit_event.dart';
 import 'package:itproject/ui/screens/events/event_access_list.dart';
+import 'package:itproject/ui/screens/events/event_check_in_screen.dart';
 import 'package:itproject/ui/screens/events/event_detail.dart';
 import 'package:itproject/ui/screens/home_screen.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -125,6 +127,13 @@ class MyApp extends StatelessWidget {
               },
             ),
             GoRoute(
+              path: '/event-check-in/:id',
+              builder: (context, state) {
+                final id = state.pathParameters['id']!;
+                return EventCheckInScreen(eventId: id);
+              },
+            ),
+            GoRoute(
               path: '/event-access-list/:id',
               builder: (context, state) {
                 final id = state.pathParameters['id']!;
@@ -147,8 +156,9 @@ class MyApp extends StatelessWidget {
         return MaterialApp.router(
           routerConfig: router,
           debugShowCheckedModeBanner: false,
-          theme: ThemeData.light(),
-          darkTheme: ThemeData.dark(),
+          theme: customLightTheme,
+          darkTheme: customDarkTheme,
+          themeMode: ThemeMode.system,
         );
       },
     );

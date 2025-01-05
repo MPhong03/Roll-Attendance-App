@@ -4,9 +4,11 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:blurry_modal_progress_hud/blurry_modal_progress_hud.dart';
 import 'package:fluttertoast/fluttertoast.dart';
-import 'package:go_router/go_router.dart';
+import 'package:itproject/models/available_event_model.dart';
 import 'package:itproject/models/organization_model.dart';
 import 'package:itproject/services/api_service.dart';
+import 'package:itproject/ui/components/events/event_card.dart';
+import 'package:itproject/ui/components/organizations/organization_card.dart';
 import 'package:itproject/ui/layouts/main_layout.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -19,10 +21,15 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   bool _isLoading = false;
   List<OrganizationModel> organizations = [];
+  List<AvailableEventModel> events = [];
   final ApiService _apiService = ApiService();
   int pageIndex = 0;
   int pageSize = 10;
   bool hasMoreData = true;
+
+  int pageEventIndex = 1;
+  int pageEventSize = 10;
+  bool hasMoreEventData = true;
 
   String imagePlaceHolder =
       'https://yt3.ggpht.com/a/AGF-l78urB8ASkb0JO2a6AB0UAXeEHe6-pc9UJqxUw=s900-mo-c-c0xffffffff-rj-k-no';
@@ -51,8 +58,6 @@ class _HomeScreenState extends State<HomeScreen> {
       setState(() {
         _isLoading = true;
       });
-
-      print("REPEATTTTTTTTTTTTTTTTT");
 
       final response = await _apiService.get(
         'api/organization/getall/${FirebaseAuth.instance.currentUser?.uid}?pageIndex=$pageIndex&pageSize=$pageSize',
@@ -105,16 +110,80 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
-  void _loadMore() {
-    pageIndex++;
-    fetchUserOrganizations(pageIndex: pageIndex, pageSize: pageSize);
+  Future<void> fetchUserAvailableEvents(
+      {int pageEventIndex = 1,
+      int pageEventSize = 10,
+      int status = 1,
+      DateTime? date}) async {
+    if (_isLoading) return;
+    try {
+      setState(() {
+        _isLoading = true;
+      });
+
+      date ??= DateTime.now();
+
+      final response = await _apiService.get(
+        'api/events/available-events?pageIndex=$pageEventIndex&pageSize=$pageEventSize&date=$date&status=$status',
+      );
+
+      if (response.statusCode == 200) {
+        if (mounted) {
+          setState(() {
+            List<dynamic> responseBody = jsonDecode(response.body);
+            if (pageIndex == 0) {
+              events = responseBody
+                  .map((orgData) => AvailableEventModel.fromMap(orgData))
+                  .toList();
+            } else {
+              events.addAll(responseBody
+                  .map((orgData) => AvailableEventModel.fromMap(orgData))
+                  .toList());
+            }
+
+            if (responseBody.length < pageEventSize) {
+              hasMoreEventData = false;
+            }
+          });
+        }
+      } else {
+        Fluttertoast.showToast(
+          msg: "No events found",
+          toastLength: Toast.LENGTH_SHORT,
+          gravity: ToastGravity.BOTTOM,
+          timeInSecForIosWeb: 1,
+          backgroundColor: Colors.black,
+          textColor: Colors.white,
+          fontSize: 16.0,
+        );
+      }
+    } catch (e) {
+      Fluttertoast.showToast(
+        msg: "Failed to fetch events, $e",
+        toastLength: Toast.LENGTH_SHORT,
+        gravity: ToastGravity.BOTTOM,
+        timeInSecForIosWeb: 1,
+        backgroundColor: Colors.black,
+        textColor: Colors.white,
+        fontSize: 16.0,
+      );
+    } finally {
+      setState(() {
+        _isLoading = false;
+      });
+    }
+  }
+
+  Future<void> initializeData() async {
+    await fetchUserOrganizations();
+    await fetchUserAvailableEvents();
+    await shareProfile();
   }
 
   @override
   void initState() {
     super.initState();
-    fetchUserOrganizations();
-    shareProfile();
+    initializeData();
   }
 
   @override
@@ -129,113 +198,34 @@ class _HomeScreenState extends State<HomeScreen> {
             onRefresh: () async {
               setState(() {
                 pageIndex = 0;
+                pageEventIndex = 1;
                 hasMoreData = true;
+                hasMoreEventData = true;
               });
-              await fetchUserOrganizations(pageIndex: pageIndex);
+              await fetchUserOrganizations();
+              await fetchUserAvailableEvents();
             },
             child: ListView(
               padding: const EdgeInsets.all(16.0),
               children: [
-                const Center(
-                  child: Text(
-                    'Welcome to the ITP!',
-                    style: TextStyle(fontSize: 24),
-                  ),
+                const Text(
+                  'Available Events',
+                  style: TextStyle(fontSize: 24),
+                ),
+                const SizedBox(height: 20),
+                if (events.isEmpty)
+                  const Center(child: Text('No available events.')),
+                ...events.map((event) => EventCard(event: event)),
+                const SizedBox(height: 40),
+                const Text(
+                  'Your Organizations',
+                  style: TextStyle(fontSize: 24),
                 ),
                 const SizedBox(height: 20),
                 if (organizations.isEmpty)
                   const Center(child: Text('No organizations available.')),
-                ...organizations.map((org) {
-                  return Card(
-                    margin: const EdgeInsets.symmetric(vertical: 8.0),
-                    elevation: 5,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: InkWell(
-                      onTap: () {
-                        context.push('/organization-detail/${org.id}');
-                      },
-                      child: Column(
-                        children: [
-                          Stack(
-                            children: [
-                              ClipRRect(
-                                borderRadius: const BorderRadius.only(
-                                  topLeft: Radius.circular(12),
-                                  topRight: Radius.circular(12),
-                                ),
-                                child: Image.network(
-                                  org.image.isNotEmpty
-                                      ? org.image
-                                      : 'your_placeholder_image_url',
-                                  height: 150.0,
-                                  width: double.infinity,
-                                  fit: BoxFit.cover,
-                                ),
-                              ),
-                              Positioned(
-                                top: 8.0,
-                                right: 8.0,
-                                child: Icon(
-                                  org.isPrivate ? Icons.lock : Icons.lock_open,
-                                  color:
-                                      org.isPrivate ? Colors.red : Colors.blue,
-                                  size: 30.0,
-                                ),
-                              ),
-                            ],
-                          ),
-                          Padding(
-                            padding: const EdgeInsets.all(12.0),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  org.name,
-                                  style: const TextStyle(
-                                    fontSize: 18,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                                const SizedBox(height: 8),
-                                Text(
-                                  org.description,
-                                  maxLines: 2,
-                                  overflow: TextOverflow.ellipsis,
-                                  style: const TextStyle(color: Colors.grey),
-                                ),
-                                const SizedBox(height: 6),
-                                Text(
-                                  org.address,
-                                  style: const TextStyle(color: Colors.black54),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  );
-                }),
-                if (hasMoreData && organizations.isNotEmpty)
-                  Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 20.0),
-                    child: Center(
-                      child: ElevatedButton(
-                        onPressed: () {
-                          if (!_isLoading) {
-                            setState(() {
-                              _isLoading = true;
-                            });
-                            pageIndex++;
-                            fetchUserOrganizations(pageIndex: pageIndex);
-                          }
-                        },
-                        child: const Text('Load More'),
-                      ),
-                    ),
-                  ),
+                ...organizations
+                    .map((org) => OrganizationCard(organization: org)),
               ],
             ),
           ),
