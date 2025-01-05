@@ -5,6 +5,7 @@ using RollAttendanceServer.DTOs;
 using RollAttendanceServer.Helpers;
 using RollAttendanceServer.Interfaces;
 using RollAttendanceServer.Models;
+using static Microsoft.Extensions.Logging.EventSource.LoggingEventSource;
 
 namespace RollAttendanceServer.Services.Systems
 {
@@ -22,6 +23,76 @@ namespace RollAttendanceServer.Services.Systems
             return await _context.Events
                 .Include(e => e.Organization)
                 .FirstOrDefaultAsync(e => e.Id == eventId);
+        }
+
+        public async Task<IEnumerable<ActiveEventDTO>> GetUserActiveEvents(string userId, DateTime? date, short status, int pageIndex, int pageSize)
+        {
+            var organizationIds = await _context.UserOrganizationRoles
+                .Where(uor => uor.UserId == userId)
+                .Select(uor => uor.OrganizationId)
+                .ToListAsync();
+
+            if (!organizationIds.Any())
+            {
+                return Enumerable.Empty<ActiveEventDTO>();
+            }
+
+            var query = _context.Events
+                .Where(e =>
+                    organizationIds.Contains(e.OrganizationId) &&
+                    (!e.IsPrivate || e.EventUsers.Any(eu => eu.UserId == userId))
+                );
+
+            if (date.HasValue)
+            {
+                query = query.Where(e => e.StartTime.Value.Date <= date.Value.Date && e.EndTime.Value.Date >= date.Value.Date);
+            }
+
+            query = query.Where(e => e.EventStatus == status);
+
+            query = query.Skip((pageIndex - 1) * pageSize).Take(pageSize);
+
+            var events = await query
+                .Select(e => new ActiveEventDTO
+                {
+                    Id = e.Id,
+                    Name = e.Name,
+                    Description = e.Description,
+                    StartTime = e.StartTime,
+                    EndTime = e.EndTime,
+                    CurrentLocation = e.CurrentLocation,
+                    CurrentLocationRadius = e.CurrentLocationRadius,
+                    CurrentQR = e.CurrentQR,
+                    EventStatus = e.EventStatus,
+                    OrganizerId = e.OrganizerId,
+                    OrganizationId = e.OrganizationId,
+                    IsPrivate = e.IsPrivate,
+
+                    OrganizerName = _context.Users
+                        .Where(u => u.Id == e.OrganizerId)
+                        .Select(u => u.DisplayName)
+                        .FirstOrDefault(),
+                    OrganizerEmail = _context.Users
+                        .Where(u => u.Id == e.OrganizerId)
+                        .Select(u => u.Email)
+                        .FirstOrDefault(),
+                    OrganizerAvatar = _context.Users
+                        .Where(u => u.Id == e.OrganizerId)
+                        .Select(u => u.Avatar)
+                        .FirstOrDefault(),
+
+                    OrganizationName = _context.Organizations
+                        .Where(o => o.Id == e.OrganizationId)
+                        .Select(o => o.Name)
+                        .FirstOrDefault(),
+                    OrganizationImage = _context.Organizations
+                        .Where(o => o.Id == e.OrganizationId)
+                        .Select(o => o.Image)
+                        .FirstOrDefault()
+                })
+                .ToListAsync();
+
+            return events;
         }
 
         public async Task<Event> Create(EventDTO eventDto, string organizerId)

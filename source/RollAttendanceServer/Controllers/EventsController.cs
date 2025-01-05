@@ -41,6 +41,29 @@ namespace RollAttendanceServer.Controllers
             }
         }
 
+        [HttpGet("available-events")]
+        public async Task<IActionResult> GetUserAvailableEvents(
+            [FromQuery] DateTime? date,
+            [FromQuery] short status,
+            [FromQuery] int pageIndex = 1,
+            [FromQuery] int pageSize = 10)
+        {
+            try
+            {
+                var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+                if (string.IsNullOrEmpty(userId))
+                {
+                    return Unauthorized("Invalid user.");
+                }
+                var events = await _eventService.GetUserActiveEvents(userId, date, status, pageIndex, pageSize);
+                return Ok(events);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+        }
+
         [HttpPost("create")]
         public async Task<IActionResult> CreateEvent([FromBody] EventDTO eventDto)
         {
