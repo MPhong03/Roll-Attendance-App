@@ -1,16 +1,34 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:intl/intl.dart'; // Thêm thư viện intl
+import 'package:intl/intl.dart';
 import 'package:itproject/models/available_event_model.dart';
 
 class EventCard extends StatelessWidget {
   final AvailableEventModel event;
   const EventCard({super.key, required this.event});
 
-  // Hàm format ngày tháng
+  String formatTime(DateTime? time) {
+    if (time == null) return '';
+    return DateFormat('hh:mm a').format(time);
+  }
+
   String formatDate(DateTime? date) {
     if (date == null) return '';
-    return DateFormat('dd/MM/yyyy hh:mm a').format(date);
+    return DateFormat('dd/MM/yyyy').format(date);
+  }
+
+  String getEventStatus() {
+    final now = DateTime.now();
+    if (event.startTime != null && event.endTime != null) {
+      if (now.isBefore(event.startTime!)) {
+        return "Upcoming";
+      } else if (now.isAfter(event.endTime!)) {
+        return "Completed";
+      } else {
+        return "Ongoing";
+      }
+    }
+    return "Unknown";
   }
 
   @override
@@ -29,15 +47,14 @@ class EventCard extends StatelessWidget {
         onTap: () {
           context.push('/event-check-in/${event.id}');
         },
-        child: Column(
-          children: [
-            // Tiêu đề sự kiện và biểu tượng ổ khóa trên cùng một dòng
-            Padding(
-              padding: const EdgeInsets.all(12.0),
-              child: Row(
+        child: Padding(
+          padding: const EdgeInsets.all(12.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  // Tiêu đề sự kiện
                   Expanded(
                     child: Text(
                       event.name ?? '',
@@ -46,100 +63,98 @@ class EventCard extends StatelessWidget {
                         fontWeight: FontWeight.bold,
                         color: titleColor,
                       ),
-                      overflow:
-                          TextOverflow.ellipsis, // Đảm bảo không bị overflow
+                      overflow: TextOverflow.ellipsis,
                     ),
                   ),
-                  // Biểu tượng ổ khóa
                   Icon(
                     (event.isPrivate ?? false) ? Icons.lock : Icons.lock_open,
-                    color:
-                        (event.isPrivate ?? false) ? Colors.red : Colors.blue,
-                    size: 30.0,
+                    color: (event.isPrivate ?? false)
+                        ? Colors.red
+                        : Colors.blue,
+                    size: 20.0,
                   ),
                 ],
               ),
-            ),
-            Padding(
-              padding: const EdgeInsets.all(12.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+              const SizedBox(height: 10),
+
+              // Tên người Host và tổ chức Host
+              Row(
                 children: [
-                  // Mô tả sự kiện
-                  Text(
-                    event.description ?? '',
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                    style: TextStyle(
-                      color: isDarkMode ? Colors.white70 : Colors.black54,
+                  CircleAvatar(
+                    backgroundImage: NetworkImage(event.organizerAvatar ?? ''),
+                    radius: 16,
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      event.organizerName ?? 'Unknown',
+                      style: const TextStyle(fontWeight: FontWeight.bold),
+                      overflow: TextOverflow.ellipsis,
                     ),
                   ),
-                  const SizedBox(height: 6),
-                  // Ngày và giờ bắt đầu - Định dạng lại ngày tháng
-                  Text(
-                    "Start: ${formatDate(event.startTime)}",
-                    style: TextStyle(color: textColor),
+                ],
+              ),
+              const SizedBox(height: 8),
+              Row(
+                children: [
+                  CircleAvatar(
+                    backgroundImage:
+                        NetworkImage(event.organizationImage ?? ''),
+                    radius: 16,
                   ),
-                  Text(
-                    "End: ${formatDate(event.endTime)}",
-                    style: TextStyle(color: textColor),
-                  ),
-                  const SizedBox(height: 10),
-
-                  // Thông tin người tổ chức
-                  Row(
-                    children: [
-                      CircleAvatar(
-                        backgroundImage:
-                            NetworkImage(event.organizerAvatar ?? ''),
-                        radius: 16,
-                      ),
-                      const SizedBox(width: 8),
-                      // Sử dụng từ ngữ sáng tạo hơn
-                      Flexible(
-                        child: Tooltip(
-                          message: event.organizerName ??
-                              'Unknown', // Hiển thị tên đầy đủ khi hover
-                          child: Text(
-                            "Host: ${event.organizerName ?? 'Unknown'}",
-                            style: const TextStyle(fontWeight: FontWeight.bold),
-                            overflow: TextOverflow
-                                .ellipsis, // Đảm bảo không bị overflow
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 10),
-
-                  // Thông tin tổ chức
-                  Row(
-                    children: [
-                      CircleAvatar(
-                        backgroundImage:
-                            NetworkImage(event.organizationImage ?? ''),
-                        radius: 16,
-                      ),
-                      const SizedBox(width: 8),
-                      // Sử dụng từ ngữ sáng tạo hơn
-                      Flexible(
-                        child: Tooltip(
-                          message: event.organizationName ??
-                              'N/A', // Hiển thị tên đầy đủ khi hover
-                          child: Text(
-                            "Hosted By: ${event.organizationName ?? 'N/A'}",
-                            style: const TextStyle(fontWeight: FontWeight.bold),
-                            overflow: TextOverflow
-                                .ellipsis, // Đảm bảo không bị overflow
-                          ),
-                        ),
-                      ),
-                    ],
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      event.organizationName ?? 'N/A',
+                      style: const TextStyle(fontWeight: FontWeight.bold),
+                      overflow: TextOverflow.ellipsis,
+                    ),
                   ),
                 ],
               ),
-            ),
-          ],
+              const SizedBox(height: 10),
+
+              // Time và Date
+              Row(
+                children: [
+                  const Icon(Icons.access_time, size: 20, color: Colors.blue),
+                  const SizedBox(width: 8),
+                  Text(
+                    "Time: ${formatTime(event.startTime)} - ${formatTime(event.endTime)}",
+                    style: TextStyle(color: textColor),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 6),
+              Row(
+                children: [
+                  const Icon(Icons.calendar_today, size: 20, color: Colors.blue),
+                  const SizedBox(width: 8),
+                  Text(
+                    "Date: ${formatDate(event.startTime)}",
+                    style: TextStyle(color: textColor),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 10),
+
+              // Trạng thái sự kiện
+              Align(
+                alignment: Alignment.centerRight,
+                child: Text(
+                  getEventStatus(),
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    color: getEventStatus() == "Ongoing"
+                        ? Colors.green
+                        : (getEventStatus() == "Completed"
+                            ? Colors.red
+                            : Colors.orange),
+                  ),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );

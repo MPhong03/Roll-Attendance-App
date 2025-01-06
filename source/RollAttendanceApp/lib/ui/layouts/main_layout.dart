@@ -149,7 +149,7 @@ class _MainLayoutState extends State<MainLayout> {
           borderRadius: BorderRadius.circular(10),
         ),
         hoverColor: Theme.of(context).primaryColor.withOpacity(0.1),
-        textStyle: TextStyle(color: Colors.white.withOpacity(0.7)),
+        textStyle: TextStyle(color: Colors.black.withOpacity(0.7)),
         selectedTextStyle: const TextStyle(color: Colors.white),
         itemTextPadding: const EdgeInsets.only(left: 30),
         selectedItemTextPadding: const EdgeInsets.only(left: 30),
@@ -225,6 +225,11 @@ class _MainLayoutState extends State<MainLayout> {
           onTap: () {
             context.push('/create-organization');
           },
+        ),
+        SidebarXItem(
+          icon: Icons.logout,
+          label: 'Logout',
+          onTap: _logout,
         ),
         SidebarXItem(
           icon: Icons.logout,

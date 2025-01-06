@@ -188,12 +188,15 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
+
     return MainLayout(
       child: BlurryModalProgressHUD(
         inAsyncCall: _isLoading,
         opacity: 0.3,
         blurEffectIntensity: 5,
         child: Scaffold(
+          backgroundColor: const Color(0xFFC5F0C8),
           body: RefreshIndicator(
             onRefresh: () async {
               setState(() {
@@ -208,14 +211,14 @@ class _HomeScreenState extends State<HomeScreen> {
             child: ListView(
               padding: const EdgeInsets.all(16.0),
               children: [
-                const Text(
-                  'Available Events',
-                  style: TextStyle(fontSize: 24),
-                ),
-                const SizedBox(height: 20),
+                // Hiển thị danh sách sự kiện theo kiểu flashcard
                 if (events.isEmpty)
                   const Center(child: Text('No available events.')),
-                ...events.map((event) => EventCard(event: event)),
+                ...events.map((event) => Container(
+                      margin: const EdgeInsets.only(bottom: 16.0),
+                      width: screenWidth * 0.8,
+                      child: EventCard(event: event),
+                    )),
                 const SizedBox(height: 40),
                 const Text(
                   'Your Organizations',

@@ -81,7 +81,7 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
       _eventFuture = getDetail(widget.eventId);
     });
   }
-
+  
   // METHOD
   void _showQrCodeDialog(BuildContext context, EventModel event) {
     final qrData = {
