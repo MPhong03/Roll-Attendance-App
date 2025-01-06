@@ -21,44 +21,17 @@ class EventCheckInScreen extends StatefulWidget {
 Map<String, dynamic> getEventStatus(EventStatus status) {
   switch (status) {
     case EventStatus.notStarted:
-      return {
-        "text": "Not Started",
-        "color": Colors.orange, // Màu cam cho Not Started
-      };
+      return {"text": "Not Started", "color": Colors.orange};
     case EventStatus.inProgress:
-      return {
-        "text": "In Progress",
-        "color": Colors.green, // Màu xanh lá cho In Progress
-      };
+      return {"text": "In Progress", "color": Colors.green};
     case EventStatus.completed:
-      return {
-        "text": "Completed",
-        "color": Colors.grey, // Màu xám cho Completed
-      };
+      return {"text": "Completed", "color": Colors.grey};
     case EventStatus.cancelled:
-      return {
-        "text": "Cancelled",
-        "color": Colors.red, // Màu đỏ cho Cancelled
-      };
+      return {"text": "Cancelled", "color": Colors.red};
     case EventStatus.postponed:
-      return {
-        "text": "Postponed",
-        "color": Colors.blue, // Màu xanh dương cho Postponed
-      };
+      return {"text": "Postponed", "color": Colors.blue};
     default:
-      return {
-        "text": "Unknown",
-        "color": Colors.black, // Mặc định màu đen
-      };
-  }
-}
-
-double getResponsiveFontSize(double baseFontSize, BuildContext context) {
-  final screenWidth = MediaQuery.of(context).size.width;
-  if (screenWidth > 480) {
-    return baseFontSize * 1.4;
-  } else {
-    return baseFontSize;
+      return {"text": "Unknown", "color": Colors.black};
   }
 }
 
@@ -136,234 +109,232 @@ class _EventCheckInScreenState extends State<EventCheckInScreen> {
   }
 
   @override
-Widget build(BuildContext context) {
-  final screenWidth = MediaQuery.of(context).size.width;
-  final screenHeight = MediaQuery.of(context).size.height;
-  final bool isDarkMode = Theme.of(context).brightness == Brightness.dark;
-  final Color textColor = isDarkMode ? Colors.white70 : Colors.black54;
+  Widget build(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final screenHeight = MediaQuery.of(context).size.height;
+    final bool isDarkMode = Theme.of(context).brightness == Brightness.dark;
+    final Color textColor = isDarkMode ? Colors.white70 : Colors.black54;
 
-  // Hàm tính kích thước chữ responsive
-  double getResponsiveFontSize(double baseFontSize) {
-    if (screenWidth > 480) {
-      return baseFontSize * 1.2;
-    } else {
-      return baseFontSize;
+    double getResponsiveFontSize(double baseFontSize) {
+      if (screenWidth > 480) {
+        return baseFontSize * 1.4;
+      } else {
+        return baseFontSize;
+      }
     }
-  }
 
-  return Scaffold(
-    appBar: AppBar(
-      backgroundColor: Colors.transparent,
-      elevation: 0,
-      leading: Padding(
-        padding: const EdgeInsets.only(top: 10),
-        child: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.black),
-          onPressed: () => context.pop(),
+    return Scaffold(
+      appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        leading: Padding(
+          padding: const EdgeInsets.only(top: 10),
+          child: IconButton(
+            icon: const Icon(Icons.arrow_back, color: Colors.black),
+            onPressed: () => context.pop(),
+          ),
         ),
       ),
-    ),
-    backgroundColor: const Color(0xFFC5F0C8),
-    body: BlurryModalProgressHUD(
-      inAsyncCall: _isLoading,
-      opacity: 0.3,
-      blurEffectIntensity: 5,
-      child: FutureBuilder<EventModel>(
-        future: _eventFuture,
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(child: CircularProgressIndicator());
-          } else if (snapshot.hasError) {
-            return Center(
-              child: Text(
-                'Error: ${snapshot.error}',
-                style: TextStyle(
-                  color: Colors.red,
-                  fontSize: getResponsiveFontSize(16),
+      backgroundColor: const Color(0xFFC5F0C8),
+      body: BlurryModalProgressHUD(
+        inAsyncCall: _isLoading,
+        opacity: 0.3,
+        blurEffectIntensity: 5,
+        child: FutureBuilder<EventModel>(
+          future: _eventFuture,
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return const Center(child: CircularProgressIndicator());
+            } else if (snapshot.hasError) {
+              return Center(
+                child: Text(
+                  'Error: ${snapshot.error}',
+                  style: TextStyle(
+                    color: Colors.red,
+                    fontSize: getResponsiveFontSize(16),
+                  ),
                 ),
-              ),
-            );
-          } else if (!snapshot.hasData) {
-            return Center(
-              child: Text(
-                'No data available',
-                style: TextStyle(
-                  fontSize: getResponsiveFontSize(16),
+              );
+            } else if (!snapshot.hasData) {
+              return Center(
+                child: Text(
+                  'No data available',
+                  style: TextStyle(
+                    fontSize: getResponsiveFontSize(16),
+                  ),
                 ),
-              ),
-            );
-          } else {
-            final event = snapshot.data!;
-            return RefreshIndicator(
-              onRefresh: _onRefresh,
-              child: SingleChildScrollView(
-                child: Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: Center(
-                    child: Container(
-                      width: screenWidth * 0.9,
-                      height: screenHeight * 0.85,
-                      padding: const EdgeInsets.all(16.0),
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(12),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withOpacity(0.2),
-                            spreadRadius: 3,
-                            blurRadius: 4,
-                            offset: const Offset(0, 0),
-                          ),
-                        ],
-                      ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            event.name,
-                            style: TextStyle(
-                              fontWeight: FontWeight.bold,
-                              fontSize: getResponsiveFontSize(24),
-                            ),
-                          ),
-                          const SizedBox(height: 8),
-                          Row(
-                            children: [
-                              const Icon(Icons.lock_outline, size: 20),
-                              const SizedBox(width: 8),
-                              Text(
-                                event.isPrivate
-                                    ? "Private Event"
-                                    : "Public Event",
-                                style: TextStyle(
-                                  color: event.isPrivate
-                                      ? Colors.red
-                                      : Colors.blue,
-                                  fontSize: getResponsiveFontSize(16),
-                                ),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 16),
-                          Text(
-                            event.description,
-                            style: TextStyle(
-                              fontSize: getResponsiveFontSize(16),
-                            ),
-                          ),
-                          const SizedBox(height: 16),
-                          // Event Date and Time
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              // Time
-                              Row(
-                                children: [
-                                  const Icon(Icons.access_time,
-                                      size: 20, color: Colors.blue),
-                                  const SizedBox(width: 8),
-                                  Text(
-                                    "Time: ${formatTime(event.startTime)} - ${formatTime(event.endTime)}",
-                                    style: TextStyle(
-                                      color: textColor,
-                                      fontSize: getResponsiveFontSize(14),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              // Status
-                              Row(
-                                children: [
-                                  const SizedBox(width: 8),
-                                  Text(
-                                    getEventStatus(event.eventStatus)["text"],
-                                    style: TextStyle(
-                                      fontWeight: FontWeight.bold,
-                                      color: getEventStatus(
-                                          event.eventStatus)["color"],
-                                      fontSize: getResponsiveFontSize(14),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 16),
-                          // Date
-                          Row(
-                            children: [
-                              const Icon(Icons.calendar_today,
-                                  size: 20, color: Colors.blue),
-                              const SizedBox(width: 8),
-                              Text(
-                                "Date: ${formatDate(event.startTime)}",
-                                style: TextStyle(
-                                  color: textColor,
-                                  fontSize: getResponsiveFontSize(14),
-                                ),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 50),
-                          if (event.eventStatus == EventStatus.inProgress) ...[
-                            Center(
-                              child: Text(
-                                "Check In",
-                                style: TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: getResponsiveFontSize(24),
-                                ),
-                              ),
-                            ),
-                            const SizedBox(height: 20),
-                            Center(
-                              child: SizedBox(
-                                width: screenWidth * 0.5,
-                                height: screenHeight * 0.05,
-                                child: ElevatedButton(
-                                  onPressed: () {
-                                    _showQrCodeScanner(context, event);
-                                  },
-                                  style: ElevatedButton.styleFrom(
-                                    backgroundColor: const Color(0xFF0FB900),
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(25),
-                                    ),
-                                  ),
-                                  child: Row(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    children: [
-                                      const Icon(
-                                        Icons.qr_code,
-                                        color: Colors.white,
-                                      ),
-                                      const SizedBox(width: 8),
-                                      Text(
-                                        "QR SCAN",
-                                        style: TextStyle(
-                                          color: Colors.white,
-                                          fontWeight: FontWeight.bold,
-                                          fontSize: getResponsiveFontSize(16),
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ),
+              );
+            } else {
+              final event = snapshot.data!;
+              return RefreshIndicator(
+                onRefresh: _onRefresh,
+                child: SingleChildScrollView(
+                  child: Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: Center(
+                      child: Container(
+                        width: screenWidth * 0.9,
+                        height: screenHeight * 0.85,
+                        padding: const EdgeInsets.all(16.0),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(12),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.2),
+                              spreadRadius: 3,
+                              blurRadius: 4,
+                              offset: const Offset(0, 0),
                             ),
                           ],
-                        ],
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              event.name,
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: getResponsiveFontSize(24),
+                              ),
+                            ),
+                            const SizedBox(height: 8),
+                            Row(
+                              children: [
+                                const Icon(Icons.lock_outline, size: 20),
+                                const SizedBox(width: 8),
+                                Text(
+                                  event.isPrivate
+                                      ? "Private Event"
+                                      : "Public Event",
+                                  style: TextStyle(
+                                    color: event.isPrivate
+                                        ? Colors.red
+                                        : Colors.blue,
+                                    fontSize: getResponsiveFontSize(16),
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 16),
+                            Text(
+                              event.description,
+                              style: TextStyle(
+                                fontSize: getResponsiveFontSize(16),
+                              ),
+                            ),
+                            const SizedBox(height: 16),
+                            // Event Date and Time
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                // Time
+                                Row(
+                                  children: [
+                                    const Icon(Icons.access_time,
+                                        size: 20, color: Colors.blue),
+                                    const SizedBox(width: 8),
+                                    Text(
+                                      "Time: ${formatTime(event.startTime)} - ${formatTime(event.endTime)}",
+                                      style: TextStyle(
+                                        color: textColor,
+                                        fontSize: getResponsiveFontSize(14),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                // Status
+                                Row(
+                                  children: [
+                                    const SizedBox(width: 8),
+                                    Text(
+                                      getEventStatus(event.eventStatus)["text"],
+                                      style: TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                        color: getEventStatus(
+                                            event.eventStatus)["color"],
+                                        fontSize: getResponsiveFontSize(14),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 16),
+                            // Date
+                            Row(
+                              children: [
+                                const Icon(Icons.calendar_today,
+                                    size: 20, color: Colors.blue),
+                                const SizedBox(width: 8),
+                                Text(
+                                  "Date: ${formatDate(event.startTime)}",
+                                  style: TextStyle(
+                                    color: textColor,
+                                    fontSize: getResponsiveFontSize(14),
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 50),
+                            if (event.eventStatus == EventStatus.inProgress) ...[
+                              Center(
+                                child: Text(
+                                  "Check In",
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: getResponsiveFontSize(24),
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(height: 20),
+                              Center(
+                                child: SizedBox(
+                                  width: screenWidth * 0.5,
+                                  height: screenHeight * 0.05,
+                                  child: ElevatedButton(
+                                    onPressed: () {
+                                      _showQrCodeScanner(context, event);
+                                    },
+                                    style: ElevatedButton.styleFrom(
+                                      backgroundColor: const Color(0xFF0FB900),
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(25),
+                                      ),
+                                    ),
+                                    child: Row(
+                                      mainAxisAlignment: MainAxisAlignment.center,
+                                      children: [
+                                        const Icon(
+                                          Icons.qr_code,
+                                          color: Colors.white,
+                                        ),
+                                        const SizedBox(width: 8),
+                                        Text(
+                                          "QR SCAN",
+                                          style: TextStyle(
+                                            color: Colors.white,
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: getResponsiveFontSize(16),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ],
+                        ),
                       ),
                     ),
                   ),
                 ),
-              ),
-            );
-          }
-        },
+              );
+            }
+          },
+        ),
       ),
-    ),
-  );
-}
-
+    );
+  }
 }

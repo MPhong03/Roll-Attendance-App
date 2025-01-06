@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:itproject/models/available_event_model.dart';
+import 'package:itproject/enums/event_status.dart';
 
 class EventCard extends StatelessWidget {
   final AvailableEventModel event;
@@ -17,146 +18,186 @@ class EventCard extends StatelessWidget {
     return DateFormat('dd/MM/yyyy').format(date);
   }
 
-  String getEventStatus() {
-    final now = DateTime.now();
-    if (event.startTime != null && event.endTime != null) {
-      if (now.isBefore(event.startTime!)) {
-        return "Upcoming";
-      } else if (now.isAfter(event.endTime!)) {
-        return "Completed";
-      } else {
-        return "Ongoing";
-      }
-    }
-    return "Unknown";
+Map<String, dynamic> getEventStatus(EventStatus status) {
+  switch (status) {
+    case EventStatus.notStarted:
+      return {"text": "Not Started", "color": Colors.orange};
+    case EventStatus.inProgress:
+      return {"text": "In Progress", "color": Colors.green};
+    case EventStatus.completed:
+      return {"text": "Completed", "color": Colors.grey};
+    case EventStatus.cancelled:
+      return {"text": "Cancelled", "color": Colors.red};
+    case EventStatus.postponed:
+      return {"text": "Postponed", "color": Colors.blue};
+    default:
+      return {"text": "Unknown", "color": Colors.black};
   }
+}
+
+EventStatus parseEventStatus(int? status) {
+  switch (status) {
+    case 0:
+      return EventStatus.notStarted;
+    case 1:
+      return EventStatus.inProgress;
+    case 2:
+      return EventStatus.completed;
+    case 3:
+      return EventStatus.cancelled;
+    case 4:
+      return EventStatus.postponed;
+    default:
+      return EventStatus.notStarted;
+  }
+}
 
   @override
-  Widget build(BuildContext context) {
-    final bool isDarkMode = Theme.of(context).brightness == Brightness.dark;
-    final Color textColor = isDarkMode ? Colors.white70 : Colors.black54;
-    final Color titleColor = isDarkMode ? Colors.white : Colors.black;
+Widget build(BuildContext context) {
+  final bool isDarkMode = Theme.of(context).brightness == Brightness.dark;
+  final Color textColor = isDarkMode ? Colors.white70 : Colors.black54;
+  final Color titleColor = isDarkMode ? Colors.white : Colors.black;
+  final screenWidth = MediaQuery.of(context).size.width;
+  final screenHeight = MediaQuery.of(context).size.height;
 
-    return Card(
-      margin: const EdgeInsets.symmetric(vertical: 8.0),
-      elevation: 5,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: InkWell(
-        onTap: () {
-          context.push('/event-check-in/${event.id}');
-        },
-        child: Padding(
-          padding: const EdgeInsets.all(12.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Expanded(
-                    child: Text(
-                      event.name ?? '',
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                        color: titleColor,
-                      ),
-                      overflow: TextOverflow.ellipsis,
+  // Hàm tính kích thước chữ responsive
+  double getResponsiveFontSize(double baseFontSize) {
+    if (screenWidth > 480) {
+      return baseFontSize * 1.4;
+    } else {
+      return baseFontSize;
+    }
+  }
+
+  return Card(
+    margin: const EdgeInsets.symmetric(vertical: 8.0),
+    elevation: 5,
+    shape: RoundedRectangleBorder(
+      borderRadius: BorderRadius.circular(12),
+    ),
+    child: InkWell(
+      onTap: () {
+        context.push('/event-check-in/${event.id}');
+      },
+      child: Padding(
+        padding: const EdgeInsets.all(12.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Expanded(
+                  child: Text(
+                    event.name ?? '',
+                    style: TextStyle(
+                      fontSize: getResponsiveFontSize(18),
+                      fontWeight: FontWeight.bold,
+                      color: titleColor,
                     ),
-                  ),
-                  Icon(
-                    (event.isPrivate ?? false) ? Icons.lock : Icons.lock_open,
-                    color: (event.isPrivate ?? false)
-                        ? Colors.red
-                        : Colors.blue,
-                    size: 20.0,
-                  ),
-                ],
-              ),
-              const SizedBox(height: 10),
-
-              // Tên người Host và tổ chức Host
-              Row(
-                children: [
-                  CircleAvatar(
-                    backgroundImage: NetworkImage(event.organizerAvatar ?? ''),
-                    radius: 16,
-                  ),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: Text(
-                      event.organizerName ?? 'Unknown',
-                      style: const TextStyle(fontWeight: FontWeight.bold),
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 8),
-              Row(
-                children: [
-                  CircleAvatar(
-                    backgroundImage:
-                        NetworkImage(event.organizationImage ?? ''),
-                    radius: 16,
-                  ),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: Text(
-                      event.organizationName ?? 'N/A',
-                      style: const TextStyle(fontWeight: FontWeight.bold),
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 10),
-
-              // Time và Date
-              Row(
-                children: [
-                  const Icon(Icons.access_time, size: 20, color: Colors.blue),
-                  const SizedBox(width: 8),
-                  Text(
-                    "Time: ${formatTime(event.startTime)} - ${formatTime(event.endTime)}",
-                    style: TextStyle(color: textColor),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 6),
-              Row(
-                children: [
-                  const Icon(Icons.calendar_today, size: 20, color: Colors.blue),
-                  const SizedBox(width: 8),
-                  Text(
-                    "Date: ${formatDate(event.startTime)}",
-                    style: TextStyle(color: textColor),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 10),
-
-              // Trạng thái sự kiện
-              Align(
-                alignment: Alignment.centerRight,
-                child: Text(
-                  getEventStatus(),
-                  style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                    color: getEventStatus() == "Ongoing"
-                        ? Colors.green
-                        : (getEventStatus() == "Completed"
-                            ? Colors.red
-                            : Colors.orange),
+                    overflow: TextOverflow.ellipsis,
                   ),
                 ),
+                Icon(
+                  (event.isPrivate ?? false) ? Icons.lock : Icons.lock_open,
+                  color: (event.isPrivate ?? false) ? Colors.red : Colors.blue,
+                  size: 20.0,
+                ),
+              ],
+            ),
+            const SizedBox(height: 10),
+
+            // Tên người Host và tổ chức Host
+            Row(
+              children: [
+                CircleAvatar(
+                  backgroundImage: NetworkImage(event.organizerAvatar ?? ''),
+                  radius: 16,
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    event.organizerName ?? 'Unknown',
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: getResponsiveFontSize(14),
+                    ),
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 8),
+            Row(
+              children: [
+                CircleAvatar(
+                  backgroundImage: NetworkImage(event.organizationImage ?? ''),
+                  radius: 16,
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    event.organizationName ?? 'N/A',
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: getResponsiveFontSize(14),
+                    ),
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 10),
+
+            // Time và Date
+            Row(
+              children: [
+                const Icon(Icons.access_time, size: 20, color: Colors.blue),
+                const SizedBox(width: 8),
+                Text(
+                  "Time: ${formatTime(event.startTime)} - ${formatTime(event.endTime)}",
+                  style: TextStyle(
+                    color: textColor,
+                    fontSize: getResponsiveFontSize(14),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 6),
+            Row(
+              children: [
+                const Icon(Icons.calendar_today, size: 20, color: Colors.blue),
+                const SizedBox(width: 8),
+                Text(
+                  "Date: ${formatDate(event.startTime)}",
+                  style: TextStyle(
+                    color: textColor,
+                    fontSize: getResponsiveFontSize(14),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 10),
+
+            // Trạng thái sự kiện
+            Align(
+              alignment: Alignment.centerRight,
+              child: Text(
+                getEventStatus(parseEventStatus(event.eventStatus))["text"],
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  color: getEventStatus(
+                    parseEventStatus(event.eventStatus),
+                  )["color"],
+                  fontSize: getResponsiveFontSize(14),
+                ),
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
-    );
-  }
+    ),
+  );
+}
+
 }
