@@ -53,151 +53,150 @@ EventStatus parseEventStatus(int? status) {
 }
 
   @override
-Widget build(BuildContext context) {
-  final bool isDarkMode = Theme.of(context).brightness == Brightness.dark;
-  final Color textColor = isDarkMode ? Colors.white70 : Colors.black54;
-  final Color titleColor = isDarkMode ? Colors.white : Colors.black;
-  final screenWidth = MediaQuery.of(context).size.width;
-  final screenHeight = MediaQuery.of(context).size.height;
+  Widget build(BuildContext context) {
+    final bool isDarkMode = Theme.of(context).brightness == Brightness.dark;
+    final Color textColor = isDarkMode ? Colors.white70 : Colors.black54;
+    final Color titleColor = isDarkMode ? Colors.white : Colors.black;
+    final screenWidth = MediaQuery.of(context).size.width;
+    final screenHeight = MediaQuery.of(context).size.height;
 
-  // Hàm tính kích thước chữ responsive
-  double getResponsiveFontSize(double baseFontSize) {
-    if (screenWidth > 480) {
-      return baseFontSize * 1.4;
-    } else {
-      return baseFontSize;
+    // Hàm tính kích thước chữ responsive
+    double getResponsiveFontSize(double baseFontSize) {
+      if (screenWidth > 480) {
+        return baseFontSize * 1.4;
+      } else {
+        return baseFontSize;
+      }
     }
-  }
 
-  return Card(
-    margin: const EdgeInsets.symmetric(vertical: 8.0),
-    elevation: 5,
-    shape: RoundedRectangleBorder(
-      borderRadius: BorderRadius.circular(12),
-    ),
-    child: InkWell(
-      onTap: () {
-        context.push('/event-check-in/${event.id}');
-      },
-      child: Padding(
-        padding: const EdgeInsets.all(12.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Expanded(
-                  child: Text(
-                    event.name ?? '',
-                    style: TextStyle(
-                      fontSize: getResponsiveFontSize(18),
-                      fontWeight: FontWeight.bold,
-                      color: titleColor,
+    return Card(
+      margin: const EdgeInsets.symmetric(vertical: 8.0),
+      elevation: 5,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: InkWell(
+        onTap: () {
+          context.push('/event-check-in/${event.id}');
+        },
+        child: Padding(
+          padding: const EdgeInsets.all(12.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Expanded(
+                    child: Text(
+                      event.name ?? '',
+                      style: TextStyle(
+                        fontSize: getResponsiveFontSize(18),
+                        fontWeight: FontWeight.bold,
+                        color: titleColor,
+                      ),
+                      overflow: TextOverflow.ellipsis,
                     ),
-                    overflow: TextOverflow.ellipsis,
                   ),
-                ),
-                Icon(
-                  (event.isPrivate ?? false) ? Icons.lock : Icons.lock_open,
-                  color: (event.isPrivate ?? false) ? Colors.red : Colors.blue,
-                  size: 20.0,
-                ),
-              ],
-            ),
-            const SizedBox(height: 10),
+                  Icon(
+                    (event.isPrivate ?? false) ? Icons.lock : Icons.lock_open,
+                    color: (event.isPrivate ?? false) ? Colors.red : Colors.blue,
+                    size: 20.0,
+                  ),
+                ],
+              ),
+              const SizedBox(height: 10),
 
-            // Tên người Host và tổ chức Host
-            Row(
-              children: [
-                CircleAvatar(
-                  backgroundImage: NetworkImage(event.organizerAvatar ?? ''),
-                  radius: 16,
-                ),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: Text(
-                    event.organizerName ?? 'Unknown',
+              // Tên người Host và tổ chức Host
+              Row(
+                children: [
+                  CircleAvatar(
+                    backgroundImage: NetworkImage(event.organizerAvatar ?? ''),
+                    radius: 16,
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      event.organizerName ?? 'Unknown',
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: getResponsiveFontSize(14),
+                      ),
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 8),
+              Row(
+                children: [
+                  CircleAvatar(
+                    backgroundImage: NetworkImage(event.organizationImage ?? ''),
+                    radius: 16,
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      event.organizationName ?? 'N/A',
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: getResponsiveFontSize(14),
+                      ),
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 10),
+
+              // Time và Date
+              Row(
+                children: [
+                  const Icon(Icons.access_time, size: 20, color: Colors.blue),
+                  const SizedBox(width: 8),
+                  Text(
+                    "Time: ${formatTime(event.startTime)} - ${formatTime(event.endTime)}",
                     style: TextStyle(
-                      fontWeight: FontWeight.bold,
+                      color: textColor,
                       fontSize: getResponsiveFontSize(14),
                     ),
-                    overflow: TextOverflow.ellipsis,
                   ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 8),
-            Row(
-              children: [
-                CircleAvatar(
-                  backgroundImage: NetworkImage(event.organizationImage ?? ''),
-                  radius: 16,
-                ),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: Text(
-                    event.organizationName ?? 'N/A',
+                ],
+              ),
+              const SizedBox(height: 6),
+              Row(
+                children: [
+                  const Icon(Icons.calendar_today, size: 20, color: Colors.blue),
+                  const SizedBox(width: 8),
+                  Text(
+                    "Date: ${formatDate(event.startTime)}",
                     style: TextStyle(
-                      fontWeight: FontWeight.bold,
+                      color: textColor,
                       fontSize: getResponsiveFontSize(14),
                     ),
-                    overflow: TextOverflow.ellipsis,
                   ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 10),
+                ],
+              ),
+              const SizedBox(height: 10),
 
-            // Time và Date
-            Row(
-              children: [
-                const Icon(Icons.access_time, size: 20, color: Colors.blue),
-                const SizedBox(width: 8),
-                Text(
-                  "Time: ${formatTime(event.startTime)} - ${formatTime(event.endTime)}",
+              // Trạng thái sự kiện
+              Align(
+                alignment: Alignment.centerRight,
+                child: Text(
+                  getEventStatus(parseEventStatus(event.eventStatus))["text"],
                   style: TextStyle(
-                    color: textColor,
+                    fontWeight: FontWeight.bold,
+                    color: getEventStatus(
+                      parseEventStatus(event.eventStatus),
+                    )["color"],
                     fontSize: getResponsiveFontSize(14),
                   ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 6),
-            Row(
-              children: [
-                const Icon(Icons.calendar_today, size: 20, color: Colors.blue),
-                const SizedBox(width: 8),
-                Text(
-                  "Date: ${formatDate(event.startTime)}",
-                  style: TextStyle(
-                    color: textColor,
-                    fontSize: getResponsiveFontSize(14),
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 10),
-
-            // Trạng thái sự kiện
-            Align(
-              alignment: Alignment.centerRight,
-              child: Text(
-                getEventStatus(parseEventStatus(event.eventStatus))["text"],
-                style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  color: getEventStatus(
-                    parseEventStatus(event.eventStatus),
-                  )["color"],
-                  fontSize: getResponsiveFontSize(14),
                 ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
-    ),
-  );
-}
-
+    );
+  }
 }

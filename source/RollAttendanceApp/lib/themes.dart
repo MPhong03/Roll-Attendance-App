@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 ThemeData customLightTheme = ThemeData(
   brightness: Brightness.light,
   primaryColor: Colors.green, // Màu chủ đạo (Xanh lá)
-  scaffoldBackgroundColor: Colors.white, // Nền sáng
+  scaffoldBackgroundColor: Color(0xFFC5F0C8), // Nền sáng
   appBarTheme: const AppBarTheme(
     color: Colors.green, // Màu AppBar
     iconTheme: IconThemeData(color: Colors.white), // Màu icon trên AppBar

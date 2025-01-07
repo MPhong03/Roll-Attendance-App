@@ -120,7 +120,7 @@ class _EventCheckInScreenState extends State<EventCheckInScreen> {
 
     double getResponsiveFontSize(double baseFontSize) {
       if (screenWidth > 480) {
-        return baseFontSize * 1.4;
+        return baseFontSize * 1.25;
       } else {
         return baseFontSize;
       }

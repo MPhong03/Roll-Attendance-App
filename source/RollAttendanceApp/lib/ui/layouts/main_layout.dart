@@ -22,6 +22,7 @@ class _MainLayoutState extends State<MainLayout> {
   final SidebarXController _controller = SidebarXController(selectedIndex: 0);
   final ApiService _apiService = ApiService();
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
+  int _selectedIndex = 0;
 
   Map<String, dynamic>? _userProfile;
   bool _isLoading = true;
@@ -102,141 +103,334 @@ class _MainLayoutState extends State<MainLayout> {
     }
   }
 
+  void _onItemTapped(int index) {
+    setState(() {
+      _selectedIndex = index;
+    });
+    switch (index) {
+      case 0:
+        context.push('/home');
+        break;
+      case 1:
+        context.push('/profile');
+        break;
+      case 2:
+        context.push('/create-organization');
+        break;
+      case 3:
+      case 4:
+        _logout();
+        break;
+    }
+  }
+
   @override
   void initState() {
     super.initState();
     _loadUserProfile();
   }
 
-  @override
+ @override
   Widget build(BuildContext context) {
-    final isSmallScreen = MediaQuery.of(context).size.width < 600;
-    final theme = Theme.of(context);
+    final screenWidth = MediaQuery.of(context).size.width;
+    final bool isDarkMode = Theme.of(context).brightness == Brightness.dark;
+    final Color selectedBackgroundColor = const Color(0xFF1E8925);
+    final Color selectedTextColor = Colors.white;
+    final Color unselectedBackgroundColor = isDarkMode ? Colors.black : Colors.white;
+    final Color unselectedTextColor = const Color(0xFF1E8925);
+    final Color borderColor = isDarkMode ? Colors.white : Colors.black.withOpacity(0.1);
+
+    double getResponsiveFontSize(double baseFontSize) {
+      if (screenWidth > 480) {
+        return baseFontSize * 1.25;
+      } else {
+        return baseFontSize;
+      }
+    }
+
+    void _onItemTapped(int index) {
+      setState(() {
+        _selectedIndex = index;
+      });
+      switch (index) {
+        case 0:
+          context.push('/home');
+          break;
+        case 1:
+          context.push('/profile');
+          break;
+        case 2:
+          context.push('/create-organization');
+          break;
+        case 3:
+        case 4:
+          _logout();
+          break;
+      }
+    }
 
     return Scaffold(
       key: _scaffoldKey,
-      appBar: isSmallScreen
-          ? AppBar(
-              backgroundColor: theme.primaryColor,
-              title: const Text('ITP'),
-              leading: IconButton(
-                onPressed: () {
-                  _scaffoldKey.currentState?.openDrawer();
-                },
-                icon: Icon(Icons.menu, color: theme.iconTheme.color),
-              ),
-            )
-          : null,
-      drawer: isSmallScreen ? _buildSidebarX() : null,
-      body: Row(
-        children: [
-          if (!isSmallScreen) _buildSidebarX(),
-          Expanded(
-            child: widget.child,
-          ),
-        ],
+      appBar: AppBar(
+        backgroundColor: Theme.of(context).primaryColor,
+        title: const Text('ITP'),
       ),
-    );
-  }
-
-  SidebarX _buildSidebarX() {
-    return SidebarX(
-      controller: _controller,
-      theme: SidebarXTheme(
-        margin: const EdgeInsets.all(10),
+      body: widget.child,
+      bottomNavigationBar: Container(
         decoration: BoxDecoration(
-          color: Theme.of(context).primaryColor,
-          borderRadius: BorderRadius.circular(10),
+          color: unselectedBackgroundColor,
+          boxShadow: [
+            BoxShadow(
+              color: borderColor.withOpacity(0.2),
+              spreadRadius: 3,
+              blurRadius: 4,
+              offset: const Offset(0, -2),
+            ),
+          ],
         ),
-        hoverColor: Theme.of(context).primaryColor.withOpacity(0.1),
-        textStyle: TextStyle(color: Colors.black.withOpacity(0.7)),
-        selectedTextStyle: const TextStyle(color: Colors.white),
-        itemTextPadding: const EdgeInsets.only(left: 30),
-        selectedItemTextPadding: const EdgeInsets.only(left: 30),
-        itemDecoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(10),
-        ),
-        selectedItemDecoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(10),
-          border: Border.all(
-              color: Theme.of(context).primaryColor.withOpacity(0.5)),
-        ),
-        iconTheme: IconThemeData(
-          color: Colors.white.withOpacity(0.7),
-          size: 20,
-        ),
-        selectedIconTheme: const IconThemeData(
-          color: Colors.white,
-          size: 20,
+        child: Row(
+          children: [
+            _buildNavButton(
+              context,
+              icon: Icons.home,
+              label: 'Home',
+              isSelected: _selectedIndex == 0,
+              selectedBackgroundColor: selectedBackgroundColor,
+              selectedTextColor: selectedTextColor,
+              unselectedBackgroundColor: unselectedBackgroundColor,
+              unselectedTextColor: unselectedTextColor,
+              onTap: () => _onItemTapped(0),
+              getResponsiveFontSize: getResponsiveFontSize,
+            ),
+            _buildNavButton(
+              context,
+              icon: Icons.account_circle,
+              label: 'Profile',
+              isSelected: _selectedIndex == 1,
+              selectedBackgroundColor: selectedBackgroundColor,
+              selectedTextColor: selectedTextColor,
+              unselectedBackgroundColor: unselectedBackgroundColor,
+              unselectedTextColor: unselectedTextColor,
+              onTap: () => _onItemTapped(1),
+              getResponsiveFontSize: getResponsiveFontSize,
+            ),
+            _buildNavButton(
+              context,
+              icon: Icons.add,
+              label: 'Create',
+              isSelected: _selectedIndex == 2,
+              selectedBackgroundColor: selectedBackgroundColor,
+              selectedTextColor: selectedTextColor,
+              unselectedBackgroundColor: unselectedBackgroundColor,
+              unselectedTextColor: unselectedTextColor,
+              onTap: () => _onItemTapped(2),
+              getResponsiveFontSize: getResponsiveFontSize,
+            ),
+            _buildNavButton(
+              context,
+              icon: Icons.logout,
+              label: 'Logout',
+              isSelected: _selectedIndex == 3,
+              selectedBackgroundColor: selectedBackgroundColor,
+              selectedTextColor: selectedTextColor,
+              unselectedBackgroundColor: unselectedBackgroundColor,
+              unselectedTextColor: unselectedTextColor,
+              onTap: () => _onItemTapped(3),
+              getResponsiveFontSize: getResponsiveFontSize,
+            ),
+            _buildNavButton(
+              context,
+              icon: Icons.logout,
+              label: 'Logout',
+              isSelected: _selectedIndex == 4,
+              selectedBackgroundColor: selectedBackgroundColor,
+              selectedTextColor: selectedTextColor,
+              unselectedBackgroundColor: unselectedBackgroundColor,
+              unselectedTextColor: unselectedTextColor,
+              onTap: () => _onItemTapped(4),
+              getResponsiveFontSize: getResponsiveFontSize,
+            ),
+          ],
         ),
       ),
-      extendedTheme: const SidebarXTheme(
-        width: 200,
-      ),
-      footerDivider: Divider(color: Colors.white.withOpacity(0.3), height: 1),
-      headerBuilder: (context, extended) {
-        if (_isLoading) {
-          return const Center(child: CircularProgressIndicator());
-        }
-
-        if (_userProfile == null) {
-          return const Center(child: Text('Error loading profile'));
-        }
-
-        final user = _userProfile!;
-        return Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            children: [
-              CircleAvatar(
-                backgroundImage: NetworkImage(user['photoUrl'] ?? ''),
-                radius: 40,
-              ),
-              if (extended) ...[
-                const SizedBox(height: 8),
-                Text(user['displayName'] ?? 'No Name',
-                    style: const TextStyle(fontSize: 18, color: Colors.white)),
-                const SizedBox(height: 4),
-                Text(user['email'] ?? 'No Email',
-                    style: const TextStyle(fontSize: 14, color: Colors.white)),
-              ],
-            ],
-          ),
-        );
-      },
-      items: [
-        SidebarXItem(
-          icon: Icons.home,
-          label: 'Home',
-          onTap: () {
-            context.push('/home');
-          },
-        ),
-        SidebarXItem(
-          icon: Icons.account_circle,
-          label: 'Profile',
-          onTap: () {
-            context.push('/profile');
-          },
-        ),
-        SidebarXItem(
-          icon: Icons.add,
-          label: 'Create Organization',
-          onTap: () {
-            context.push('/create-organization');
-          },
-        ),
-        SidebarXItem(
-          icon: Icons.logout,
-          label: 'Logout',
-          onTap: _logout,
-        ),
-        SidebarXItem(
-          icon: Icons.logout,
-          label: 'Logout',
-          onTap: _logout,
-        ),
-      ],
     );
   }
+
+Widget _buildNavButton(
+  BuildContext context, {
+  required IconData icon,
+  required String label,
+  required bool isSelected,
+  required Color selectedBackgroundColor,
+  required Color selectedTextColor,
+  required Color unselectedBackgroundColor,
+  required Color unselectedTextColor,
+  required VoidCallback onTap,
+  required double Function(double) getResponsiveFontSize,
+}) {
+  return Expanded(
+    child: GestureDetector(
+      onTap: onTap,
+      child: Container(
+        decoration: BoxDecoration(
+          color: isSelected ? selectedBackgroundColor : unselectedBackgroundColor,
+          border: Border(
+            right: BorderSide(color: Colors.white.withOpacity(0.2), width: 1),
+          ),
+        ),
+        padding: const EdgeInsets.symmetric(vertical: 10),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              icon,
+              color: isSelected ? selectedTextColor : unselectedTextColor,
+              size: getResponsiveFontSize(20),
+            ),
+            const SizedBox(height: 5),
+            Text(
+              label,
+              style: TextStyle(
+                fontSize: getResponsiveFontSize(12),
+                color: isSelected ? selectedTextColor : unselectedTextColor,
+              ),
+            ),
+          ],
+        ),
+      ),
+    ),
+  );
+}
+
+  // @override
+  // Widget build(BuildContext context) {
+  //   final isSmallScreen = MediaQuery.of(context).size.width < 600;
+  //   final theme = Theme.of(context);
+
+  //   return Scaffold(
+  //     key: _scaffoldKey,
+  //     appBar: isSmallScreen
+  //         ? AppBar(
+  //             backgroundColor: theme.primaryColor,
+  //             title: const Text('ITP'),
+  //             leading: IconButton(
+  //               onPressed: () {
+  //                 _scaffoldKey.currentState?.openDrawer();
+  //               },
+  //               icon: Icon(Icons.menu, color: theme.iconTheme.color),
+  //             ),
+  //           )
+  //         : null,
+  //     drawer: isSmallScreen ? _buildSidebarX() : null,
+  //     body: Row(
+  //       children: [
+  //         if (!isSmallScreen) _buildSidebarX(),
+  //         Expanded(
+  //           child: widget.child,
+  //         ),
+  //       ],
+  //     ),
+  //   );
+  // }
+
+  // SidebarX _buildSidebarX() {
+  //   return SidebarX(
+  //     controller: _controller,
+  //     theme: SidebarXTheme(
+  //       margin: const EdgeInsets.all(10),
+  //       decoration: BoxDecoration(
+  //         color: Theme.of(context).primaryColor,
+  //         borderRadius: BorderRadius.circular(10),
+  //       ),
+  //       hoverColor: Theme.of(context).primaryColor.withOpacity(0.1),
+  //       textStyle: TextStyle(color: Colors.black.withOpacity(0.7)),
+  //       selectedTextStyle: const TextStyle(color: Colors.white),
+  //       itemTextPadding: const EdgeInsets.only(left: 30),
+  //       selectedItemTextPadding: const EdgeInsets.only(left: 30),
+  //       itemDecoration: BoxDecoration(
+  //         borderRadius: BorderRadius.circular(10),
+  //       ),
+  //       selectedItemDecoration: BoxDecoration(
+  //         borderRadius: BorderRadius.circular(10),
+  //         border: Border.all(
+  //             color: Theme.of(context).primaryColor.withOpacity(0.5)),
+  //       ),
+  //       iconTheme: IconThemeData(
+  //         color: Colors.white.withOpacity(0.7),
+  //         size: 20,
+  //       ),
+  //       selectedIconTheme: const IconThemeData(
+  //         color: Colors.white,
+  //         size: 20,
+  //       ),
+  //     ),
+  //     extendedTheme: const SidebarXTheme(
+  //       width: 200,
+  //     ),
+  //     footerDivider: Divider(color: Colors.white.withOpacity(0.3), height: 1),
+  //     headerBuilder: (context, extended) {
+  //       if (_isLoading) {
+  //         return const Center(child: CircularProgressIndicator());
+  //       }
+
+  //       if (_userProfile == null) {
+  //         return const Center(child: Text('Error loading profile'));
+  //       }
+
+  //       final user = _userProfile!;
+  //       return Padding(
+  //         padding: const EdgeInsets.all(16.0),
+  //         child: Column(
+  //           children: [
+  //             CircleAvatar(
+  //               backgroundImage: NetworkImage(user['photoUrl'] ?? ''),
+  //               radius: 40,
+  //             ),
+  //             if (extended) ...[
+  //               const SizedBox(height: 8),
+  //               Text(user['displayName'] ?? 'No Name',
+  //                   style: const TextStyle(fontSize: 18, color: Colors.white)),
+  //               const SizedBox(height: 4),
+  //               Text(user['email'] ?? 'No Email',
+  //                   style: const TextStyle(fontSize: 14, color: Colors.white)),
+  //             ],
+  //           ],
+  //         ),
+  //       );
+  //     },
+  //     items: [
+  //       SidebarXItem(
+  //         icon: Icons.home,
+  //         label: 'Home',
+  //         onTap: () {
+  //           context.push('/home');
+  //         },
+  //       ),
+  //       SidebarXItem(
+  //         icon: Icons.account_circle,
+  //         label: 'Profile',
+  //         onTap: () {
+  //           context.push('/profile');
+  //         },
+  //       ),
+  //       SidebarXItem(
+  //         icon: Icons.add,
+  //         label: 'Create Organization',
+  //         onTap: () {
+  //           context.push('/create-organization');
+  //         },
+  //       ),
+  //       SidebarXItem(
+  //         icon: Icons.logout,
+  //         label: 'Logout',
+  //         onTap: _logout,
+  //       ),
+  //       SidebarXItem(
+  //         icon: Icons.logout,
+  //         label: 'Logout',
+  //         onTap: _logout,
+  //       ),
+  //     ],
+  //   );
+  // }
 }
