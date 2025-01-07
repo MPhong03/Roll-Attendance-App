@@ -104,25 +104,27 @@ class _MainLayoutState extends State<MainLayout> {
   }
 
   void _onItemTapped(int index) {
-    setState(() {
-      _selectedIndex = index;
-    });
-    switch (index) {
-      case 0:
-        context.push('/home');
-        break;
-      case 1:
-        context.push('/profile');
-        break;
-      case 2:
-        context.push('/create-organization');
-        break;
-      case 3:
-      case 4:
-        _logout();
-        break;
+      setState(() {
+        _selectedIndex = index;
+      });
+      switch (index) {
+        case 0:
+          context.push('/home');
+          break;
+        case 1:
+          _logout();
+          break;
+        case 2:
+          context.push('/create-organization');
+          break;
+        case 3:
+          context.push('/organization');
+          break;
+        case 4:
+          context.push('/profile');
+          break;
+      }
     }
-  }
 
   @override
   void initState() {
@@ -148,37 +150,12 @@ class _MainLayoutState extends State<MainLayout> {
       }
     }
 
-    void _onItemTapped(int index) {
-      setState(() {
-        _selectedIndex = index;
-      });
-      switch (index) {
-        case 0:
-          context.push('/home');
-          break;
-        case 1:
-          context.push('/profile');
-          break;
-        case 2:
-          context.push('/create-organization');
-          break;
-        case 3:
-        case 4:
-          _logout();
-          break;
-      }
-    }
-
     return Scaffold(
       key: _scaffoldKey,
-      appBar: AppBar(
-        backgroundColor: Theme.of(context).primaryColor,
-        title: const Text('ITP'),
-      ),
       body: widget.child,
       bottomNavigationBar: Container(
         decoration: BoxDecoration(
-          color: unselectedBackgroundColor,
+          color: const Color.fromARGB(255, 90, 90, 90),
           boxShadow: [
             BoxShadow(
               color: borderColor.withOpacity(0.2),
@@ -192,7 +169,7 @@ class _MainLayoutState extends State<MainLayout> {
           children: [
             _buildNavButton(
               context,
-              icon: Icons.home,
+              iconPath: 'assets/icons/home_icon.png',
               label: 'Home',
               isSelected: _selectedIndex == 0,
               selectedBackgroundColor: selectedBackgroundColor,
@@ -204,8 +181,8 @@ class _MainLayoutState extends State<MainLayout> {
             ),
             _buildNavButton(
               context,
-              icon: Icons.account_circle,
-              label: 'Profile',
+              iconPath: 'assets/icons/join_icon.png',
+              label: 'Logout',
               isSelected: _selectedIndex == 1,
               selectedBackgroundColor: selectedBackgroundColor,
               selectedTextColor: selectedTextColor,
@@ -216,7 +193,7 @@ class _MainLayoutState extends State<MainLayout> {
             ),
             _buildNavButton(
               context,
-              icon: Icons.add,
+              iconPath: 'assets/icons/create_icon.png',
               label: 'Create',
               isSelected: _selectedIndex == 2,
               selectedBackgroundColor: selectedBackgroundColor,
@@ -228,8 +205,8 @@ class _MainLayoutState extends State<MainLayout> {
             ),
             _buildNavButton(
               context,
-              icon: Icons.logout,
-              label: 'Logout',
+              iconPath: 'assets/icons/organization_icon.png',
+              label: 'Organization',
               isSelected: _selectedIndex == 3,
               selectedBackgroundColor: selectedBackgroundColor,
               selectedTextColor: selectedTextColor,
@@ -240,8 +217,8 @@ class _MainLayoutState extends State<MainLayout> {
             ),
             _buildNavButton(
               context,
-              icon: Icons.logout,
-              label: 'Logout',
+              iconPath: 'assets/icons/profile_icon.png',
+              label: 'Profile',
               isSelected: _selectedIndex == 4,
               selectedBackgroundColor: selectedBackgroundColor,
               selectedTextColor: selectedTextColor,
@@ -258,7 +235,7 @@ class _MainLayoutState extends State<MainLayout> {
 
 Widget _buildNavButton(
   BuildContext context, {
-  required IconData icon,
+  required String iconPath, // Đường dẫn icon
   required String label,
   required bool isSelected,
   required Color selectedBackgroundColor,
@@ -282,10 +259,11 @@ Widget _buildNavButton(
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(
-              icon,
+            Image.asset(
+              iconPath, // Sử dụng icon từ assets
               color: isSelected ? selectedTextColor : unselectedTextColor,
-              size: getResponsiveFontSize(20),
+              height: getResponsiveFontSize(20),
+              width: getResponsiveFontSize(20),
             ),
             const SizedBox(height: 5),
             Text(

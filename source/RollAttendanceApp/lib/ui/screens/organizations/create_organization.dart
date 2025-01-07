@@ -197,9 +197,6 @@ class _CreateOrganizationScreenState extends State<CreateOrganizationScreen> {
       opacity: 0.3,
       blurEffectIntensity: 5,
       child: Scaffold(
-        appBar: AppBar(
-          title: const Text('Create Organization'),
-        ),
         body: Padding(
           padding: const EdgeInsets.all(16.0),
           child: Form(
@@ -208,6 +205,7 @@ class _CreateOrganizationScreenState extends State<CreateOrganizationScreen> {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
+                  const SizedBox(height: 70),
                   Align(
                     alignment: Alignment.centerLeft,
                     child: Container(

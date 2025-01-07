@@ -9,6 +9,7 @@ import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:itproject/services/api_service.dart';
 import 'package:itproject/services/user_service.dart';
+import 'package:itproject/ui/layouts/main_layout.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -299,21 +300,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Profile'),
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () {
-            context.pop();
-          },
-        ),
-      ),
       body: RefreshIndicator(
         onRefresh: _getProfile,
         child: ListView(
           padding: const EdgeInsets.all(16.0),
           children: [
-            // Profile Image and Name
+            const SizedBox(height: 70),
             Center(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,

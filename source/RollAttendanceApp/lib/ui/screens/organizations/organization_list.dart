@@ -10,14 +10,14 @@ import 'package:itproject/services/api_service.dart';
 import 'package:itproject/ui/components/events/event_card.dart';
 import 'package:itproject/ui/components/organizations/organization_card.dart';
 
-class HomeScreen extends StatefulWidget {
-  const HomeScreen({super.key});
+class OrganizationScreen extends StatefulWidget {
+  const OrganizationScreen({super.key});
 
   @override
-  State<HomeScreen> createState() => _HomeScreenState();
+  State<OrganizationScreen> createState() => _OrganizationScreenState();
 }
 
-class _HomeScreenState extends State<HomeScreen> {
+class _OrganizationScreenState extends State<OrganizationScreen> {
   bool _isLoading = false;
   List<OrganizationModel> organizations = [];
   List<AvailableEventModel> events = [];
@@ -219,22 +219,19 @@ class _HomeScreenState extends State<HomeScreen> {
           child: ListView(
             padding: const EdgeInsets.all(16.0),
             children: [
-              const SizedBox(height: 70),
-              if (events.isEmpty)
+              const SizedBox(height: 50),
+              if (organizations.isEmpty)
                 Center(
                   child: Text(
-                    'No available events.',
+                    'No organizations available.',
                     style: TextStyle(
                       fontSize: getResponsiveFontSize(16),
                       color: textColor,
                     ),
                   ),
                 ),
-              ...events.map((event) => Container(
-                    margin: const EdgeInsets.only(bottom: 16.0),
-                    width: screenWidth * 0.8,
-                    child: EventCard(event: event),
-                  )),
+              ...organizations
+                  .map((org) => OrganizationCard(organization: org)),
             ],
           ),
         ),
