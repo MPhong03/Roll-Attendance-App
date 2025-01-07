@@ -189,6 +189,17 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
+    final bool isDarkMode = Theme.of(context).brightness == Brightness.dark;
+    final Color textColor = isDarkMode ? Colors.white70 : Colors.black54;
+    final Color backgroundColor = Theme.of(context).scaffoldBackgroundColor;
+
+    double getResponsiveFontSize(double baseFontSize) {
+      if (screenWidth > 480) {
+        return baseFontSize * 1.2;
+      } else {
+        return baseFontSize;
+      }
+    }
 
     return MainLayout(
       child: BlurryModalProgressHUD(
@@ -196,7 +207,7 @@ class _HomeScreenState extends State<HomeScreen> {
         opacity: 0.3,
         blurEffectIntensity: 5,
         child: Scaffold(
-          backgroundColor: const Color(0xFFC5F0C8),
+          backgroundColor: backgroundColor,
           body: RefreshIndicator(
             onRefresh: () async {
               setState(() {
@@ -213,20 +224,40 @@ class _HomeScreenState extends State<HomeScreen> {
               children: [
                 // Hiển thị danh sách sự kiện theo kiểu flashcard
                 if (events.isEmpty)
-                  const Center(child: Text('No available events.')),
+                  Center(
+                    child: Text(
+                      'No available events.',
+                      style: TextStyle(
+                        fontSize: getResponsiveFontSize(16),
+                        color: textColor,
+                      ),
+                    ),
+                  ),
                 ...events.map((event) => Container(
                       margin: const EdgeInsets.only(bottom: 16.0),
                       width: screenWidth * 0.8,
                       child: EventCard(event: event),
                     )),
                 const SizedBox(height: 40),
-                const Text(
+                Text(
                   'Your Organizations',
-                  style: TextStyle(fontSize: 24),
+                  style: TextStyle(
+                    fontSize: getResponsiveFontSize(24),
+                    fontWeight: FontWeight.bold,
+                    color: textColor,
+                  ),
                 ),
                 const SizedBox(height: 20),
                 if (organizations.isEmpty)
-                  const Center(child: Text('No organizations available.')),
+                  Center(
+                    child: Text(
+                      'No organizations available.',
+                      style: TextStyle(
+                        fontSize: getResponsiveFontSize(16),
+                        color: textColor,
+                      ),
+                    ),
+                  ),
                 ...organizations
                     .map((org) => OrganizationCard(organization: org)),
               ],

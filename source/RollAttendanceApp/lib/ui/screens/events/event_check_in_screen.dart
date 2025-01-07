@@ -110,10 +110,13 @@ class _EventCheckInScreenState extends State<EventCheckInScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final bool isDarkMode = Theme.of(context).brightness == Brightness.dark;
+    final Color textColor =
+        isDarkMode ? Theme.of(context).textTheme.bodyLarge!.color! : Colors.black54;
+    final Color titleColor =
+        isDarkMode ? Theme.of(context).textTheme.headlineLarge!.color! : Colors.black;
     final screenWidth = MediaQuery.of(context).size.width;
     final screenHeight = MediaQuery.of(context).size.height;
-    final bool isDarkMode = Theme.of(context).brightness == Brightness.dark;
-    final Color textColor = isDarkMode ? Colors.white70 : Colors.black54;
 
     double getResponsiveFontSize(double baseFontSize) {
       if (screenWidth > 480) {
@@ -130,12 +133,12 @@ class _EventCheckInScreenState extends State<EventCheckInScreen> {
         leading: Padding(
           padding: const EdgeInsets.only(top: 10),
           child: IconButton(
-            icon: const Icon(Icons.arrow_back, color: Colors.black),
+            icon: Icon(Icons.arrow_back, color: titleColor),
             onPressed: () => context.pop(),
           ),
         ),
       ),
-      backgroundColor: const Color(0xFFC5F0C8),
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: BlurryModalProgressHUD(
         inAsyncCall: _isLoading,
         opacity: 0.3,
@@ -174,10 +177,10 @@ class _EventCheckInScreenState extends State<EventCheckInScreen> {
                     child: Center(
                       child: Container(
                         width: screenWidth * 0.9,
-                        height: screenHeight * 0.85,
+                        height: screenHeight * 0.8,
                         padding: const EdgeInsets.all(16.0),
                         decoration: BoxDecoration(
-                          color: Colors.white,
+                          color: Theme.of(context).cardColor,
                           borderRadius: BorderRadius.circular(12),
                           boxShadow: [
                             BoxShadow(
@@ -196,6 +199,7 @@ class _EventCheckInScreenState extends State<EventCheckInScreen> {
                               style: TextStyle(
                                 fontWeight: FontWeight.bold,
                                 fontSize: getResponsiveFontSize(24),
+                                color: titleColor,
                               ),
                             ),
                             const SizedBox(height: 8),
@@ -204,13 +208,11 @@ class _EventCheckInScreenState extends State<EventCheckInScreen> {
                                 const Icon(Icons.lock_outline, size: 20),
                                 const SizedBox(width: 8),
                                 Text(
-                                  event.isPrivate
-                                      ? "Private Event"
-                                      : "Public Event",
+                                  event.isPrivate ? "Private Event" : "Public Event",
                                   style: TextStyle(
                                     color: event.isPrivate
                                         ? Colors.red
-                                        : Colors.blue,
+                                        : Theme.of(context).primaryColor,
                                     fontSize: getResponsiveFontSize(16),
                                   ),
                                 ),
@@ -221,6 +223,7 @@ class _EventCheckInScreenState extends State<EventCheckInScreen> {
                               event.description,
                               style: TextStyle(
                                 fontSize: getResponsiveFontSize(16),
+                                color: textColor,
                               ),
                             ),
                             const SizedBox(height: 16),
@@ -228,14 +231,13 @@ class _EventCheckInScreenState extends State<EventCheckInScreen> {
                             Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
-                                // Time
                                 Row(
                                   children: [
                                     const Icon(Icons.access_time,
                                         size: 20, color: Colors.blue),
                                     const SizedBox(width: 8),
                                     Text(
-                                      "Time: ${formatTime(event.startTime)} - ${formatTime(event.endTime)}",
+                                      "${formatTime(event.startTime)} - ${formatTime(event.endTime)}",
                                       style: TextStyle(
                                         color: textColor,
                                         fontSize: getResponsiveFontSize(14),
@@ -243,7 +245,6 @@ class _EventCheckInScreenState extends State<EventCheckInScreen> {
                                     ),
                                   ],
                                 ),
-                                // Status
                                 Row(
                                   children: [
                                     const SizedBox(width: 8),
@@ -268,7 +269,7 @@ class _EventCheckInScreenState extends State<EventCheckInScreen> {
                                     size: 20, color: Colors.blue),
                                 const SizedBox(width: 8),
                                 Text(
-                                  "Date: ${formatDate(event.startTime)}",
+                                  "${formatDate(event.startTime)}",
                                   style: TextStyle(
                                     color: textColor,
                                     fontSize: getResponsiveFontSize(14),
@@ -284,6 +285,7 @@ class _EventCheckInScreenState extends State<EventCheckInScreen> {
                                   style: TextStyle(
                                     fontWeight: FontWeight.bold,
                                     fontSize: getResponsiveFontSize(24),
+                                    color: textColor,
                                   ),
                                 ),
                               ),
