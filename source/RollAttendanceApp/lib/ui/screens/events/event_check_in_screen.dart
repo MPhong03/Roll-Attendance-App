@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:blurry_modal_progress_hud/blurry_modal_progress_hud.dart';
 import 'package:go_router/go_router.dart';
 import 'package:itproject/enums/event_status.dart';
+import 'package:itproject/models/event_history_model.dart';
 import 'package:itproject/models/event_model.dart';
 import 'package:intl/intl.dart';
 import 'package:itproject/services/api_service.dart';
@@ -39,6 +40,7 @@ class _EventCheckInScreenState extends State<EventCheckInScreen> {
   final ApiService _apiService = ApiService();
   bool _isLoading = false;
   late Future<EventModel> _eventFuture;
+  late Future<HistoryModel> _eventHistoryFuture;
 
   // ASYNCHRONOUS METHODS
   Future<EventModel> getDetail(id) async {
@@ -63,14 +65,38 @@ class _EventCheckInScreenState extends State<EventCheckInScreen> {
     }
   }
 
+  Future<HistoryModel> getHistoryDetail(id) async {
+    try {
+      setState(() {
+        _isLoading = true;
+      });
+
+      final response = await _apiService.get('api/histories/$id');
+
+      if (response.statusCode == 200) {
+        return HistoryModel.fromMap(jsonDecode(response.body));
+      } else {
+        throw Exception('Failed to load history');
+      }
+    } catch (e) {
+      throw Exception('Failed to load history: $e');
+    } finally {
+      setState(() {
+        _isLoading = false;
+      });
+    }
+  }
+
   Future<void> _onRefresh() async {
-    setState(() {
+    setState(() async {
       _eventFuture = getDetail(widget.eventId);
+      _eventHistoryFuture = getHistoryDetail(widget.eventId);
     });
   }
 
   // METHOD
-  void _showQrCodeScanner(BuildContext context, EventModel event) {
+  void _showQrCodeScanner(
+      BuildContext context, EventModel event, HistoryModel history) {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -85,7 +111,7 @@ class _EventCheckInScreenState extends State<EventCheckInScreen> {
                 top: Radius.circular(20),
               ),
             ),
-            child: QRScannerModal(event: event),
+            child: QRScannerModal(event: event, history: history),
           ),
         );
       },
@@ -96,6 +122,7 @@ class _EventCheckInScreenState extends State<EventCheckInScreen> {
   void initState() {
     super.initState();
     _eventFuture = getDetail(widget.eventId);
+    _eventHistoryFuture = getHistoryDetail(widget.eventId);
   }
 
   String formatTime(DateTime? time) {
@@ -111,10 +138,12 @@ class _EventCheckInScreenState extends State<EventCheckInScreen> {
   @override
   Widget build(BuildContext context) {
     final bool isDarkMode = Theme.of(context).brightness == Brightness.dark;
-    final Color textColor =
-        isDarkMode ? Theme.of(context).textTheme.bodyLarge!.color! : Colors.black54;
-    final Color titleColor =
-        isDarkMode ? Theme.of(context).textTheme.headlineLarge!.color! : Colors.black;
+    final Color textColor = isDarkMode
+        ? Theme.of(context).textTheme.bodyLarge!.color!
+        : Colors.black54;
+    final Color titleColor = isDarkMode
+        ? Theme.of(context).textTheme.headlineLarge!.color!
+        : Colors.black;
     final screenWidth = MediaQuery.of(context).size.width;
     final screenHeight = MediaQuery.of(context).size.height;
 
@@ -143,8 +172,11 @@ class _EventCheckInScreenState extends State<EventCheckInScreen> {
         inAsyncCall: _isLoading,
         opacity: 0.3,
         blurEffectIntensity: 5,
-        child: FutureBuilder<EventModel>(
-          future: _eventFuture,
+        child: FutureBuilder<List<dynamic>>(
+          future: Future.wait([
+            _eventFuture,
+            _eventHistoryFuture,
+          ]),
           builder: (context, snapshot) {
             if (snapshot.connectionState == ConnectionState.waiting) {
               return const Center(child: CircularProgressIndicator());
@@ -158,7 +190,7 @@ class _EventCheckInScreenState extends State<EventCheckInScreen> {
                   ),
                 ),
               );
-            } else if (!snapshot.hasData) {
+            } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
               return Center(
                 child: Text(
                   'No data available',
@@ -168,7 +200,9 @@ class _EventCheckInScreenState extends State<EventCheckInScreen> {
                 ),
               );
             } else {
-              final event = snapshot.data!;
+              final event = snapshot.data![0] as EventModel;
+              final history = snapshot.data![1] as HistoryModel;
+
               return RefreshIndicator(
                 onRefresh: _onRefresh,
                 child: SingleChildScrollView(
@@ -208,7 +242,9 @@ class _EventCheckInScreenState extends State<EventCheckInScreen> {
                                 const Icon(Icons.lock_outline, size: 20),
                                 const SizedBox(width: 8),
                                 Text(
-                                  event.isPrivate ? "Private Event" : "Public Event",
+                                  event.isPrivate
+                                      ? "Private Event"
+                                      : "Public Event",
                                   style: TextStyle(
                                     color: event.isPrivate
                                         ? Colors.red
@@ -278,7 +314,8 @@ class _EventCheckInScreenState extends State<EventCheckInScreen> {
                               ],
                             ),
                             const SizedBox(height: 50),
-                            if (event.eventStatus == EventStatus.inProgress) ...[
+                            if (event.eventStatus ==
+                                EventStatus.inProgress) ...[
                               Center(
                                 child: Text(
                                   "Check In",
@@ -296,7 +333,8 @@ class _EventCheckInScreenState extends State<EventCheckInScreen> {
                                   height: screenHeight * 0.05,
                                   child: ElevatedButton(
                                     onPressed: () {
-                                      _showQrCodeScanner(context, event);
+                                      _showQrCodeScanner(
+                                          context, event, history);
                                     },
                                     style: ElevatedButton.styleFrom(
                                       backgroundColor: const Color(0xFF0FB900),
@@ -305,7 +343,8 @@ class _EventCheckInScreenState extends State<EventCheckInScreen> {
                                       ),
                                     ),
                                     child: Row(
-                                      mainAxisAlignment: MainAxisAlignment.center,
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
                                       children: [
                                         const Icon(
                                           Icons.qr_code,

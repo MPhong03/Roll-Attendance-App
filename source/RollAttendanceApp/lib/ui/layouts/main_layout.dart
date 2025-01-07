@@ -104,27 +104,27 @@ class _MainLayoutState extends State<MainLayout> {
   }
 
   void _onItemTapped(int index) {
-      setState(() {
-        _selectedIndex = index;
-      });
-      switch (index) {
-        case 0:
-          context.push('/home');
-          break;
-        case 1:
-          _logout();
-          break;
-        case 2:
-          context.push('/create-organization');
-          break;
-        case 3:
-          context.push('/organization');
-          break;
-        case 4:
-          context.push('/profile');
-          break;
-      }
+    setState(() {
+      _selectedIndex = index;
+    });
+    switch (index) {
+      case 0:
+        context.push('/home');
+        break;
+      case 1:
+        _logout();
+        break;
+      case 2:
+        context.push('/create-organization');
+        break;
+      case 3:
+        context.push('/organization');
+        break;
+      case 4:
+        context.push('/profile');
+        break;
     }
+  }
 
   @override
   void initState() {
@@ -132,15 +132,17 @@ class _MainLayoutState extends State<MainLayout> {
     _loadUserProfile();
   }
 
- @override
+  @override
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
     final bool isDarkMode = Theme.of(context).brightness == Brightness.dark;
     final Color selectedBackgroundColor = const Color(0xFF1E8925);
     final Color selectedTextColor = Colors.white;
-    final Color unselectedBackgroundColor = isDarkMode ? Colors.black : Colors.white;
+    final Color unselectedBackgroundColor =
+        isDarkMode ? Colors.black : Colors.white;
     final Color unselectedTextColor = const Color(0xFF1E8925);
-    final Color borderColor = isDarkMode ? Colors.white : Colors.black.withOpacity(0.1);
+    final Color borderColor =
+        isDarkMode ? Colors.white : Colors.black.withOpacity(0.1);
 
     double getResponsiveFontSize(double baseFontSize) {
       if (screenWidth > 480) {
@@ -206,7 +208,7 @@ class _MainLayoutState extends State<MainLayout> {
             _buildNavButton(
               context,
               iconPath: 'assets/icons/organization_icon.png',
-              label: 'Organization',
+              label: 'Org',
               isSelected: _selectedIndex == 3,
               selectedBackgroundColor: selectedBackgroundColor,
               selectedTextColor: selectedTextColor,
@@ -233,52 +235,54 @@ class _MainLayoutState extends State<MainLayout> {
     );
   }
 
-Widget _buildNavButton(
-  BuildContext context, {
-  required String iconPath, // Đường dẫn icon
-  required String label,
-  required bool isSelected,
-  required Color selectedBackgroundColor,
-  required Color selectedTextColor,
-  required Color unselectedBackgroundColor,
-  required Color unselectedTextColor,
-  required VoidCallback onTap,
-  required double Function(double) getResponsiveFontSize,
-}) {
-  return Expanded(
-    child: GestureDetector(
-      onTap: onTap,
-      child: Container(
-        decoration: BoxDecoration(
-          color: isSelected ? selectedBackgroundColor : unselectedBackgroundColor,
-          border: Border(
-            right: BorderSide(color: Colors.white.withOpacity(0.2), width: 1),
+  Widget _buildNavButton(
+    BuildContext context, {
+    required String iconPath, // Đường dẫn icon
+    required String label,
+    required bool isSelected,
+    required Color selectedBackgroundColor,
+    required Color selectedTextColor,
+    required Color unselectedBackgroundColor,
+    required Color unselectedTextColor,
+    required VoidCallback onTap,
+    required double Function(double) getResponsiveFontSize,
+  }) {
+    return Expanded(
+      child: GestureDetector(
+        onTap: onTap,
+        child: Container(
+          decoration: BoxDecoration(
+            color: isSelected
+                ? selectedBackgroundColor
+                : unselectedBackgroundColor,
+            border: Border(
+              right: BorderSide(color: Colors.white.withOpacity(0.2), width: 1),
+            ),
+          ),
+          padding: const EdgeInsets.symmetric(vertical: 10),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Image.asset(
+                iconPath, // Sử dụng icon từ assets
+                color: isSelected ? selectedTextColor : unselectedTextColor,
+                height: getResponsiveFontSize(20),
+                width: getResponsiveFontSize(20),
+              ),
+              const SizedBox(height: 5),
+              Text(
+                label,
+                style: TextStyle(
+                  fontSize: getResponsiveFontSize(12),
+                  color: isSelected ? selectedTextColor : unselectedTextColor,
+                ),
+              ),
+            ],
           ),
         ),
-        padding: const EdgeInsets.symmetric(vertical: 10),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Image.asset(
-              iconPath, // Sử dụng icon từ assets
-              color: isSelected ? selectedTextColor : unselectedTextColor,
-              height: getResponsiveFontSize(20),
-              width: getResponsiveFontSize(20),
-            ),
-            const SizedBox(height: 5),
-            Text(
-              label,
-              style: TextStyle(
-                fontSize: getResponsiveFontSize(12),
-                color: isSelected ? selectedTextColor : unselectedTextColor,
-              ),
-            ),
-          ],
-        ),
       ),
-    ),
-  );
-}
+    );
+  }
 
   // @override
   // Widget build(BuildContext context) {

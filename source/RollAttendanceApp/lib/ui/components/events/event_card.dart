@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
+import 'package:itproject/enums/user_attendance_status.dart';
 import 'package:itproject/models/available_event_model.dart';
 import 'package:itproject/enums/event_status.dart';
 
@@ -18,39 +19,39 @@ class EventCard extends StatelessWidget {
     return DateFormat('dd/MM/yyyy').format(date);
   }
 
-Map<String, dynamic> getEventStatus(EventStatus status) {
-  switch (status) {
-    case EventStatus.notStarted:
-      return {"text": "Not Started", "color": Colors.orange};
-    case EventStatus.inProgress:
-      return {"text": "In Progress", "color": Colors.green};
-    case EventStatus.completed:
-      return {"text": "Completed", "color": Colors.grey};
-    case EventStatus.cancelled:
-      return {"text": "Cancelled", "color": Colors.red};
-    case EventStatus.postponed:
-      return {"text": "Postponed", "color": Colors.blue};
-    default:
-      return {"text": "Unknown", "color": Colors.black};
+  Map<String, dynamic> getEventStatus(EventStatus status) {
+    switch (status) {
+      case EventStatus.notStarted:
+        return {"text": "Not Started", "color": Colors.orange};
+      case EventStatus.inProgress:
+        return {"text": "In Progress", "color": Colors.green};
+      case EventStatus.completed:
+        return {"text": "Completed", "color": Colors.grey};
+      case EventStatus.cancelled:
+        return {"text": "Cancelled", "color": Colors.red};
+      case EventStatus.postponed:
+        return {"text": "Postponed", "color": Colors.blue};
+      default:
+        return {"text": "Unknown", "color": Colors.black};
+    }
   }
-}
 
-EventStatus parseEventStatus(int? status) {
-  switch (status) {
-    case 0:
-      return EventStatus.notStarted;
-    case 1:
-      return EventStatus.inProgress;
-    case 2:
-      return EventStatus.completed;
-    case 3:
-      return EventStatus.cancelled;
-    case 4:
-      return EventStatus.postponed;
-    default:
-      return EventStatus.notStarted;
+  EventStatus parseEventStatus(int? status) {
+    switch (status) {
+      case 0:
+        return EventStatus.notStarted;
+      case 1:
+        return EventStatus.inProgress;
+      case 2:
+        return EventStatus.completed;
+      case 3:
+        return EventStatus.cancelled;
+      case 4:
+        return EventStatus.postponed;
+      default:
+        return EventStatus.notStarted;
+    }
   }
-}
 
   @override
   Widget build(BuildContext context) {
@@ -100,7 +101,8 @@ EventStatus parseEventStatus(int? status) {
                   ),
                   Icon(
                     (event.isPrivate ?? false) ? Icons.lock : Icons.lock_open,
-                    color: (event.isPrivate ?? false) ? Colors.red : Colors.blue,
+                    color:
+                        (event.isPrivate ?? false) ? Colors.red : Colors.blue,
                     size: 20.0,
                   ),
                 ],
@@ -131,7 +133,8 @@ EventStatus parseEventStatus(int? status) {
               Row(
                 children: [
                   CircleAvatar(
-                    backgroundImage: NetworkImage(event.organizationImage ?? ''),
+                    backgroundImage:
+                        NetworkImage(event.organizationImage ?? ''),
                     radius: 16,
                   ),
                   const SizedBox(width: 8),
@@ -166,7 +169,8 @@ EventStatus parseEventStatus(int? status) {
               const SizedBox(height: 6),
               Row(
                 children: [
-                  const Icon(Icons.calendar_today, size: 20, color: Colors.blue),
+                  const Icon(Icons.calendar_today,
+                      size: 20, color: Colors.blue),
                   const SizedBox(width: 8),
                   Text(
                     "Date: ${formatDate(event.startTime)}",
@@ -182,15 +186,36 @@ EventStatus parseEventStatus(int? status) {
               // Trạng thái sự kiện
               Align(
                 alignment: Alignment.centerRight,
-                child: Text(
-                  getEventStatus(parseEventStatus(event.eventStatus))["text"],
-                  style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                    color: getEventStatus(
-                      parseEventStatus(event.eventStatus),
-                    )["color"],
-                    fontSize: getResponsiveFontSize(14),
-                  ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    // Trạng thái điểm danh
+                    Text(
+                      event.isCheckInYet == true
+                          ? "Attendance: ${getRoleFromValue(event.attendanceStatus ?? -1)['text']}"
+                          : "Not Absent Yet",
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        color: event.isCheckInYet == true
+                            ? getRoleFromValue(
+                                event.attendanceStatus ?? -1)['color']
+                            : Colors.grey,
+                        fontSize: getResponsiveFontSize(14),
+                      ),
+                    ),
+                    // Trạng thái sự kiện
+                    Text(
+                      getEventStatus(
+                          parseEventStatus(event.eventStatus))["text"],
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        color: getEventStatus(
+                          parseEventStatus(event.eventStatus),
+                        )["color"],
+                        fontSize: getResponsiveFontSize(14),
+                      ),
+                    ),
+                  ],
                 ),
               ),
             ],

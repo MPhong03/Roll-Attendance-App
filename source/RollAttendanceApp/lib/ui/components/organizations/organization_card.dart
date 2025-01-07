@@ -71,7 +71,6 @@ class OrganizationCard extends StatelessWidget {
                   const SizedBox(height: 6),
                   Text(
                     organization.address,
-                    style: const TextStyle(color: Colors.black54),
                   ),
                 ],
               ),

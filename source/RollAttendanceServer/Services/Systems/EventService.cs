@@ -5,6 +5,7 @@ using RollAttendanceServer.DTOs;
 using RollAttendanceServer.Helpers;
 using RollAttendanceServer.Interfaces;
 using RollAttendanceServer.Models;
+using System.Diagnostics;
 using static Microsoft.Extensions.Logging.EventSource.LoggingEventSource;
 
 namespace RollAttendanceServer.Services.Systems
@@ -338,6 +339,11 @@ namespace RollAttendanceServer.Services.Systems
                 .ThenInclude(h => h.HistoryDetails)
                 .FirstOrDefaultAsync(e => e.Id == eventId);
 
+            var user = await _context.Users.FirstOrDefaultAsync(e => e.Id == userId);
+
+            if (user == null)
+                throw new Exception("User not found");
+
             if (eventEntity == null || eventEntity.EventStatus != (short)Status.EVENT_IN_PROGRESS)
                 throw new Exception("Event not found or not active.");
 
@@ -356,14 +362,21 @@ namespace RollAttendanceServer.Services.Systems
                 userDetail = new HistoryDetail
                 {
                     UserId = userId,
+                    UserAvatar = user.Avatar,
+                    UserEmail = user.Email,
+                    UserName = user.DisplayName,
                     AttendanceCount = 1,
                     AbsentTime = DateTime.UtcNow,
-                    AttendanceStatus = attendanceAttempt == 1 ? (short)Status.USER_PRESENTED : (short)Status.USER_LATED
+                    AttendanceStatus = attendanceAttempt <= history.AttendanceTimes ? (short)Status.USER_PRESENTED : (short)Status.USER_LATED
                 };
                 history.HistoryDetails.Add(userDetail);
             }
             else
             {
+                if (attendanceAttempt == history.AttendanceTimes)
+                {
+                    throw new Exception("You have already checked in!");
+                }
                 userDetail.AttendanceCount++;
                 userDetail.LeaveTime = DateTime.UtcNow;
             }

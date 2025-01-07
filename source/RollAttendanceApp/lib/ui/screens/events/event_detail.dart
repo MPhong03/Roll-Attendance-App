@@ -81,7 +81,7 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
       _eventFuture = getDetail(widget.eventId);
     });
   }
-  
+
   // METHOD
   void _showQrCodeDialog(BuildContext context, EventModel event) {
     final qrData = {
@@ -354,7 +354,7 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
                                     color: Colors.blue),
                                 title: const Text("History"),
                                 onTap: () {
-                                  // Handle history action (Develop later)
+                                  context.push('/event-history/${event.id}');
                                 },
                               ),
                               const Divider(),

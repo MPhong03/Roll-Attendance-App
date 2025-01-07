@@ -288,17 +288,34 @@ class ApiService {
     }
   }
 
+  void _printInChunks(String data, {int chunkSize = 800}) {
+    for (var i = 0; i < data.length; i += chunkSize) {
+      print(data.substring(
+          i, i + chunkSize > data.length ? data.length : i + chunkSize));
+    }
+  }
+
   void _logResponse({
     required http.Response response,
     required String url,
     required String method,
     Map<String, dynamic>? requestBody,
   }) {
-    const maxBodyLength = 500;
+    const maxBodyLength = 1000;
 
-    final truncatedBody = response.body.length > maxBodyLength
-        ? '${response.body.substring(0, maxBodyLength)}... [Truncated]'
-        : response.body;
+    String truncatedBody;
+    try {
+      final jsonBody = json.decode(response.body);
+      final prettyJsonBody =
+          const JsonEncoder.withIndent('  ').convert(jsonBody);
+      truncatedBody = prettyJsonBody.length > maxBodyLength
+          ? '${prettyJsonBody.substring(0, maxBodyLength)}... [Truncated]'
+          : prettyJsonBody;
+    } catch (e) {
+      truncatedBody = response.body.length > maxBodyLength
+          ? '${response.body.substring(0, maxBodyLength)}... [Truncated]'
+          : response.body;
+    }
 
     final logData = {
       'request': {
@@ -314,6 +331,6 @@ class ApiService {
     };
 
     final prettyJson = const JsonEncoder.withIndent('  ').convert(logData);
-    print(prettyJson);
+    _printInChunks(prettyJson);
   }
 }
