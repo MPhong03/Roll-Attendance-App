@@ -182,8 +182,14 @@ namespace RollAttendanceServer.Controllers
         {
             try
             {
-                await _eventService.CheckInAsync(eventId, request.UserId, request.QrCode, request.AttendanceAttempt);
-                return Ok();
+                var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+                if (string.IsNullOrEmpty(userId))
+                {
+                    return Unauthorized("Invalid user.");
+                }
+
+                await _eventService.CheckInAsync(eventId, userId, request.QrCode, request.AttendanceAttempt);
+                return Ok("Successfully check in!");
             }
             catch (Exception ex)
             {
@@ -197,7 +203,7 @@ namespace RollAttendanceServer.Controllers
             try
             {
                 await _eventService.AddAttendanceAttemptAsync(eventId);
-                return Ok();
+                return Ok("Successfully add attempt");
             }
             catch (Exception ex)
             {
