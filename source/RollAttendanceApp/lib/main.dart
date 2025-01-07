@@ -16,11 +16,13 @@ import 'package:itproject/ui/screens/organizations/add_user_to_organization.dart
 import 'package:itproject/ui/screens/organizations/create_organization.dart';
 import 'package:itproject/ui/screens/organizations/edit_organization.dart';
 import 'package:itproject/ui/screens/organizations/organization_detail.dart';
+import 'package:itproject/ui/screens/organizations/organization_list.dart';
 import 'package:itproject/ui/screens/profile_screen.dart';
 import 'package:itproject/ui/screens/settings/update_face_data_screen.dart';
 import 'firebase_options.dart';
 import 'package:go_router/go_router.dart';
 import 'package:logging/logging.dart';
+import 'package:itproject/ui/layouts/main_layout.dart';
 
 class MyHttpOverrides extends HttpOverrides {
   @override
@@ -69,19 +71,32 @@ class MyApp extends StatelessWidget {
               path: '/',
               builder: (context, state) => const MainView(),
             ),
-            GoRoute(
-              path: '/home',
-              builder: (context, state) => const HomeScreen(),
+            ShellRoute(
+              builder: (context, state, child) => MainLayout(child: child),
+              routes: [
+                GoRoute(
+                  path: '/home',
+                  builder: (context, state) => const HomeScreen(),
+                ),
+                GoRoute(
+                  path: '/create-organization',
+                  builder: (context, state) => const CreateOrganizationScreen(),
+                ),
+                GoRoute(
+                  path: '/organization',
+                  builder: (context, state) => const OrganizationScreen(),
+                ),
+                GoRoute(
+                  path: '/profile',
+                  builder: (context, state) => const ProfileScreen(),
+                ),
+              ],
             ),
             GoRoute(
               path: '/signin',
               builder: (context, state) => LoginScreen(
                 controller: PageController(),
               ),
-            ),
-            GoRoute(
-              path: '/profile',
-              builder: (context, state) => const ProfileScreen(),
             ),
             GoRoute(
               path: '/update-face-data',
