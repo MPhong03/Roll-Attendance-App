@@ -27,6 +27,11 @@ namespace RollAttendanceServer.DTOs
         public string? OrganizationName { get; set; }
         public string? OrganizationImage { get; set; }
 
+        // ATTENDANCE
+        public bool IsCheckInYet { get; set; } = false;
+        public short AttendanceStatus { get; set; }
+        public int AttendanceTimes { get; set; }
+
         public bool IsPrivate { get; set; }
     }
 }

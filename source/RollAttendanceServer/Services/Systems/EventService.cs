@@ -25,6 +25,53 @@ namespace RollAttendanceServer.Services.Systems
                 .FirstOrDefaultAsync(e => e.Id == eventId);
         }
 
+        public async Task<CheckInStateDTO?> GetEventCheckInState(string eventId, string userId)
+        {
+            var history = await _context.Histories
+                .Where(h => h.EventId == eventId)
+                .Include(h => h.HistoryDetails)
+                .FirstOrDefaultAsync();
+
+            if (history == null)
+            {
+                return new CheckInStateDTO
+                {
+                    UserId = userId,
+                    EventId = eventId,
+                    IsCheckInYet = false,
+                    AttendanceStatus = (short)Status.EVENT_NOT_STARTED,
+                    AttendanceCount = 0
+                };
+            }
+
+            var userHistoryDetail = history.HistoryDetails
+                .FirstOrDefault(hd => hd.UserId == userId);
+
+            if (userHistoryDetail == null)
+            {
+                return new CheckInStateDTO
+                {
+                    UserId = userId,
+                    EventId = eventId,
+                    IsCheckInYet = false,
+                    AttendanceStatus = (short)Status.USER_ABSENTED,
+                    AttendanceCount = 0
+                };
+            }
+
+             return new CheckInStateDTO
+            {
+                UserId = userHistoryDetail.UserId,
+                DisplayName = userHistoryDetail.UserName,
+                Email = userHistoryDetail.UserEmail,
+                Avatar = userHistoryDetail.UserAvatar,
+                IsCheckInYet = true,
+                AttendanceStatus = userHistoryDetail.AttendanceStatus,
+                AttendanceCount = userHistoryDetail.AttendanceCount,
+                EventId = history.EventId
+            };
+        }
+
         public async Task<IEnumerable<ActiveEventDTO>> GetUserActiveEvents(string userId, DateTime? date, short status, int pageIndex, int pageSize)
         {
             var organizationIds = await _context.UserOrganizationRoles
@@ -91,6 +138,35 @@ namespace RollAttendanceServer.Services.Systems
                         .FirstOrDefault()
                 })
                 .ToListAsync();
+
+            foreach (var eventDto in events)
+            {
+                var history = await _context.Histories
+                    .FirstOrDefaultAsync(h => h.EventId == eventDto.Id);
+
+                if (history != null)
+                {
+                    var historyDetail = await _context.HistoryDetails
+                        .FirstOrDefaultAsync(hd => hd.HistoryId == history.Id && hd.UserId == userId);
+
+                    if (historyDetail != null)
+                    {
+                        eventDto.AttendanceStatus = historyDetail.AttendanceStatus;
+                        eventDto.AttendanceTimes = historyDetail.AttendanceCount;
+                        eventDto.IsCheckInYet = true;
+                    }
+                    else
+                    {
+                        eventDto.AttendanceStatus = (short)Status.USER_ABSENTED;
+                        eventDto.IsCheckInYet = false;
+                    }
+                }
+                else
+                {
+                    eventDto.AttendanceStatus = (short)Status.EVENT_NOT_STARTED;
+                    eventDto.IsCheckInYet = false;
+                }
+            }
 
             return events;
         }
