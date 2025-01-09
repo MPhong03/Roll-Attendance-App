@@ -8,6 +8,7 @@ import 'package:itproject/models/event_model.dart';
 import 'package:itproject/services/api_service.dart';
 import 'package:itproject/ui/components/events/preview_event_modal.dart';
 import 'package:qr_flutter/qr_flutter.dart';
+import 'package:awesome_dialog/awesome_dialog.dart';
 
 class EventDetailScreen extends StatefulWidget {
   final String eventId;
@@ -65,6 +66,78 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text("Error: $e")),
       );
+    } finally {
+      setState(() {
+        _isLoading = false;
+      });
+    }
+  }
+
+  Future<void> _onAddEventAttempt(String id) async {
+    try {
+      setState(() {
+        _isLoading = true;
+      });
+
+      final response = await _apiService.post('api/events/$id/add-attempt');
+
+      if (response.statusCode == 200) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text("Successfully add attempt")),
+          );
+          context.push('/event-history/$id');
+        }
+      } else {
+        if (mounted) {
+          final message = jsonDecode(response.body)['message'];
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(message)),
+          );
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text("Error: $e")),
+        );
+      }
+    } finally {
+      setState(() {
+        _isLoading = false;
+      });
+    }
+  }
+
+  Future<void> _onCompleteEvent(String id) async {
+    try {
+      setState(() {
+        _isLoading = true;
+      });
+
+      final response = await _apiService.post('api/events/$id/complete');
+
+      if (response.statusCode == 200) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text("Completed!")),
+          );
+          context.push('/event-history/$id');
+        }
+      } else {
+        if (mounted) {
+          final message = jsonDecode(response.body)['message'];
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(message)),
+          );
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text("Error: $e")),
+        );
+      }
     } finally {
       setState(() {
         _isLoading = false;
@@ -229,7 +302,7 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
                             const Icon(Icons.info_outline, size: 20),
                             const SizedBox(width: 8),
                             Text(
-                              "Status: ${event.eventStatus.name}",
+                              "Status: ${formatEventStatus(event.eventStatus)}",
                               style: TextStyle(
                                 color:
                                     event.eventStatus == EventStatus.inProgress
@@ -363,7 +436,19 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
                                     const Icon(Icons.add, color: Colors.blue),
                                 title: const Text("Attempt"),
                                 onTap: () {
-                                  // Handle attempt action (Develop later)
+                                  if (mounted) {
+                                    AwesomeDialog(
+                                      context: context,
+                                      dialogType: DialogType.info,
+                                      animType: AnimType.bottomSlide,
+                                      title: 'Confirm',
+                                      desc: 'Confirm create new Attempt!',
+                                      btnCancelOnPress: () {},
+                                      btnOkOnPress: () async {
+                                        await _onAddEventAttempt(event.id);
+                                      },
+                                    ).show();
+                                  }
                                 },
                               ),
                               const Divider(),
@@ -372,7 +457,19 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
                                     color: Colors.green),
                                 title: const Text("Complete"),
                                 onTap: () {
-                                  // Handle attempt action (Develop later)
+                                  if (mounted) {
+                                    AwesomeDialog(
+                                      context: context,
+                                      dialogType: DialogType.info,
+                                      animType: AnimType.bottomSlide,
+                                      title: 'Confirm',
+                                      desc: 'Confirm create new Attempt!',
+                                      btnCancelOnPress: () {},
+                                      btnOkOnPress: () async {
+                                        await _onCompleteEvent(event.id);
+                                      },
+                                    ).show();
+                                  }
                                 },
                               ),
                             ],

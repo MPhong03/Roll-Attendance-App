@@ -11,6 +11,7 @@ using RollAttendanceServer.Models;
 using RollAttendanceServer.Requests;
 using RollAttendanceServer.Services.Systems;
 using System.Diagnostics;
+using System.Drawing.Printing;
 
 namespace RollAttendanceServer.Controllers
 {
@@ -24,6 +25,45 @@ namespace RollAttendanceServer.Controllers
         public OrganizationController(IOrganizationService organizationService)
         {
             _organizationService = organizationService;
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> SearchOrganizations(string? keyword, int pageIndex = 0, int pageSize = 10)
+        {
+            try
+            {
+                var organizations = await _organizationService.SearchOrganizationsAsync(keyword, pageIndex, pageSize);
+                return Ok(organizations);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, ex.Message);
+            }
+        }
+
+        [HttpGet("suggestions")]
+        public async Task<IActionResult> GetOrganizationSuggestions([FromQuery] string keyword)
+        {
+            try
+            {
+                var authorizationHeader = Request.Headers["Authorization"].ToString();
+
+                if (string.IsNullOrEmpty(authorizationHeader) || !authorizationHeader.StartsWith("Bearer "))
+                {
+                    return Unauthorized("Missing or invalid Authorization header.");
+                }
+
+                var token = authorizationHeader.Substring("Bearer ".Length);
+
+                Debug.WriteLine("Bearer " + token);
+
+                var suggestions = await _organizationService.SuggestOrganizationNamesAsync(keyword);
+                return Ok(suggestions);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, ex.Message);
+            }
         }
 
         [HttpGet("getall/{uid}")]

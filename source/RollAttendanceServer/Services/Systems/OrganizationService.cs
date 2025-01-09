@@ -20,6 +20,53 @@ namespace RollAttendanceServer.Services.Systems
             _cloudinaryService = cloudinaryService;
         }
 
+        public async Task<IEnumerable<PublicOrganizationDTO>> SearchOrganizationsAsync(string? keyword, int pageIndex = 0, int pageSize = 10)
+        {
+            var query = _context.Organizations
+                                .Where(org => !org.IsPrivate && !org.IsDeleted)
+                                .AsQueryable();
+
+            if (!string.IsNullOrEmpty(keyword))
+            {
+                query = query.Where(org => org.Name.Contains(keyword) || org.Description.Contains(keyword));
+            }
+
+            var organizations = await query.Skip(pageIndex * pageSize)
+                                           .Take(pageSize)
+                                           .Select(org => new PublicOrganizationDTO
+                                           {
+                                               Id = org.Id,
+                                               Name = org.Name,
+                                               Description = org.Description,
+                                               Address = org.Address,
+                                               IsPrivate = org.IsPrivate,
+                                               Banner = org.Banner,
+                                               Image = org.Image,
+                                               Users = org.UserOrganizationRoles.Count(),
+                                               Events = org.Events.Count()
+                                           })
+                                           .ToListAsync();
+
+            return organizations;
+        }
+
+        public async Task<IEnumerable<string>> SuggestOrganizationNamesAsync(string keyword, int maxSuggestions = 10)
+        {
+            if (string.IsNullOrWhiteSpace(keyword))
+            {
+                return Enumerable.Empty<string>();
+            }
+
+            var suggestions = await _context.Organizations
+                                            .Where(org => !org.IsPrivate && !org.IsDeleted && org.Name.Contains(keyword))
+                                            .OrderBy(org => org.Name)
+                                            .Select(org => org.Name.ToLower())
+                                            .Take(maxSuggestions)
+                                            .ToListAsync();
+
+            return suggestions;
+        }
+
         public async Task<IEnumerable<Organization?>> GetOrganizationsByUserAsync(string uid, UserRole role, string? keyword, int pageIndex = 0, int pageSize = 10)
         {
             var query = _context.UserOrganizationRoles

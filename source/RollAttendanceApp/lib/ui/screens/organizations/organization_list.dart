@@ -4,10 +4,10 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:blurry_modal_progress_hud/blurry_modal_progress_hud.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:go_router/go_router.dart';
 import 'package:itproject/models/available_event_model.dart';
 import 'package:itproject/models/organization_model.dart';
 import 'package:itproject/services/api_service.dart';
-import 'package:itproject/ui/components/events/event_card.dart';
 import 'package:itproject/ui/components/organizations/organization_card.dart';
 
 class OrganizationScreen extends StatefulWidget {
@@ -199,12 +199,25 @@ class _OrganizationScreenState extends State<OrganizationScreen> {
         return baseFontSize;
       }
     }
+
     return BlurryModalProgressHUD(
       inAsyncCall: _isLoading,
       opacity: 0.3,
       blurEffectIntensity: 5,
       child: Scaffold(
         backgroundColor: backgroundColor,
+        appBar: AppBar(
+          backgroundColor: backgroundColor,
+          actions: [
+            IconButton(
+              icon: Icon(Icons.search, color: textColor),
+              onPressed: () {
+                // Hành động khi nhấn vào nút tìm kiếm
+                context.push("/search-organization");
+              },
+            ),
+          ],
+        ),
         body: RefreshIndicator(
           onRefresh: () async {
             setState(() {
@@ -219,7 +232,7 @@ class _OrganizationScreenState extends State<OrganizationScreen> {
           child: ListView(
             padding: const EdgeInsets.all(16.0),
             children: [
-              const SizedBox(height: 50),
+              // const SizedBox(height: 50),
               if (organizations.isEmpty)
                 Center(
                   child: Text(

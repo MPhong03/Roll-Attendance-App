@@ -18,6 +18,7 @@ import 'package:itproject/ui/screens/organizations/create_organization.dart';
 import 'package:itproject/ui/screens/organizations/edit_organization.dart';
 import 'package:itproject/ui/screens/organizations/organization_detail.dart';
 import 'package:itproject/ui/screens/organizations/organization_list.dart';
+import 'package:itproject/ui/screens/organizations/organization_public_search.dart';
 import 'package:itproject/ui/screens/profile_screen.dart';
 import 'package:itproject/ui/screens/edit_profile_screen.dart';
 import 'package:itproject/ui/screens/settings/update_face_data_screen.dart';
@@ -125,6 +126,11 @@ class MyApp extends StatelessWidget {
                 final id = state.pathParameters['id']!;
                 return OrganizationDetailScreen(organizationId: id);
               },
+            ),
+            GoRoute(
+              path: '/search-organization',
+              builder: (context, state) =>
+                  const OrganizationPublicSearchScreen(),
             ),
             GoRoute(
               path: '/create-event/:id',

@@ -7,6 +7,8 @@ namespace RollAttendanceServer.Interfaces
 {
     public interface IOrganizationService
     {
+        Task<IEnumerable<string>> SuggestOrganizationNamesAsync(string keyword, int maxSuggestions = 10);
+        Task<IEnumerable<PublicOrganizationDTO>> SearchOrganizationsAsync(string? keyword, int pageIndex = 0, int pageSize = 10);
         Task<IEnumerable<Organization?>> GetOrganizationsByUserAsync(string uid, UserRole role, string? keyword, int pageIndex = 0, int pageSize = 10);
         Task<Organization?> GetOrganizationByIdAsync(string id);
         Task<Organization> CreateOrganizationAsync(OrganizationDTO dto, Stream bannerStream, Stream imageStream);
