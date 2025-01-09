@@ -23,8 +23,8 @@ ThemeData customLightTheme = ThemeData(
 
 ThemeData customDarkTheme = ThemeData(
   brightness: Brightness.dark,
-  primaryColor: Colors.green, // Màu chủ đạo (Xanh lá)
-  scaffoldBackgroundColor: Colors.black, // Nền tối
+  primaryColor: Colors.black, // Màu chủ đạo (Xanh lá)
+  scaffoldBackgroundColor: Color.fromARGB(255, 0, 26, 16), // Nền tối
   appBarTheme: const AppBarTheme(
     color: Colors.green, // Màu AppBar
     iconTheme: IconThemeData(color: Colors.white), // Màu icon trên AppBar

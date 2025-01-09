@@ -19,6 +19,7 @@ import 'package:itproject/ui/screens/organizations/edit_organization.dart';
 import 'package:itproject/ui/screens/organizations/organization_detail.dart';
 import 'package:itproject/ui/screens/organizations/organization_list.dart';
 import 'package:itproject/ui/screens/profile_screen.dart';
+import 'package:itproject/ui/screens/edit_profile_screen.dart';
 import 'package:itproject/ui/screens/settings/update_face_data_screen.dart';
 import 'firebase_options.dart';
 import 'package:go_router/go_router.dart';
@@ -98,6 +99,10 @@ class MyApp extends StatelessWidget {
               builder: (context, state) => LoginScreen(
                 controller: PageController(),
               ),
+            ),
+            GoRoute(
+              path: '/editprofile',
+              builder: (context, state) => const EditProfileScreen(),
             ),
             GoRoute(
               path: '/update-face-data',

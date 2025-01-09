@@ -11,14 +11,14 @@ import 'package:itproject/services/api_service.dart';
 import 'package:itproject/services/user_service.dart';
 import 'package:itproject/ui/layouts/main_layout.dart';
 
-class ProfileScreen extends StatefulWidget {
-  const ProfileScreen({super.key});
+class EditProfileScreen extends StatefulWidget {
+  const EditProfileScreen({super.key});
 
   @override
-  State<ProfileScreen> createState() => _ProfileScreenState();
+  State<EditProfileScreen> createState() => _EditProfileScreenState();
 }
 
-class _ProfileScreenState extends State<ProfileScreen> {
+class _EditProfileScreenState extends State<EditProfileScreen> {
   OverlayEntry? _overlayEntry;
   final UserService _userService = UserService();
   final ApiService _apiService = ApiService();
@@ -297,28 +297,25 @@ class _ProfileScreenState extends State<ProfileScreen> {
     }
   }
 
-  @override
-Widget build(BuildContext context) {
-  final screenWidth = MediaQuery.of(context).size.width;
-  final screenHeight = MediaQuery.of(context).size.height;
+   @override
+  Widget build(BuildContext context) {
+    final screenHeight = MediaQuery.of(context).size.height;
+    final screenWidth = MediaQuery.of(context).size.width;
+    final bool isDarkMode = Theme.of(context).brightness == Brightness.dark;
 
-  return Scaffold(
-    body: RefreshIndicator(
-      onRefresh: _getProfile,
-      child: Stack(
+    return Scaffold(
+      body: Stack(
         children: [
-          Container(
-            color: Theme.of(context).scaffoldBackgroundColor,
-          ),
+          Container(color: isDarkMode ? Colors.green : Theme.of(context).scaffoldBackgroundColor),
           Positioned(
             top: screenHeight * 0.05,
             left: 0,
             right: 0,
             child: Container(
               width: screenWidth,
-              height: screenHeight * 0.9,
+              height: screenHeight * 1,
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: isDarkMode ? Colors.black : Colors.white,
                 borderRadius: const BorderRadius.only(
                   topLeft: Radius.circular(12),
                   topRight: Radius.circular(12),
@@ -332,25 +329,46 @@ Widget build(BuildContext context) {
                   ),
                 ],
               ),
-              child: Padding(
-                padding: EdgeInsets.only(
-                  top: screenHeight * 0.1,
-                  left: 16.0,
-                  right: 16.0,
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    // Thông tin người dùng
-                    Stack(
+              child: Stack(
+                children: [
+                  Positioned(
+                    top: 16,
+                    left: 16,
+                    child: IconButton(
+                      icon: const Icon(Icons.arrow_back),
+                      onPressed: () {
+                        context.pop();
+                      },
+                    ),
+                  ),
+                  // Tiêu đề "EDIT PROFILE"
+                  Positioned(
+                    top: 16,
+                    left: 0,
+                    right: 0,
+                    child: Center(
+                      child: Text(
+                        "EDIT PROFILE",
+                        style: TextStyle(
+                          fontSize: 25,
+                          fontWeight: FontWeight.bold,
+                          color: isDarkMode ? Colors.white : Colors.black,
+                        ),
+                      ),
+                    ),
+                  ),
+                  // Avatar
+                  Positioned(
+                    top: screenHeight * 0.10,
+                    left: screenWidth / 2 - 60,
+                    child: Stack(
                       alignment: Alignment.bottomRight,
                       children: [
                         CircleAvatar(
                           radius: 60,
                           backgroundImage: profileImageUrl.isNotEmpty
                               ? NetworkImage(profileImageUrl)
-                              : const AssetImage('images/default-avatar.jpg')
-                                  as ImageProvider,
+                              : const AssetImage('images/default-avatar.jpg') as ImageProvider,
                           backgroundColor: Colors.grey.shade200,
                         ),
                         Container(
@@ -371,71 +389,92 @@ Widget build(BuildContext context) {
                               color: Colors.grey,
                             ),
                             onPressed: () {
-                              context.push('/editprofile');
+                              // Thay đổi ảnh avatar
+                              _showEditProfileBottomSheet();
                             },
                           ),
                         ),
                       ],
                     ),
-                    const SizedBox(height: 20),
-                    Text(
-                      name.isNotEmpty ? name : noName,
-                      textAlign: TextAlign.center,
-                      style: const TextStyle(
-                        fontSize: 24,
-                        fontWeight: FontWeight.bold,
-                      ),
+                  ),
+                  // Thông tin người dùng
+                  Positioned(
+                    top: screenHeight * 0.25,
+                    left: 16,
+                    right: 16,
+                    child: Column(
+                      children: [
+                        _buildInfoRow("Username", name, screenWidth),
+                        _buildInfoRow("Email", email, screenWidth),
+                        _buildInfoRow("Phone", "SDT đâu Ponie?", screenWidth),
+                      ],
                     ),
-                    const SizedBox(height: 10),
-                    Text(
-                      email.isNotEmpty ? email : 'Unable to load email!',
-                      textAlign: TextAlign.center,
-                      style: const TextStyle(
-                        fontSize: 16,
-                        color: Colors.grey,
-                      ),
-                    ),
-                    const SizedBox(height: 20),
-
-                    // Divider
-                    const Divider(),
-
-                    // Danh sách các cài đặt
-                    ListTile(
-                      leading: const Icon(Icons.account_circle),
-                      title: const Text('Account'),
-                      onTap: () {},
-                    ),
-                    ListTile(
-                      leading: const Icon(Icons.lock),
-                      title: const Text('Privacy'),
-                      onTap: () {
-                        context.push("/update-face-data");
+                  ),
+                  // Nút Change Password
+                  Positioned(
+                    top: screenHeight * 0.45,
+                    left: 16,
+                    right: 16,
+                    child: ElevatedButton(
+                      onPressed: () {
+                        // Logic đổi mật khẩu
                       },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.blue,
+                        padding: const EdgeInsets.symmetric(vertical: 14),
+                      ),
+                      child: const Text("Change Password"),
                     ),
-                    ListTile(
-                      leading: const Icon(Icons.notifications),
-                      title: const Text('Notifications'),
-                      onTap: () {},
+                  ),
+                  // Nút Save
+                  Positioned(
+                    top: screenHeight * 0.55,
+                    left: 16,
+                    right: 16,
+                    child: ElevatedButton(
+                      onPressed: () {
+                        // Logic lưu thay đổi
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.green,
+                        padding: const EdgeInsets.symmetric(vertical: 14),
+                      ),
+                      child: const Text("Save"),
                     ),
-                    ListTile(
-                      leading: const Icon(Icons.language),
-                      title: const Text('Language'),
-                      onTap: () {},
-                    ),
-                    ListTile(
-                      leading: const Icon(Icons.help),
-                      title: const Text('Help & Support'),
-                      onTap: () {},
-                    ),
-                  ],
-                ),
+                  ),
+                ],
               ),
             ),
           ),
         ],
       ),
-    ),
-  );
-}
+    );
+  }
+
+  // Widget xây dựng dòng thông tin
+  Widget _buildInfoRow(String label, String value, double screenWidth) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 10.0),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(
+            label,
+            style: const TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          SizedBox(
+            width: screenWidth * 0.5,
+            child: Text(
+              value,
+              textAlign: TextAlign.right,
+              style: const TextStyle(fontSize: 16),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 }
