@@ -9,75 +9,84 @@ class OrganizationCard extends StatelessWidget {
   const OrganizationCard({super.key, required this.organization});
 
   @override
-  Widget build(BuildContext context) {
-    return Card(
-      margin: const EdgeInsets.symmetric(vertical: 8.0),
-      elevation: 5,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: InkWell(
-        onTap: () {
-          context.push('/organization-detail/${organization.id}');
-        },
-        child: Column(
+Widget build(BuildContext context) {
+  final bool isDarkMode = Theme.of(context).brightness == Brightness.dark;
+  final Color textColor = isDarkMode ? Colors.white70 : Colors.black54;
+  final Color titleColor = isDarkMode ? Colors.white : Colors.black;
+  final screenWidth = MediaQuery.of(context).size.width;
+
+  // Hàm tính kích thước chữ responsive
+  double getResponsiveFontSize(double baseFontSize) {
+    if (screenWidth > 480) {
+      return baseFontSize * 1.4;
+    } else {
+      return baseFontSize;
+    }
+  }
+
+  return Card(
+    margin: const EdgeInsets.symmetric(vertical: 8.0),
+    elevation: 5,
+    shape: RoundedRectangleBorder(
+      borderRadius: BorderRadius.circular(12),
+    ),
+    color: isDarkMode ? const Color(0xFF1E1E1E) : Colors.white,
+    child: InkWell(
+      onTap: () {
+        context.push('/organization-detail/${organization.id}');
+      },
+      child: Padding(
+        padding: const EdgeInsets.all(12.0),
+        child: Row(
           children: [
-            Stack(
-              children: [
-                ClipRRect(
-                  borderRadius: const BorderRadius.only(
-                    topLeft: Radius.circular(12),
-                    topRight: Radius.circular(12),
-                  ),
-                  child: Image.network(
-                    organization.image.isNotEmpty
-                        ? organization.image
-                        : imagePlaceHolder,
-                    height: 150.0,
-                    width: double.infinity,
-                    fit: BoxFit.cover,
-                  ),
-                ),
-                Positioned(
-                  top: 8.0,
-                  right: 8.0,
-                  child: Icon(
-                    organization.isPrivate ? Icons.lock : Icons.lock_open,
-                    color: organization.isPrivate ? Colors.red : Colors.blue,
-                    size: 30.0,
-                  ),
-                ),
-              ],
+            // Ảnh tổ chức
+            CircleAvatar(
+              radius: screenWidth * 0.06,
+              backgroundImage: organization.image.isNotEmpty
+                  ? NetworkImage(organization.image)
+                  : const AssetImage('images/default-avatar.jpg')
+                      as ImageProvider,
+              backgroundColor: Colors.grey.shade200,
             ),
-            Padding(
-              padding: const EdgeInsets.all(12.0),
+            const SizedBox(width: 16),
+            Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  // Tên tổ chức
                   Text(
                     organization.name,
-                    style: const TextStyle(
-                      fontSize: 18,
+                    style: TextStyle(
+                      fontSize: getResponsiveFontSize(18),
                       fontWeight: FontWeight.bold,
+                      color: titleColor,
                     ),
+                    overflow: TextOverflow.ellipsis,
                   ),
                   const SizedBox(height: 8),
+                  // Mô tả tổ chức
                   Text(
                     organization.description,
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(color: Colors.grey),
-                  ),
-                  const SizedBox(height: 6),
-                  Text(
-                    organization.address,
+                    style: TextStyle(
+                      color: textColor,
+                      fontSize: getResponsiveFontSize(14),
+                    ),
                   ),
                 ],
               ),
             ),
+            // Biểu tượng khóa
+            Icon(
+              organization.isPrivate ? Icons.lock : Icons.lock_open,
+              color: organization.isPrivate ? Colors.red : Colors.blue,
+              size: 24.0,
+            ),
           ],
         ),
       ),
-    );
-  }
+    ),
+  );
+}
 }

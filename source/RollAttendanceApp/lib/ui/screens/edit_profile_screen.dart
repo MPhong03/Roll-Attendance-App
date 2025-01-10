@@ -303,10 +303,18 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     final screenWidth = MediaQuery.of(context).size.width;
     final bool isDarkMode = Theme.of(context).brightness == Brightness.dark;
 
+    double getResponsiveFontSize(double baseFontSize) {
+      if (screenWidth > 480) {
+        return baseFontSize * 1.2;
+      } else {
+        return baseFontSize;
+      }
+    }
+
     return Scaffold(
       body: Stack(
         children: [
-          Container(color: isDarkMode ? Colors.green : Theme.of(context).scaffoldBackgroundColor),
+          Container(color: Theme.of(context).scaffoldBackgroundColor),
           Positioned(
             top: screenHeight * 0.05,
             left: 0,
@@ -315,7 +323,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
               width: screenWidth,
               height: screenHeight * 1,
               decoration: BoxDecoration(
-                color: isDarkMode ? Colors.black : Colors.white,
+                color: isDarkMode ? Color(0xFF1E1E1E): Colors.white,
                 borderRadius: const BorderRadius.only(
                   topLeft: Radius.circular(12),
                   topRight: Radius.circular(12),
@@ -348,9 +356,9 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                     right: 0,
                     child: Center(
                       child: Text(
-                        "EDIT PROFILE",
+                        "ACCOUNT",
                         style: TextStyle(
-                          fontSize: 25,
+                          fontSize: getResponsiveFontSize(25),
                           fontWeight: FontWeight.bold,
                           color: isDarkMode ? Colors.white : Colors.black,
                         ),
@@ -399,7 +407,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                   ),
                   // Thông tin người dùng
                   Positioned(
-                    top: screenHeight * 0.25,
+                    top: screenHeight * 0.3,
                     left: 16,
                     right: 16,
                     child: Column(
@@ -412,34 +420,45 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                   ),
                   // Nút Change Password
                   Positioned(
-                    top: screenHeight * 0.45,
-                    left: 16,
-                    right: 16,
+                    top: screenHeight * 0.5,
+                    left: screenWidth * 0.1,
+                    right: screenWidth * 0.1,
                     child: ElevatedButton(
                       onPressed: () {
-                        // Logic đổi mật khẩu
                       },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.blue,
-                        padding: const EdgeInsets.symmetric(vertical: 14),
+                        minimumSize: const Size(0, 50),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
                       ),
-                      child: const Text("Change Password"),
+                      child: Text(
+                        "Change Password",
+                        style: TextStyle(fontSize: getResponsiveFontSize(16)),
+                      ),
                     ),
                   ),
+
                   // Nút Save
                   Positioned(
-                    top: screenHeight * 0.55,
-                    left: 16,
-                    right: 16,
+                    top: screenHeight * 0.7,
+                    left: screenWidth * 0.1,
+                    right: screenWidth * 0.1,
                     child: ElevatedButton(
                       onPressed: () {
-                        // Logic lưu thay đổi
                       },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.green,
-                        padding: const EdgeInsets.symmetric(vertical: 14),
+                        minimumSize: const Size(0, 50),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
                       ),
-                      child: const Text("Save"),
+                      child: Text(
+                        "Save",
+                        style: TextStyle(fontSize: getResponsiveFontSize(16), color: isDarkMode ? Colors.white : Colors.black),
+                      ),
                     ),
                   ),
                 ],
@@ -453,6 +472,17 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
 
   // Widget xây dựng dòng thông tin
   Widget _buildInfoRow(String label, String value, double screenWidth) {
+    final screenHeight = MediaQuery.of(context).size.height;
+    final screenWidth = MediaQuery.of(context).size.width;
+    final bool isDarkMode = Theme.of(context).brightness == Brightness.dark;
+
+    double getResponsiveFontSize(double baseFontSize) {
+      if (screenWidth > 480) {
+        return baseFontSize * 1.2;
+      } else {
+        return baseFontSize;
+      }
+    }
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 10.0),
       child: Row(
@@ -460,8 +490,8 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
         children: [
           Text(
             label,
-            style: const TextStyle(
-              fontSize: 16,
+            style: TextStyle(
+              fontSize: getResponsiveFontSize(16),
               fontWeight: FontWeight.bold,
             ),
           ),
@@ -470,7 +500,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
             child: Text(
               value,
               textAlign: TextAlign.right,
-              style: const TextStyle(fontSize: 16),
+              style: TextStyle(fontSize: getResponsiveFontSize(16)),
             ),
           ),
         ],

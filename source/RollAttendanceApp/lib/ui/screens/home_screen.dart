@@ -213,7 +213,6 @@ class _HomeScreenState extends State<HomeScreen> {
               hasMoreData = true;
               hasMoreEventData = true;
             });
-            await fetchUserOrganizations();
             await fetchUserAvailableEvents();
           },
           child: ListView(

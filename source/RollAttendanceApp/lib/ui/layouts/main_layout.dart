@@ -138,8 +138,7 @@ class _MainLayoutState extends State<MainLayout> {
     final bool isDarkMode = Theme.of(context).brightness == Brightness.dark;
     final Color selectedBackgroundColor = const Color(0xFF1E8925);
     final Color selectedTextColor = Colors.white;
-    final Color unselectedBackgroundColor =
-        isDarkMode ? Colors.black : Colors.white;
+    final Color unselectedBackgroundColor = isDarkMode ? Color(0xFF121212) : Colors.white;
     final Color unselectedTextColor = const Color(0xFF1E8925);
     final Color borderColor =
         isDarkMode ? Colors.white : Colors.black.withOpacity(0.1);
