@@ -29,7 +29,7 @@ namespace RollAttendanceServer.Controllers
 
             try
             {
-                var requestId = await _participationRequestService.CreateParticipationRequestAsync(userId, requestDto.OrganizationId);
+                var requestId = await _participationRequestService.CreateParticipationRequestAsync(userId, requestDto.OrganizationId, requestDto.Notes);
                 return Ok(new { Message = "Yêu cầu đã được tạo.", RequestId = requestId });
             }
             catch (Exception ex)
@@ -75,6 +75,7 @@ namespace RollAttendanceServer.Controllers
     public class CreateParticipationRequestDto
     {
         public string OrganizationId { get; set; } = string.Empty;
+        public string? Notes { get; set; }
     }
 
     public class ApproveOrRejectRequestDto

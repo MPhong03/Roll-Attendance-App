@@ -14,6 +14,7 @@ namespace RollAttendanceServer.Models
         public string? OrganizationId { get; set; }
         public string? OrganizationName { get; set; }
         public string? ParticipationMethod { get; set; }
+        public string? Notes { get; set; }
         public short RequestStatus { get; set; } = (short)Status.REQUEST_WAITING;
     }
 }

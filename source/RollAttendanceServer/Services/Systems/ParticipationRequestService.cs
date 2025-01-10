@@ -15,7 +15,7 @@ namespace RollAttendanceServer.Services.Systems
             _context = context;
         }
 
-        public async Task<string> CreateParticipationRequestAsync(string userId, string organizationId)
+        public async Task<string> CreateParticipationRequestAsync(string userId, string organizationId, string notes)
         {
             var organization = await _context.Organizations.FindAsync(organizationId);
             if (organization == null)
@@ -42,6 +42,7 @@ namespace RollAttendanceServer.Services.Systems
                 UserEmail = user.Email,
                 OrganizationId = organizationId,
                 OrganizationName = organization.Name,
+                Notes = notes,
                 ParticipationMethod = "Online",
                 RequestStatus = (short)Status.REQUEST_WAITING
             };
