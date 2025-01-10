@@ -300,6 +300,15 @@ class _ProfileScreenState extends State<ProfileScreen> {
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
     final screenHeight = MediaQuery.of(context).size.height;
+    final bool isDarkMode = Theme.of(context).brightness == Brightness.dark;
+
+    double getResponsiveFontSize(double baseFontSize) {
+      if (screenWidth > 480) {
+        return baseFontSize * 1.2;
+      } else {
+        return baseFontSize;
+      }
+    }
 
     return Scaffold(
       body: RefreshIndicator(
@@ -317,7 +326,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 width: screenWidth,
                 height: screenHeight * 0.9,
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                  color: isDarkMode ? Color(0xFF1E1E1E) : Colors.white,
                   borderRadius: const BorderRadius.only(
                     topLeft: Radius.circular(12),
                     topRight: Radius.circular(12),
@@ -338,61 +347,60 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     right: 16.0,
                   ),
                   child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      // Thông tin người dùng
-                      Stack(
-                        alignment: Alignment.bottomRight,
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          CircleAvatar(
-                            radius: 60,
-                            backgroundImage: profileImageUrl.isNotEmpty
-                                ? NetworkImage(profileImageUrl)
-                                : const AssetImage('images/default-avatar.jpg')
-                                    as ImageProvider,
-                            backgroundColor: Colors.grey.shade200,
-                          ),
-                          Container(
-                            decoration: BoxDecoration(
-                              shape: BoxShape.circle,
-                              color: Colors.white,
-                              boxShadow: [
-                                BoxShadow(
-                                  color: Colors.black.withOpacity(0.3),
-                                  blurRadius: 2,
-                                  offset: const Offset(0, 2),
+                          // Avatar
+                          Padding(
+                            padding: EdgeInsets.only(left: screenWidth * 0.05),
+                            child: Stack(
+                              alignment: Alignment.bottomRight,
+                              children: [
+                                CircleAvatar(
+                                  radius: 60,
+                                  backgroundImage: profileImageUrl.isNotEmpty
+                                      ? NetworkImage(profileImageUrl)
+                                      : const AssetImage(
+                                              'images/default-avatar.jpg')
+                                          as ImageProvider,
+                                  backgroundColor: Colors.grey.shade200,
                                 ),
                               ],
                             ),
-                            child: IconButton(
-                              icon: const Icon(
-                                Icons.edit,
-                                color: Colors.grey,
-                              ),
-                              onPressed: () {
-                                context.push('/editprofile');
-                              },
+                          ),
+                          const SizedBox(width: 16),
+                          // User Info
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Padding(
+                                  padding: const EdgeInsets.only(bottom: 2),
+                                  child: Text(
+                                    name.isNotEmpty ? name : noName,
+                                    style: TextStyle(
+                                      fontSize: getResponsiveFontSize(24),
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ),
+                                const SizedBox(height: 8),
+                                Text(
+                                  email.isNotEmpty
+                                      ? email
+                                      : 'Unable to load email!',
+                                  style: TextStyle(
+                                    fontSize: getResponsiveFontSize(16),
+                                    color: Colors.grey,
+                                  ),
+                                ),
+                              ],
                             ),
                           ),
                         ],
-                      ),
-                      const SizedBox(height: 20),
-                      Text(
-                        name.isNotEmpty ? name : noName,
-                        textAlign: TextAlign.center,
-                        style: const TextStyle(
-                          fontSize: 24,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      const SizedBox(height: 10),
-                      Text(
-                        email.isNotEmpty ? email : 'Unable to load email!',
-                        textAlign: TextAlign.center,
-                        style: const TextStyle(
-                          fontSize: 16,
-                          color: Colors.grey,
-                        ),
                       ),
                       const SizedBox(height: 20),
 
@@ -402,36 +410,46 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       // Danh sách các cài đặt
                       ListTile(
                         leading: const Icon(Icons.account_circle),
-                        title: const Text('Account'),
-                        onTap: () {},
+                        title: Text(
+                          'Account',
+                          style: TextStyle(fontSize: getResponsiveFontSize(16)),
+                        ),
+                        onTap: () {
+                          context.push("/editprofile");
+                        },
                       ),
                       ListTile(
                         leading: const Icon(Icons.lock),
-                        title: const Text('Privacy'),
+                        title: Text(
+                          'Privacy',
+                          style: TextStyle(fontSize: getResponsiveFontSize(16)),
+                        ),
                         onTap: () {
                           context.push("/update-face-data");
                         },
                       ),
                       ListTile(
-                        leading: const Icon(Icons.markunread_mailbox_rounded),
-                        title: const Text('Requests'),
-                        onTap: () {
-                          context.push("/my-requests");
-                        },
-                      ),
-                      ListTile(
                         leading: const Icon(Icons.notifications),
-                        title: const Text('Notifications'),
+                        title: Text(
+                          'Notifications',
+                          style: TextStyle(fontSize: getResponsiveFontSize(16)),
+                        ),
                         onTap: () {},
                       ),
                       ListTile(
                         leading: const Icon(Icons.language),
-                        title: const Text('Language'),
+                        title: Text(
+                          'Language',
+                          style: TextStyle(fontSize: getResponsiveFontSize(16)),
+                        ),
                         onTap: () {},
                       ),
                       ListTile(
                         leading: const Icon(Icons.help),
-                        title: const Text('Help & Support'),
+                        title: Text(
+                          'Help & Support',
+                          style: TextStyle(fontSize: getResponsiveFontSize(16)),
+                        ),
                         onTap: () {},
                       ),
                     ],

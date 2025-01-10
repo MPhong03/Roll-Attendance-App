@@ -214,7 +214,7 @@ class _EventCheckInScreenState extends State<EventCheckInScreen> {
                         height: screenHeight * 0.8,
                         padding: const EdgeInsets.all(16.0),
                         decoration: BoxDecoration(
-                          color: Theme.of(context).cardColor,
+                          color: isDarkMode ? Color(0xFF1E1E1E): Colors.white,
                           borderRadius: BorderRadius.circular(12),
                           boxShadow: [
                             BoxShadow(

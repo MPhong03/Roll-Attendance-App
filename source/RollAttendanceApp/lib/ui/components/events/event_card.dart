@@ -76,6 +76,7 @@ class EventCard extends StatelessWidget {
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
       ),
+      color: isDarkMode ? Color(0xFF1E1E1E) : Colors.white,
       child: InkWell(
         onTap: () {
           context.push('/event-check-in/${event.id}');
