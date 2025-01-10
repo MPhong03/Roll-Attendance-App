@@ -33,6 +33,7 @@ namespace RollAttendanceServer.Controllers
                     query.UserId ?? userId,
                     query.OrganizationId,
                     query.Keyword,
+                    query.Status,
                     query.PageIndex,
                     query.PageSize
                 );
@@ -128,6 +129,7 @@ namespace RollAttendanceServer.Controllers
         public string? UserId { get; set; }
         public string? OrganizationId { get; set; }
         public string? Keyword { get; set; }
+        public int Status { get; set; }
         public int PageIndex { get; set; } = 1;
         public int PageSize { get; set; } = 10;
     }

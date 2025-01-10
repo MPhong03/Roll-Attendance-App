@@ -20,6 +20,7 @@ namespace RollAttendanceServer.Services.Systems
             string userId,
             string organizationId,
             string keyword,
+            int status,
             int pageIndex,
             int pageSize)
         {
@@ -33,6 +34,11 @@ namespace RollAttendanceServer.Services.Systems
             if (!string.IsNullOrEmpty(organizationId))
             {
                 query = query.Where(r => r.OrganizationId == organizationId);
+            }
+
+            if (status >= 0)
+            {
+                query = query.Where(r => r.RequestStatus == (short)status);
             }
 
             if (!string.IsNullOrEmpty(keyword))
