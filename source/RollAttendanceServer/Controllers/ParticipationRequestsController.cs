@@ -35,7 +35,8 @@ namespace RollAttendanceServer.Controllers
                     query.Keyword,
                     query.Status,
                     query.PageIndex,
-                    query.PageSize
+                    query.PageSize,
+                    query.ForUser
                 );
 
                 return Ok(new
@@ -126,6 +127,7 @@ namespace RollAttendanceServer.Controllers
 
     public class ParticipationQuery
     {
+        public bool ForUser { get; set; } = true;
         public string? UserId { get; set; }
         public string? OrganizationId { get; set; }
         public string? Keyword { get; set; }

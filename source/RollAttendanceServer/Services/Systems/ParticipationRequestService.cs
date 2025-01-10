@@ -22,11 +22,12 @@ namespace RollAttendanceServer.Services.Systems
             string keyword,
             int status,
             int pageIndex,
-            int pageSize)
+            int pageSize,
+            bool forUser)
         {
             var query = _context.ParticipationRequests.AsQueryable();
 
-            if (!string.IsNullOrEmpty(userId))
+            if (!string.IsNullOrEmpty(userId) && forUser)
             {
                 query = query.Where(r => r.UserId == userId);
             }
