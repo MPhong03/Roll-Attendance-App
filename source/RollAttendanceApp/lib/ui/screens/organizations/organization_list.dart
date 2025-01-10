@@ -212,41 +212,78 @@ class _OrganizationScreenState extends State<OrganizationScreen> {
             IconButton(
               icon: Icon(Icons.search, color: textColor),
               onPressed: () {
-                // Hành động khi nhấn vào nút tìm kiếm
                 context.push("/search-organization");
               },
             ),
           ],
         ),
-        body: RefreshIndicator(
-          onRefresh: () async {
-            setState(() {
-              pageIndex = 0;
-              pageEventIndex = 1;
-              hasMoreData = true;
-              hasMoreEventData = true;
-            });
-            await fetchUserOrganizations();
-            await fetchUserAvailableEvents();
-          },
-          child: ListView(
-            padding: const EdgeInsets.all(16.0),
-            children: [
-              // const SizedBox(height: 50),
-              if (organizations.isEmpty)
-                Center(
+        body: Stack(
+          children: [
+            Padding(
+              padding: const EdgeInsets.only(top: 100.0),
+              child: RefreshIndicator(
+                onRefresh: () async {
+                  setState(() {
+                    pageIndex = 0;
+                    pageEventIndex = 1;
+                    hasMoreData = true;
+                    hasMoreEventData = true;
+                  });
+                  await fetchUserOrganizations();
+                  await fetchUserAvailableEvents();
+                },
+                child: ListView(
+                  padding: const EdgeInsets.all(16.0),
+                  children: [
+                    if (organizations.isEmpty)
+                      Center(
+                        child: Text(
+                          'No organizations available.',
+                          style: TextStyle(
+                            fontSize: getResponsiveFontSize(16),
+                            color: textColor,
+                          ),
+                        ),
+                      ),
+                    ...organizations.map(
+                      (org) => OrganizationCard(organization: org),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            Positioned(
+              top: 0.0,
+              left: 0.0,
+              right: 0.0,
+              child: Container(
+                height: 100.0,
+                padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 16.0),
+                color: backgroundColor,
+                child: ElevatedButton(
+                  onPressed: () {
+                    context.push("/create-organization");
+                  },
+                  style: ElevatedButton.styleFrom(
+                    minimumSize: const Size(double.infinity, 50),
+                    padding: const EdgeInsets.symmetric(vertical: 14),
+                    backgroundColor: Colors.green,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
                   child: Text(
-                    'No organizations available.',
+                    "Create New Organization",
                     style: TextStyle(
+                      color: Colors.white,
                       fontSize: getResponsiveFontSize(16),
-                      color: textColor,
+                      fontWeight: FontWeight.bold,
                     ),
                   ),
                 ),
-              ...organizations
-                  .map((org) => OrganizationCard(organization: org)),
-            ],
-          ),
+              ),
+            ),
+          ],
         ),
       ),
     );

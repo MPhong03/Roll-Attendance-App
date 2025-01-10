@@ -85,10 +85,6 @@ class MyApp extends StatelessWidget {
                   builder: (context, state) => const HomeScreen(),
                 ),
                 GoRoute(
-                  path: '/create-organization',
-                  builder: (context, state) => const CreateOrganizationScreen(),
-                ),
-                GoRoute(
                   path: '/organization',
                   builder: (context, state) => const OrganizationScreen(),
                 ),
@@ -97,6 +93,10 @@ class MyApp extends StatelessWidget {
                   builder: (context, state) => const ProfileScreen(),
                 ),
               ],
+            ),
+            GoRoute(
+              path: '/create-organization',
+              builder: (context, state) => const CreateOrganizationScreen(),
             ),
             GoRoute(
               path: '/signin',

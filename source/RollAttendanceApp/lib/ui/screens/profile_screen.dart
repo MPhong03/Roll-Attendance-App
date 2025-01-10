@@ -9,6 +9,7 @@ import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:itproject/services/api_service.dart';
 import 'package:itproject/services/user_service.dart';
+import 'package:awesome_dialog/awesome_dialog.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -52,6 +53,41 @@ class _ProfileScreenState extends State<ProfileScreen> {
         _overlayEntry = null;
       }
     });
+  }
+
+  Future<void> _logout() async {
+    _showLoadingOverlay();
+
+    try {
+      await FirebaseAuth.instance.signOut();
+
+      if (mounted) {
+        Fluttertoast.showToast(
+          msg: "You have been logged out",
+          toastLength: Toast.LENGTH_SHORT,
+          gravity: ToastGravity.BOTTOM,
+          timeInSecForIosWeb: 1,
+          backgroundColor: Colors.black,
+          textColor: Colors.white,
+          fontSize: 16.0,
+        );
+
+        context.go('/');
+      }
+    } catch (e) {
+      if (mounted) {
+        AwesomeDialog(
+          context: context,
+          dialogType: DialogType.error,
+          animType: AnimType.bottomSlide,
+          title: 'Error',
+          desc: 'Error, $e',
+          btnCancelOnPress: () {},
+        ).show();
+      }
+    } finally {
+      _hideLoadingOverlay();
+    }
   }
 
   @override
@@ -451,6 +487,16 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           style: TextStyle(fontSize: getResponsiveFontSize(16)),
                         ),
                         onTap: () {},
+                      ),
+                      ListTile(
+                        leading: const Icon(Icons.logout),
+                        title: Text(
+                          'Logout',
+                          style: TextStyle(fontSize: getResponsiveFontSize(16)),
+                        ),
+                        onTap: () {
+                          _logout();
+                        },
                       ),
                     ],
                   ),
