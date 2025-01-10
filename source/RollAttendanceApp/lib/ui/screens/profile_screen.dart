@@ -9,7 +9,6 @@ import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:itproject/services/api_service.dart';
 import 'package:itproject/services/user_service.dart';
-import 'package:itproject/ui/layouts/main_layout.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -298,144 +297,151 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   @override
-Widget build(BuildContext context) {
-  final screenWidth = MediaQuery.of(context).size.width;
-  final screenHeight = MediaQuery.of(context).size.height;
+  Widget build(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final screenHeight = MediaQuery.of(context).size.height;
 
-  return Scaffold(
-    body: RefreshIndicator(
-      onRefresh: _getProfile,
-      child: Stack(
-        children: [
-          Container(
-            color: Theme.of(context).scaffoldBackgroundColor,
-          ),
-          Positioned(
-            top: screenHeight * 0.05,
-            left: 0,
-            right: 0,
-            child: Container(
-              width: screenWidth,
-              height: screenHeight * 0.9,
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: const BorderRadius.only(
-                  topLeft: Radius.circular(12),
-                  topRight: Radius.circular(12),
-                ),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.2),
-                    blurRadius: 4,
-                    spreadRadius: 2,
-                    offset: const Offset(0, 2),
+    return Scaffold(
+      body: RefreshIndicator(
+        onRefresh: _getProfile,
+        child: Stack(
+          children: [
+            Container(
+              color: Theme.of(context).scaffoldBackgroundColor,
+            ),
+            Positioned(
+              top: screenHeight * 0.05,
+              left: 0,
+              right: 0,
+              child: Container(
+                width: screenWidth,
+                height: screenHeight * 0.9,
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: const BorderRadius.only(
+                    topLeft: Radius.circular(12),
+                    topRight: Radius.circular(12),
                   ),
-                ],
-              ),
-              child: Padding(
-                padding: EdgeInsets.only(
-                  top: screenHeight * 0.1,
-                  left: 16.0,
-                  right: 16.0,
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    // Thông tin người dùng
-                    Stack(
-                      alignment: Alignment.bottomRight,
-                      children: [
-                        CircleAvatar(
-                          radius: 60,
-                          backgroundImage: profileImageUrl.isNotEmpty
-                              ? NetworkImage(profileImageUrl)
-                              : const AssetImage('images/default-avatar.jpg')
-                                  as ImageProvider,
-                          backgroundColor: Colors.grey.shade200,
-                        ),
-                        Container(
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            color: Colors.white,
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.black.withOpacity(0.3),
-                                blurRadius: 2,
-                                offset: const Offset(0, 2),
-                              ),
-                            ],
-                          ),
-                          child: IconButton(
-                            icon: const Icon(
-                              Icons.edit,
-                              color: Colors.grey,
-                            ),
-                            onPressed: () {
-                              context.push('/editprofile');
-                            },
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 20),
-                    Text(
-                      name.isNotEmpty ? name : noName,
-                      textAlign: TextAlign.center,
-                      style: const TextStyle(
-                        fontSize: 24,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    const SizedBox(height: 10),
-                    Text(
-                      email.isNotEmpty ? email : 'Unable to load email!',
-                      textAlign: TextAlign.center,
-                      style: const TextStyle(
-                        fontSize: 16,
-                        color: Colors.grey,
-                      ),
-                    ),
-                    const SizedBox(height: 20),
-
-                    // Divider
-                    const Divider(),
-
-                    // Danh sách các cài đặt
-                    ListTile(
-                      leading: const Icon(Icons.account_circle),
-                      title: const Text('Account'),
-                      onTap: () {},
-                    ),
-                    ListTile(
-                      leading: const Icon(Icons.lock),
-                      title: const Text('Privacy'),
-                      onTap: () {
-                        context.push("/update-face-data");
-                      },
-                    ),
-                    ListTile(
-                      leading: const Icon(Icons.notifications),
-                      title: const Text('Notifications'),
-                      onTap: () {},
-                    ),
-                    ListTile(
-                      leading: const Icon(Icons.language),
-                      title: const Text('Language'),
-                      onTap: () {},
-                    ),
-                    ListTile(
-                      leading: const Icon(Icons.help),
-                      title: const Text('Help & Support'),
-                      onTap: () {},
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.2),
+                      blurRadius: 4,
+                      spreadRadius: 2,
+                      offset: const Offset(0, 2),
                     ),
                   ],
                 ),
+                child: Padding(
+                  padding: EdgeInsets.only(
+                    top: screenHeight * 0.1,
+                    left: 16.0,
+                    right: 16.0,
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      // Thông tin người dùng
+                      Stack(
+                        alignment: Alignment.bottomRight,
+                        children: [
+                          CircleAvatar(
+                            radius: 60,
+                            backgroundImage: profileImageUrl.isNotEmpty
+                                ? NetworkImage(profileImageUrl)
+                                : const AssetImage('images/default-avatar.jpg')
+                                    as ImageProvider,
+                            backgroundColor: Colors.grey.shade200,
+                          ),
+                          Container(
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              color: Colors.white,
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black.withOpacity(0.3),
+                                  blurRadius: 2,
+                                  offset: const Offset(0, 2),
+                                ),
+                              ],
+                            ),
+                            child: IconButton(
+                              icon: const Icon(
+                                Icons.edit,
+                                color: Colors.grey,
+                              ),
+                              onPressed: () {
+                                context.push('/editprofile');
+                              },
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 20),
+                      Text(
+                        name.isNotEmpty ? name : noName,
+                        textAlign: TextAlign.center,
+                        style: const TextStyle(
+                          fontSize: 24,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const SizedBox(height: 10),
+                      Text(
+                        email.isNotEmpty ? email : 'Unable to load email!',
+                        textAlign: TextAlign.center,
+                        style: const TextStyle(
+                          fontSize: 16,
+                          color: Colors.grey,
+                        ),
+                      ),
+                      const SizedBox(height: 20),
+
+                      // Divider
+                      const Divider(),
+
+                      // Danh sách các cài đặt
+                      ListTile(
+                        leading: const Icon(Icons.account_circle),
+                        title: const Text('Account'),
+                        onTap: () {},
+                      ),
+                      ListTile(
+                        leading: const Icon(Icons.lock),
+                        title: const Text('Privacy'),
+                        onTap: () {
+                          context.push("/update-face-data");
+                        },
+                      ),
+                      ListTile(
+                        leading: const Icon(Icons.markunread_mailbox_rounded),
+                        title: const Text('Requests'),
+                        onTap: () {
+                          context.push("/my-requests");
+                        },
+                      ),
+                      ListTile(
+                        leading: const Icon(Icons.notifications),
+                        title: const Text('Notifications'),
+                        onTap: () {},
+                      ),
+                      ListTile(
+                        leading: const Icon(Icons.language),
+                        title: const Text('Language'),
+                        onTap: () {},
+                      ),
+                      ListTile(
+                        leading: const Icon(Icons.help),
+                        title: const Text('Help & Support'),
+                        onTap: () {},
+                      ),
+                    ],
+                  ),
+                ),
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
-    ),
-  );
-}
+    );
+  }
 }

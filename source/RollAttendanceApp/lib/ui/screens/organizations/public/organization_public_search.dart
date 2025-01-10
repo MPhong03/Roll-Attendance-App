@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:itproject/models/public_organization_model.dart';
 import 'package:itproject/services/api_service.dart';
 
@@ -131,39 +132,45 @@ class _OrganizationPublicSearchScreenState
                         itemCount: organizations.length,
                         itemBuilder: (context, index) {
                           final org = organizations[index];
-                          return Card(
-                            margin: const EdgeInsets.symmetric(vertical: 8),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                            elevation: 4,
-                            child: ListTile(
-                              leading: ClipRRect(
-                                borderRadius: BorderRadius.circular(8),
-                                child: Image.network(
-                                  org.image ??
-                                      'https://via.placeholder.com/150',
-                                  fit: BoxFit.cover,
-                                  width: 50,
-                                  height: 50,
-                                ),
+                          return GestureDetector(
+                            onTap: () {
+                              context.push(
+                                  '/public-organization-detail/${org.id}');
+                            },
+                            child: Card(
+                              margin: const EdgeInsets.symmetric(vertical: 8),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12),
                               ),
-                              title: Text(org.name ?? 'N/A'),
-                              subtitle: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(org.description ?? 'No description'),
-                                  const SizedBox(height: 5),
-                                  Text('Address: ${org.address ?? 'N/A'}'),
-                                  const SizedBox(height: 5),
-                                  Row(
-                                    children: [
-                                      Text('Users: ${org.users}'),
-                                      const SizedBox(width: 10),
-                                      Text('Events: ${org.events}'),
-                                    ],
+                              elevation: 4,
+                              child: ListTile(
+                                leading: ClipRRect(
+                                  borderRadius: BorderRadius.circular(8),
+                                  child: Image.network(
+                                    org.image ??
+                                        'https://via.placeholder.com/150',
+                                    fit: BoxFit.cover,
+                                    width: 50,
+                                    height: 50,
                                   ),
-                                ],
+                                ),
+                                title: Text(org.name ?? 'N/A'),
+                                subtitle: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(org.description ?? 'No description'),
+                                    const SizedBox(height: 5),
+                                    Text('Address: ${org.address ?? 'N/A'}'),
+                                    const SizedBox(height: 5),
+                                    Row(
+                                      children: [
+                                        Text('Users: ${org.users}'),
+                                        const SizedBox(width: 10),
+                                        Text('Events: ${org.events}'),
+                                      ],
+                                    ),
+                                  ],
+                                ),
                               ),
                             ),
                           );

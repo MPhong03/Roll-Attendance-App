@@ -17,10 +17,13 @@ import 'package:itproject/ui/screens/organizations/add_user_to_organization.dart
 import 'package:itproject/ui/screens/organizations/create_organization.dart';
 import 'package:itproject/ui/screens/organizations/edit_organization.dart';
 import 'package:itproject/ui/screens/organizations/organization_detail.dart';
+import 'package:itproject/ui/screens/organizations/organization_join_requests.dart';
 import 'package:itproject/ui/screens/organizations/organization_list.dart';
-import 'package:itproject/ui/screens/organizations/organization_public_search.dart';
+import 'package:itproject/ui/screens/organizations/public/organization_public_search.dart';
+import 'package:itproject/ui/screens/organizations/public/public_organization_detail.dart';
 import 'package:itproject/ui/screens/profile_screen.dart';
 import 'package:itproject/ui/screens/edit_profile_screen.dart';
+import 'package:itproject/ui/screens/settings/my_request_screen.dart';
 import 'package:itproject/ui/screens/settings/update_face_data_screen.dart';
 import 'firebase_options.dart';
 import 'package:go_router/go_router.dart';
@@ -128,6 +131,13 @@ class MyApp extends StatelessWidget {
               },
             ),
             GoRoute(
+              path: '/public-organization-detail/:id',
+              builder: (context, state) {
+                final id = state.pathParameters['id']!;
+                return PublicOrganizationDetailScreen(organizationId: id);
+              },
+            ),
+            GoRoute(
               path: '/search-organization',
               builder: (context, state) =>
                   const OrganizationPublicSearchScreen(),
@@ -179,6 +189,17 @@ class MyApp extends StatelessWidget {
               builder: (context, state) {
                 final id = state.pathParameters['id']!;
                 return AddUserToOrganizationScreen(organizationId: id);
+              },
+            ),
+            GoRoute(
+              path: '/my-requests',
+              builder: (context, state) => const MyRequestsScreen(),
+            ),
+            GoRoute(
+              path: '/organization-requests/:id',
+              builder: (context, state) {
+                final id = state.pathParameters['id']!;
+                return OrganizationJoinRequestsScreen(organizationId: id);
               },
             ),
           ],

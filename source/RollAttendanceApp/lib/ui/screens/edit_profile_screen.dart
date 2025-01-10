@@ -9,7 +9,6 @@ import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:itproject/services/api_service.dart';
 import 'package:itproject/services/user_service.dart';
-import 'package:itproject/ui/layouts/main_layout.dart';
 
 class EditProfileScreen extends StatefulWidget {
   const EditProfileScreen({super.key});
@@ -297,7 +296,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     }
   }
 
-   @override
+  @override
   Widget build(BuildContext context) {
     final screenHeight = MediaQuery.of(context).size.height;
     final screenWidth = MediaQuery.of(context).size.width;
@@ -306,7 +305,10 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     return Scaffold(
       body: Stack(
         children: [
-          Container(color: isDarkMode ? Colors.green : Theme.of(context).scaffoldBackgroundColor),
+          Container(
+              color: isDarkMode
+                  ? Colors.green
+                  : Theme.of(context).scaffoldBackgroundColor),
           Positioned(
             top: screenHeight * 0.05,
             left: 0,
@@ -368,7 +370,8 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                           radius: 60,
                           backgroundImage: profileImageUrl.isNotEmpty
                               ? NetworkImage(profileImageUrl)
-                              : const AssetImage('images/default-avatar.jpg') as ImageProvider,
+                              : const AssetImage('images/default-avatar.jpg')
+                                  as ImageProvider,
                           backgroundColor: Colors.grey.shade200,
                         ),
                         Container(

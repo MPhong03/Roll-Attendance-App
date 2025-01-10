@@ -24,21 +24,27 @@ class ApiService {
   }
 
   // GET METHOD
-  Future<http.Response> get(String endpoint) async {
+  Future<http.Response> get(String endpoint,
+      {Map<String, dynamic>? queryParams}) async {
     try {
       final accessToken = await _getAccessToken();
+      Uri uri = Uri.parse('$baseUrl/$endpoint');
+      if (queryParams != null && queryParams.isNotEmpty) {
+        uri = uri.replace(queryParameters: queryParams);
+      }
       final response = await http.get(
-        Uri.parse('$baseUrl/$endpoint'),
+        uri,
         headers: {
           'Authorization': 'Bearer $accessToken',
           'Content-Type': 'application/json',
         },
       );
       _logResponse(
-          response: response,
-          url: Uri.parse('$baseUrl/$endpoint').toString(),
-          method: 'GET',
-          requestBody: null);
+        response: response,
+        url: uri.toString(),
+        method: 'GET',
+        requestBody: null,
+      );
       return response;
     } catch (e) {
       print('Error during GET request to $endpoint: $e');
@@ -292,6 +298,17 @@ class ApiService {
     for (var i = 0; i < data.length; i += chunkSize) {
       print(data.substring(
           i, i + chunkSize > data.length ? data.length : i + chunkSize));
+    }
+  }
+
+  void printAccessToken(String accessToken) {
+    const chunkSize = 100;
+    for (var i = 0; i < accessToken.length; i += chunkSize) {
+      print(accessToken.substring(
+          i,
+          i + chunkSize > accessToken.length
+              ? accessToken.length
+              : i + chunkSize));
     }
   }
 

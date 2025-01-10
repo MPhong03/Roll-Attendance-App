@@ -82,6 +82,17 @@ namespace RollAttendanceServer.Services.Systems
                 throw new Exception("Người dùng đã tham gia tổ chức này.");
             }
 
+            var existingRequest = await _context.ParticipationRequests
+                                                .FirstOrDefaultAsync(r =>
+                                                    r.UserId == userId &&
+                                                    r.OrganizationId == organizationId &&
+                                                    r.RequestStatus == (short)Status.REQUEST_WAITING);
+
+            if (existingRequest != null)
+            {
+                throw new Exception("Người dùng đã nộp đơn tham gia tổ chức này và đang chờ xử lý.");
+            }
+
             var user = await _context.Users.FindAsync(userId);
             if (user == null)
             {
@@ -91,6 +102,7 @@ namespace RollAttendanceServer.Services.Systems
             var newRequest = new ParticipationRequest
             {
                 UserId = userId,
+                UserName = user.DisplayName,
                 UserEmail = user.Email,
                 OrganizationId = organizationId,
                 OrganizationName = organization.Name,

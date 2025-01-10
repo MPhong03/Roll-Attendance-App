@@ -261,6 +261,20 @@ class _OrganizationDetailScreenState extends State<OrganizationDetailScreen> {
                                 ),
                               ],
                             ),
+                            const SizedBox(height: 20),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                              children: [
+                                ElevatedButton.icon(
+                                  onPressed: () {
+                                    context.push(
+                                        '/organization-requests/${widget.organizationId}');
+                                  },
+                                  icon: const Icon(Icons.mail),
+                                  label: const Text('Requests'),
+                                ),
+                              ],
+                            ),
                           ],
                         ),
                       ),

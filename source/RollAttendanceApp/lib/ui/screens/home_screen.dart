@@ -8,7 +8,6 @@ import 'package:itproject/models/available_event_model.dart';
 import 'package:itproject/models/organization_model.dart';
 import 'package:itproject/services/api_service.dart';
 import 'package:itproject/ui/components/events/event_card.dart';
-import 'package:itproject/ui/components/organizations/organization_card.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -199,6 +198,7 @@ class _HomeScreenState extends State<HomeScreen> {
         return baseFontSize;
       }
     }
+
     return BlurryModalProgressHUD(
       inAsyncCall: _isLoading,
       opacity: 0.3,
