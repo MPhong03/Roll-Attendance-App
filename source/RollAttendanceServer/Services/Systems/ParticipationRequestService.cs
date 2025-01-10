@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using RollAttendanceServer.Data;
 using RollAttendanceServer.Data.Enum;
+using RollAttendanceServer.Data.Responses;
 using RollAttendanceServer.Interfaces;
 using RollAttendanceServer.Models;
 
@@ -13,6 +14,50 @@ namespace RollAttendanceServer.Services.Systems
         public ParticipationRequestService(ApplicationDbContext context)
         {
             _context = context;
+        }
+
+        public async Task<PagedResult<ParticipationRequest>> GetParticipationRequestsAsync(
+            string userId,
+            string organizationId,
+            string keyword,
+            int pageIndex,
+            int pageSize)
+        {
+            var query = _context.ParticipationRequests.AsQueryable();
+
+            if (!string.IsNullOrEmpty(userId))
+            {
+                query = query.Where(r => r.UserId == userId);
+            }
+
+            if (!string.IsNullOrEmpty(organizationId))
+            {
+                query = query.Where(r => r.OrganizationId == organizationId);
+            }
+
+            if (!string.IsNullOrEmpty(keyword))
+            {
+                query = query.Where(r =>
+                    (r.UserName != null && r.UserName.Contains(keyword, StringComparison.OrdinalIgnoreCase)) ||
+                    (r.UserEmail != null && r.UserEmail.Contains(keyword, StringComparison.OrdinalIgnoreCase)) ||
+                    (r.OrganizationName != null && r.OrganizationName.Contains(keyword, StringComparison.OrdinalIgnoreCase))
+                );
+            }
+
+            var totalRecords = await query.CountAsync();
+
+            var requests = await query
+                .Skip((pageIndex - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync();
+
+            return new PagedResult<ParticipationRequest>
+            {
+                Items = requests,
+                TotalRecords = totalRecords,
+                PageIndex = pageIndex,
+                PageSize = pageSize
+            };
         }
 
         public async Task<string> CreateParticipationRequestAsync(string userId, string organizationId, string notes)

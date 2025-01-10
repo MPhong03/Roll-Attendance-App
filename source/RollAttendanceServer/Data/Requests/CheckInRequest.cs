@@ -1,4 +1,4 @@
-﻿namespace RollAttendanceServer.Requests
+﻿namespace RollAttendanceServer.Data.Requests
 {
     public class CheckInRequest
     {

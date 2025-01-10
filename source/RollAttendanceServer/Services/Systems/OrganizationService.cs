@@ -3,9 +3,9 @@ using RollAttendanceServer.Data;
 using RollAttendanceServer.DTOs;
 using RollAttendanceServer.Interfaces;
 using RollAttendanceServer.Models;
-using RollAttendanceServer.Requests;
 using Microsoft.EntityFrameworkCore;
 using Google.Api.Gax.ResourceNames;
+using RollAttendanceServer.Data.Requests;
 
 namespace RollAttendanceServer.Services.Systems
 {

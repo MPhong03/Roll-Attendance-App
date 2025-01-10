@@ -2,9 +2,9 @@
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using RollAttendanceServer.Data;
+using RollAttendanceServer.Data.Requests;
 using RollAttendanceServer.DTOs;
 using RollAttendanceServer.Interfaces;
-using RollAttendanceServer.Requests;
 using System.Security.Claims;
 
 namespace RollAttendanceServer.Controllers

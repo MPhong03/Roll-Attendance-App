@@ -1,7 +1,7 @@
 ﻿using RollAttendanceServer.Data.Enum;
+using RollAttendanceServer.Data.Requests;
 using RollAttendanceServer.DTOs;
 using RollAttendanceServer.Models;
-using RollAttendanceServer.Requests;
 
 namespace RollAttendanceServer.Interfaces
 {

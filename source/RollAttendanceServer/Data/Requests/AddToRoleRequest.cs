@@ -1,6 +1,6 @@
 ﻿using RollAttendanceServer.Data.Enum;
 
-namespace RollAttendanceServer.Requests
+namespace RollAttendanceServer.Data.Requests
 {
     public class AddToRoleRequest
     {
