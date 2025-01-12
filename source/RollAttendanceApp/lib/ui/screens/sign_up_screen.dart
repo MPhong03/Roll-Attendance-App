@@ -150,200 +150,211 @@ class _SignUpScreenState extends State<SignUpScreen> {
   }
 
   @override
-Widget build(BuildContext context) {
-  final screenWidth = MediaQuery.of(context).size.width;
+  Widget build(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    
+    double getResponsiveFontSize(double baseFontSize) {
+        if (screenWidth > 480) {
+          return baseFontSize * 1.2;
+        } else {
+          return baseFontSize;
+        }
+      }
 
-  return BlurryModalProgressHUD(
-    inAsyncCall: _isLoading,
-    opacity: 0.3,
-    blurEffectIntensity: 5,
-    child: Scaffold(
-      backgroundColor: const Color.fromRGBO(197, 240, 200, 1),
-      body: SingleChildScrollView(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Center(
-              child: Padding(
-                padding: EdgeInsets.only(
-                    top: MediaQuery.of(context).size.height * 0.05),
-                child: Image.asset(
-                  "assets/images/logo.png",
-                  // Logo responsive
-                  width: screenWidth > 1024
-                      ? screenWidth * 0.4
-                      : screenWidth * 0.6,
-                  fit: BoxFit.cover,
+    return BlurryModalProgressHUD(
+      inAsyncCall: _isLoading,
+      opacity: 0.3,
+      blurEffectIntensity: 5,
+      child: Scaffold(
+        backgroundColor: const Color.fromRGBO(197, 240, 200, 1),
+        body: SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Center(
+                child: Padding(
+                  padding: EdgeInsets.only(
+                      top: MediaQuery.of(context).size.height * 0.05),
+                  child: Image.asset(
+                    "assets/images/logo.png",
+                    // Logo responsive
+                    width: screenWidth > 1024
+                        ? screenWidth * 0.4
+                        : screenWidth * 0.6,
+                    fit: BoxFit.cover,
+                  ),
                 ),
               ),
-            ),
-            const SizedBox(height: 15),
-            Padding(
-              padding: EdgeInsets.symmetric(horizontal: screenWidth * 0.1),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const SizedBox(height: 20),
-                  // Email TextBox
-                  _buildResponsiveTextBox(
-                      context, _emailController, Icons.email, 'Email'),
-                  const SizedBox(height: 30),
-                  // Password TextBox
-                  _buildResponsiveTextBox(
-                      context, _passController, Icons.lock, 'Password',
-                      isObscure: true, toggleObscure: () {
-                    setState(() {
-                      _isPasswordHidden = !_isPasswordHidden;
-                    });
-                  }),
-                  const SizedBox(height: 30),
-                  // Confirm Password TextBox
-                  _buildResponsiveTextBox(
-                      context, _repassController, Icons.lock, 'Confirm Password',
-                      isObscure: true, toggleObscure: () {
-                    setState(() {
-                      _isConfirmPasswordHidden = !_isConfirmPasswordHidden;
-                    });
-                  }),
-                  const SizedBox(height: 60),
-                  // SIGN UP Button
-                  Center(
-                    child: ClipRRect(
-                      borderRadius:
-                          const BorderRadius.all(Radius.circular(10)),
-                      child: SizedBox(
-                        width: screenWidth > 480
-                            ? screenWidth * 0.5
-                            : screenWidth * 0.7,
-                        height: 60,
-                        child: ElevatedButton(
-                          onPressed: _register,
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: const Color(0xFF1E8925),
-                          ),
-                          child: const Text(
-                            'SIGN UP',
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 18,
-                              fontFamily: 'Baloo',
-                              fontWeight: FontWeight.w700,
+              const SizedBox(height: 15),
+              Padding(
+                padding: EdgeInsets.symmetric(horizontal: screenWidth * 0.1),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const SizedBox(height: 20),
+                    // Email TextBox
+                    _buildResponsiveTextBox(
+                        context, _emailController, Icons.email, 'Email'),
+                    const SizedBox(height: 30),
+                    // Password TextBox
+                    _buildResponsiveTextBox(
+                        context, _passController, Icons.lock, 'Password',
+                        isObscure: true, toggleObscure: () {
+                      setState(() {
+                        _isPasswordHidden = !_isPasswordHidden;
+                      });
+                    }),
+                    const SizedBox(height: 30),
+                    // Confirm Password TextBox
+                    _buildResponsiveTextBox(
+                        context, _repassController, Icons.lock, 'Confirm Password',
+                        isObscure: true, toggleObscure: () {
+                      setState(() {
+                        _isConfirmPasswordHidden = !_isConfirmPasswordHidden;
+                      });
+                    }),
+                    const SizedBox(height: 60),
+                    // SIGN UP Button
+                    Center(
+                      child: ClipRRect(
+                        borderRadius:
+                            const BorderRadius.all(Radius.circular(10)),
+                        child: SizedBox(
+                          width: screenWidth * 0.7,
+                          height: 60,
+                          child: ElevatedButton(
+                            onPressed: _register,
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: const Color(0xFF1E8925),
+                            ),
+                            child: Text(
+                              'SIGN UP',
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: getResponsiveFontSize(18),
+                                fontFamily: 'Baloo',
+                                fontWeight: FontWeight.w700,
+                              ),
                             ),
                           ),
                         ),
                       ),
                     ),
-                  ),
-                  const SizedBox(height: 60),
-                  // Already have an account
-                  Center(
-                    child: GestureDetector(
-                      onTap: () {
-                        widget.controller.animateToPage(0,
-                            duration: const Duration(milliseconds: 500),
-                            curve: Curves.ease);
-                      },
-                      child: const Text(
-                        'Already have an account? Log in now',
-                        style: TextStyle(
-                          color: Color(0xFF000000),
-                          fontSize: 14,
-                          fontFamily: 'Baloo',
-                          fontWeight: FontWeight.w700,
-                          decoration: TextDecoration.none,
+                    const SizedBox(height: 60),
+                    Center(
+                      child: GestureDetector(
+                        onTap: () {
+                          widget.controller.animateToPage(0,
+                              duration: const Duration(milliseconds: 500),
+                              curve: Curves.ease);
+                        },
+                        child: Text(
+                          'Already have an account? Log in now',
+                          style: TextStyle(
+                            color: Color(0xFF000000),
+                            fontSize: getResponsiveFontSize(14),
+                            fontFamily: 'Baloo',
+                            fontWeight: FontWeight.w700,
+                            decoration: TextDecoration.none,
+                          ),
                         ),
                       ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildResponsiveTextBox(
+    BuildContext context,
+    TextEditingController controller,
+    IconData icon,
+    String hintText, {
+    bool isObscure = false,
+    VoidCallback? toggleObscure,
+  }) {
+    final screenWidth = MediaQuery.of(context).size.width;
+
+    double getResponsiveFontSize(double baseFontSize) {
+        if (screenWidth > 480) {
+          return baseFontSize * 1.2;
+        } else {
+          return baseFontSize;
+        }
+      }
+
+    return Stack(
+      clipBehavior: Clip.none,
+      children: [
+        TextField(
+          controller: controller,
+          obscureText: isObscure && (toggleObscure != null),
+          style: TextStyle(
+            fontSize: getResponsiveFontSize(15),
+            fontFamily: 'Baloo',
+            color: Color(0xFF000000),
+            fontWeight: FontWeight.w400,
+          ),
+          decoration: InputDecoration(
+            hintText: hintText,
+            hintStyle: TextStyle(
+              color: Color(0xFFDBDBDB),
+              fontSize: getResponsiveFontSize(15),
+              fontFamily: 'Baloo',
+              fontWeight: FontWeight.w600,
+            ),
+            filled: true,
+            fillColor: Colors.white,
+            enabledBorder: const OutlineInputBorder(
+              borderRadius: BorderRadius.all(Radius.circular(10)),
+              borderSide: BorderSide(
+                width: 1,
+                color: Color(0xFF48B02C),
               ),
             ),
-          ],
-        ),
-      ),
-    ),
-  );
-}
-
-// Helper method for building responsive TextBox
-Widget _buildResponsiveTextBox(
-  BuildContext context,
-  TextEditingController controller,
-  IconData icon,
-  String hintText, {
-  bool isObscure = false,
-  VoidCallback? toggleObscure,
-}) {
-  final screenWidth = MediaQuery.of(context).size.width;
-
-  return Stack(
-    clipBehavior: Clip.none,
-    children: [
-      TextField(
-        controller: controller,
-        obscureText: isObscure && (toggleObscure != null),
-        style: const TextStyle(
-          fontSize: 15,
-          fontFamily: 'Baloo',
-          color: Color(0xFF000000),
-          fontWeight: FontWeight.w400,
-        ),
-        decoration: InputDecoration(
-          hintText: hintText,
-          hintStyle: const TextStyle(
-            color: Color(0xFFDBDBDB),
-            fontSize: 15,
-            fontFamily: 'Baloo',
-            fontWeight: FontWeight.w600,
+            focusedBorder: const OutlineInputBorder(
+              borderRadius: BorderRadius.all(Radius.circular(10)),
+              borderSide: BorderSide(
+                width: 1,
+                color: Color(0xFF48B02C),
+              ),
+            ),
+            contentPadding: const EdgeInsets.only(left: 60),
+            suffixIcon: isObscure && toggleObscure != null
+                ? IconButton(
+                    icon: Icon(
+                      isObscure ? Icons.visibility_off : Icons.visibility,
+                      color: const Color(0xFF48B02C),
+                    ),
+                    onPressed: toggleObscure,
+                  )
+                : null,
           ),
-          filled: true,
-          fillColor: Colors.white,
-          enabledBorder: const OutlineInputBorder(
-            borderRadius: BorderRadius.all(Radius.circular(10)),
-            borderSide: BorderSide(
-              width: 1,
+        ),
+        Positioned(
+          left: -25,
+          top: 0,
+          bottom: 0,
+          child: Container(
+            width: 70,
+            height: 60,
+            decoration: const BoxDecoration(
               color: Color(0xFF48B02C),
+              shape: BoxShape.circle,
+            ),
+            child: Icon(
+              icon,
+              color: Colors.white,
+              size: getResponsiveFontSize(24),
             ),
           ),
-          focusedBorder: const OutlineInputBorder(
-            borderRadius: BorderRadius.all(Radius.circular(10)),
-            borderSide: BorderSide(
-              width: 1,
-              color: Color(0xFF48B02C),
-            ),
-          ),
-          contentPadding: const EdgeInsets.only(left: 60),
-          suffixIcon: isObscure && toggleObscure != null
-              ? IconButton(
-                  icon: Icon(
-                    isObscure ? Icons.visibility_off : Icons.visibility,
-                    color: const Color(0xFF48B02C),
-                  ),
-                  onPressed: toggleObscure,
-                )
-              : null,
         ),
-      ),
-      Positioned(
-        left: -25,
-        top: 0,
-        bottom: 0,
-        child: Container(
-          width: 70,
-          height: 60,
-          decoration: const BoxDecoration(
-            color: Color(0xFF48B02C),
-            shape: BoxShape.circle,
-          ),
-          child: Icon(
-            icon,
-            color: Colors.white,
-            size: 24,
-          ),
-        ),
-      ),
-    ],
-  );
-}
-
+      ],
+    );
+  }
 }

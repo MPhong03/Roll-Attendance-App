@@ -23,6 +23,7 @@ import 'package:itproject/ui/screens/organizations/public/organization_public_se
 import 'package:itproject/ui/screens/organizations/public/public_organization_detail.dart';
 import 'package:itproject/ui/screens/profile_screen.dart';
 import 'package:itproject/ui/screens/edit_profile_screen.dart';
+import 'package:itproject/ui/screens/forgot_password_screen.dart';
 import 'package:itproject/ui/screens/settings/my_request_screen.dart';
 import 'package:itproject/ui/screens/settings/update_face_data_screen.dart';
 import 'firebase_options.dart';
@@ -101,6 +102,12 @@ class MyApp extends StatelessWidget {
             GoRoute(
               path: '/signin',
               builder: (context, state) => LoginScreen(
+                controller: PageController(),
+              ),
+            ),
+            GoRoute(
+              path: '/forgot-password',
+              builder: (context, state) => ForgotPasswordScreen(
                 controller: PageController(),
               ),
             ),

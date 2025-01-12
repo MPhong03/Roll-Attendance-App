@@ -188,8 +188,9 @@ class _OrganizationScreenState extends State<OrganizationScreen> {
   @override
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
+    final screenHeight = MediaQuery.of(context).size.height;
     final bool isDarkMode = Theme.of(context).brightness == Brightness.dark;
-    final Color textColor = isDarkMode ? Colors.white70 : Colors.black54;
+    final Color textColor = isDarkMode ? Colors.white : Colors.black;
     final Color backgroundColor = Theme.of(context).scaffoldBackgroundColor;
 
     double getResponsiveFontSize(double baseFontSize) {
@@ -207,10 +208,15 @@ class _OrganizationScreenState extends State<OrganizationScreen> {
       child: Scaffold(
         backgroundColor: backgroundColor,
         appBar: AppBar(
+          automaticallyImplyLeading: false,
           backgroundColor: backgroundColor,
           actions: [
             IconButton(
-              icon: Icon(Icons.search, color: textColor),
+              icon: Icon(
+                Icons.search,
+                color: textColor,
+                size: getResponsiveFontSize(24),
+              ),
               onPressed: () {
                 context.push("/search-organization");
               },
