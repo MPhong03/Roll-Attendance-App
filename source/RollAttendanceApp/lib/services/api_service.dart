@@ -78,25 +78,27 @@ class ApiService {
   }
 
   // PUT METHOD
-  Future<http.Response> put(String endpoint,
-      [Map<String, dynamic>? data]) async {
+  Future<http.Response> put(String endpoint, [dynamic data]) async {
     try {
       final accessToken = await _getAccessToken();
+
+      final formattedData =
+          data != null && data is Map ? Map<String, dynamic>.from(data) : null;
+
       final response = await http.put(
         Uri.parse('$baseUrl/$endpoint'),
         headers: {
           'Authorization': 'Bearer $accessToken',
           'Content-Type': 'application/json',
         },
-        body: data != null
-            ? json.encode(data)
-            : null, // Xử lý nếu data không được truyền
+        body: formattedData != null ? json.encode(formattedData) : null,
       );
+
       _logResponse(
         response: response,
         url: Uri.parse('$baseUrl/$endpoint').toString(),
         method: 'PUT',
-        requestBody: data ?? {}, // Log dữ liệu nếu có, ngược lại log Map rỗng
+        requestBody: formattedData ?? {},
       );
       return response;
     } catch (e) {

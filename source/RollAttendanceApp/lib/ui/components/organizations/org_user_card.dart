@@ -2,23 +2,46 @@ import 'package:flutter/material.dart';
 import 'package:itproject/enums/user_role.dart';
 import 'package:itproject/models/user_model.dart';
 
-class OrgUserCard extends StatelessWidget {
+class OrgUserCard extends StatefulWidget {
   final List<UserModel> users;
+  final Function(List<String>) onUserSelectionChanged;
 
-  const OrgUserCard({super.key, required this.users});
+  const OrgUserCard({
+    super.key,
+    required this.users,
+    required this.onUserSelectionChanged,
+  });
+
+  @override
+  _OrgUserCardState createState() => _OrgUserCardState();
+}
+
+class _OrgUserCardState extends State<OrgUserCard> {
+  final Set<String> _selectedUserIds = {};
+
+  void _onCheckboxChanged(bool? isChecked, String userId) {
+    setState(() {
+      if (isChecked == true) {
+        _selectedUserIds.add(userId);
+      } else {
+        _selectedUserIds.remove(userId);
+      }
+    });
+
+    widget.onUserSelectionChanged(_selectedUserIds.toList());
+  }
 
   @override
   Widget build(BuildContext context) {
-    // Phân loại user theo role
-    final List<UserModel> representatives = users
+    final List<UserModel> representatives = widget.users
         .where((user) => user.role == getRoleValue(UserRole.REPRESENTATIVE))
         .toList();
 
-    final List<UserModel> organizers = users
+    final List<UserModel> organizers = widget.users
         .where((user) => user.role == getRoleValue(UserRole.ORGANIZER))
         .toList();
 
-    final List<UserModel> members = users
+    final List<UserModel> members = widget.users
         .where((user) => user.role == getRoleValue(UserRole.USER))
         .toList();
 
@@ -26,7 +49,6 @@ class OrgUserCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Phần Admin (Representative & Organizer)
           if (representatives.isNotEmpty || organizers.isNotEmpty) ...[
             const Padding(
               padding: EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
@@ -42,8 +64,6 @@ class OrgUserCard extends StatelessWidget {
             ...representatives.map((user) => _buildUserCard(user)),
             ...organizers.map((user) => _buildUserCard(user)),
           ],
-
-          // Phần Member (User)
           if (members.isNotEmpty) ...[
             const Padding(
               padding: EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
@@ -63,9 +83,9 @@ class OrgUserCard extends StatelessWidget {
     );
   }
 
-  // Hàm tạo từng card user
   Widget _buildUserCard(UserModel user) {
     final role = getRoleFromValue(user.role ?? 0);
+    final isRepresentative = user.role == getRoleValue(UserRole.REPRESENTATIVE);
 
     return Card(
       margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
@@ -96,6 +116,13 @@ class OrgUserCard extends StatelessWidget {
               ),
             ),
           ],
+        ),
+        trailing: Checkbox(
+          value: _selectedUserIds.contains(user.id),
+          onChanged: isRepresentative
+              ? null
+              : (isChecked) => _onCheckboxChanged(isChecked, user.id),
+          activeColor: isRepresentative ? Colors.grey : Colors.green,
         ),
       ),
     );

@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:awesome_dialog/awesome_dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:blurry_modal_progress_hud/blurry_modal_progress_hud.dart';
 import 'package:go_router/go_router.dart';
@@ -26,6 +27,8 @@ class _OrganizationDetailScreenState extends State<OrganizationDetailScreen> {
   late Future<OrganizationModel> _organizationFuture;
   late Future<List<EventModel>> _eventListFuture;
   late Future<List<UserModel>> _userListFuture;
+  List<String> _selectedUserIds = [];
+
   int _page = 1;
   final int _limit = 10;
 
@@ -87,6 +90,54 @@ class _OrganizationDetailScreenState extends State<OrganizationDetailScreen> {
     } catch (e) {
       throw Exception('Failed to load events: $e');
     }
+  }
+
+  Future<void> _removeUsers(List<String> userIds) async {
+    setState(() {
+      _isLoading = true;
+    });
+
+    try {
+      final requestBody = {
+        "userIds": userIds,
+      };
+      final response = await _apiService.put(
+          'api/organization/remove-list/${widget.organizationId}', requestBody);
+      if (response.statusCode == 200) {
+        if (mounted) {
+          AwesomeDialog(
+            context: context,
+            dialogType: DialogType.success,
+            animType: AnimType.scale,
+            title: 'Success',
+            desc: 'Remove users successfully',
+            btnOkOnPress: () {
+              context.pop();
+            },
+          ).show();
+        }
+      } else {
+        _showErrorDialog(
+            'Failed to update event: ${jsonDecode(response.body)['message']}');
+      }
+    } catch (e) {
+      _showErrorDialog('Error: $e');
+    } finally {
+      setState(() {
+        _isLoading = false;
+      });
+    }
+  }
+
+  void _showErrorDialog(String message) {
+    AwesomeDialog(
+      context: context,
+      dialogType: DialogType.error,
+      animType: AnimType.bottomSlide,
+      title: 'Error',
+      desc: message,
+      btnCancelOnPress: () {},
+    ).show();
   }
 
   void _nextPage() {
@@ -514,12 +565,68 @@ class _OrganizationDetailScreenState extends State<OrganizationDetailScreen> {
                                           child: Text('No users available'));
                                     } else {
                                       final users = snapshot.data!;
-                                      return OrgUserCard(users: users);
+                                      return OrgUserCard(
+                                        users: users,
+                                        onUserSelectionChanged:
+                                            (selectedUserIds) {
+                                          setState(() {
+                                            _selectedUserIds = selectedUserIds;
+                                          });
+                                        },
+                                      );
                                     }
                                   },
                                 ),
                               ),
                             ),
+                            if (_selectedUserIds.isNotEmpty)
+                              Positioned(
+                                bottom: 16,
+                                left: 16,
+                                right: 16,
+                                child: ElevatedButton.icon(
+                                  onPressed: () async {
+                                    bool shouldRemove = false;
+
+                                    await AwesomeDialog(
+                                      context: context,
+                                      dialogType: DialogType.warning,
+                                      animType: AnimType.topSlide,
+                                      title: 'Confirm Remove',
+                                      desc:
+                                          'Are you sure you want to remove selected users?',
+                                      btnOkOnPress: () {
+                                        shouldRemove = true;
+                                      },
+                                      btnCancelOnPress: () {
+                                        shouldRemove = false;
+                                      },
+                                    ).show();
+
+                                    if (shouldRemove) {
+                                      await _removeUsers(_selectedUserIds);
+                                      _onRefresh();
+                                    }
+                                  },
+                                  icon: const Icon(Icons.delete),
+                                  label: const Text(
+                                    'Remove',
+                                    style: TextStyle(
+                                      color: Colors.white,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: Colors.red,
+                                    foregroundColor: Colors.white,
+                                    padding: const EdgeInsets.symmetric(
+                                        horizontal: 20, vertical: 12),
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(12),
+                                    ),
+                                  ),
+                                ),
+                              ),
                             Positioned(
                               top: 0,
                               left: 0,
