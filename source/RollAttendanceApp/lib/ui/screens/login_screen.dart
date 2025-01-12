@@ -249,7 +249,6 @@ class _LoginScreenState extends State<LoginScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     const SizedBox(height: 20),
-                    // Email TextBox
                     Stack(
                       clipBehavior: Clip.none,
                       children: [
@@ -258,19 +257,19 @@ class _LoginScreenState extends State<LoginScreen> {
                           style: TextStyle(
                             fontSize: getResponsiveFontSize(15),
                             fontFamily: 'Baloo',
-                            color: Color(0xFF000000),
+                            color: isDarkMode ? Colors.white : Colors.black,
                             fontWeight: FontWeight.w400,
                           ),
                           decoration: InputDecoration(
                             hintText: 'Email',
                             hintStyle: TextStyle(
-                              color: Color(0xFFDBDBDB),
+                              color: Colors.grey,
                               fontSize: getResponsiveFontSize(15),
                               fontFamily: 'Baloo',
                               fontWeight: FontWeight.w600,
                             ),
                             filled: true,
-                            fillColor: Colors.white,
+                            fillColor: isDarkMode ? Colors.black : Colors.white,
                             enabledBorder: OutlineInputBorder(
                               borderRadius: BorderRadius.all(Radius.circular(10)),
                               borderSide: BorderSide(
@@ -319,19 +318,19 @@ class _LoginScreenState extends State<LoginScreen> {
                           style:  TextStyle(
                             fontSize: getResponsiveFontSize(15),
                             fontFamily: 'Baloo',
-                            color: Color(0xFF000000),
+                            color: isDarkMode ? Colors.white : Colors.black,
                             fontWeight: FontWeight.w400,
                           ),
                           decoration: InputDecoration(
                             hintText: 'Password',
                             hintStyle: TextStyle(
-                              color: Color(0xFFDBDBDB),
+                              color: Colors.grey,
                               fontSize: getResponsiveFontSize(15),
                               fontFamily: 'Baloo',
                               fontWeight: FontWeight.w600,
                             ),
                             filled: true,
-                            fillColor: Colors.white,
+                            fillColor: isDarkMode ? Colors.black : Colors.white,
                             enabledBorder: const OutlineInputBorder(
                               borderRadius: BorderRadius.all(Radius.circular(10)),
                               borderSide: BorderSide(

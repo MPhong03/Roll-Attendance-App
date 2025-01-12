@@ -280,6 +280,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
     VoidCallback? toggleObscure,
   }) {
     final screenWidth = MediaQuery.of(context).size.width;
+    final bool isDarkMode = Theme.of(context).brightness == Brightness.dark;
 
     double getResponsiveFontSize(double baseFontSize) {
         if (screenWidth > 480) {
@@ -298,19 +299,19 @@ class _SignUpScreenState extends State<SignUpScreen> {
           style: TextStyle(
             fontSize: getResponsiveFontSize(15),
             fontFamily: 'Baloo',
-            color: Color(0xFF000000),
+            color: isDarkMode ? Colors.white : Colors.black,
             fontWeight: FontWeight.w400,
           ),
           decoration: InputDecoration(
             hintText: hintText,
             hintStyle: TextStyle(
-              color: Color(0xFFDBDBDB),
+              color: Colors.grey,
               fontSize: getResponsiveFontSize(15),
               fontFamily: 'Baloo',
               fontWeight: FontWeight.w600,
             ),
             filled: true,
-            fillColor: Colors.white,
+            fillColor: isDarkMode ? Colors.black : Colors.white,
             enabledBorder: const OutlineInputBorder(
               borderRadius: BorderRadius.all(Radius.circular(10)),
               borderSide: BorderSide(

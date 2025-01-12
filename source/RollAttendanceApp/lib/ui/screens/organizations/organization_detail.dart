@@ -123,6 +123,8 @@ class _OrganizationDetailScreenState extends State<OrganizationDetailScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final bool isDarkMode = Theme.of(context).brightness == Brightness.dark;
+
     return BlurryModalProgressHUD(
       inAsyncCall: _isLoading,
       opacity: 0.3,
@@ -131,307 +133,336 @@ class _OrganizationDetailScreenState extends State<OrganizationDetailScreen> {
         future: _organizationFuture,
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
-            return const BlurryModalProgressHUD(
-              inAsyncCall: true,
-              opacity: 0.3,
-              blurEffectIntensity: 5,
-              child: Center(child: CircularProgressIndicator()),
-            );
+            return const Center(child: CircularProgressIndicator());
           } else if (snapshot.hasError) {
             return Center(
-              child: Text('Error: ${snapshot.error}',
-                  style: const TextStyle(color: Colors.red)),
+              child: Text('Error: ${snapshot.error}', style: const TextStyle(color: Colors.red)),
             );
           } else if (!snapshot.hasData) {
-            return const Center(
-              child: Text('No data available'),
-            );
+            return const Center(child: Text('No data available'));
           } else {
             final organization = snapshot.data!;
-            return Scaffold(
-              appBar: AppBar(
-                title: const Text('Organization Details'),
-                leading: IconButton(
-                  icon: const Icon(Icons.arrow_back),
-                  onPressed: () => context.pop(),
-                ),
-              ),
-              body: RefreshIndicator(
-                onRefresh: _onRefresh,
-                child: SingleChildScrollView(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      Container(
-                        child: Stack(
-                          alignment: Alignment.bottomCenter,
-                          clipBehavior: Clip.none,
-                          children: <Widget>[
-                            Container(
-                              height: 200.0,
-                              decoration: BoxDecoration(
-                                image: DecorationImage(
-                                  fit: BoxFit.cover,
-                                  image: NetworkImage(
-                                      organization.banner.isNotEmpty
-                                          ? organization.banner
-                                          : bannerPlaceHolder),
-                                ),
-                              ),
-                              child: Container(
-                                color: Colors.black.withOpacity(0.3),
-                              ),
-                            ),
-                            Positioned(
-                              top: 100.0,
-                              child: Container(
-                                height: 150.0,
-                                width: 150.0,
-                                decoration: BoxDecoration(
-                                  shape: BoxShape.circle,
-                                  image: DecorationImage(
-                                    fit: BoxFit.cover,
-                                    image: NetworkImage(
-                                        organization.image.isNotEmpty
-                                            ? organization.image
-                                            : imagePlaceHolder),
-                                  ),
-                                  border: Border.all(
-                                    color: Colors.transparent,
-                                    width: 5.0,
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      const SizedBox(height: 50),
-                      Padding(
-                        padding: const EdgeInsets.all(16.0),
-                        child: Column(
-                          children: [
-                            Text(
-                              organization.name,
-                              style: Theme.of(context).textTheme.headlineLarge,
-                              textAlign: TextAlign.center,
-                            ),
-                            const SizedBox(height: 10),
-                            Text(
-                              organization.description,
-                              style: Theme.of(context).textTheme.bodyMedium,
-                              textAlign: TextAlign.center,
-                            ),
-                            const SizedBox(height: 20),
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                const Icon(Icons.location_on,
-                                    color: Colors.grey),
-                                const SizedBox(width: 5),
-                                Text(
-                                  organization.address.isNotEmpty
-                                      ? organization.address
-                                      : 'No address provided',
-                                  style: Theme.of(context).textTheme.bodyMedium,
-                                ),
-                              ],
-                            ),
-                            const SizedBox(height: 10),
-                            Chip(
-                              label: Text(organization.isPrivate
-                                  ? 'Private'
-                                  : 'Public'),
-                              backgroundColor: organization.isPrivate
-                                  ? Colors.red
-                                  : Colors.green,
-                              labelStyle: const TextStyle(color: Colors.white),
-                            ),
-                            const SizedBox(height: 20),
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                              children: [
-                                ElevatedButton.icon(
-                                  onPressed: () {
-                                    context.push(
-                                        '/edit-organization/${widget.organizationId}');
-                                  },
-                                  icon: const Icon(Icons.edit),
-                                  label: const Text('Edit'),
-                                ),
-                              ],
-                            ),
-                            const SizedBox(height: 20),
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                              children: [
-                                ElevatedButton.icon(
-                                  onPressed: () {
-                                    context.push(
-                                        '/organization-requests/${widget.organizationId}');
-                                  },
-                                  icon: const Icon(Icons.mail),
-                                  label: const Text('Requests'),
-                                ),
-                              ],
-                            ),
-                          ],
-                        ),
-                      ),
-                      // const Divider(thickness: 1, height: 40),
-                      DefaultTabController(
-                        length: 2,
-                        child: Column(
-                          children: [
-                            const TabBar(
-                              tabs: [
-                                Tab(text: 'Events'),
-                                Tab(text: 'Users'),
-                              ],
-                            ),
-                            SizedBox(
-                              height: 400.0,
-                              child: TabBarView(
-                                children: [
-                                  // Tab Events
-                                  Padding(
-                                    padding: const EdgeInsets.all(16.0),
-                                    child: SingleChildScrollView(
-                                      child: Column(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.stretch,
-                                        children: [
-                                          const Text(
-                                            'Events',
-                                            style: TextStyle(
-                                              fontSize: 20,
-                                              fontWeight: FontWeight.bold,
-                                            ),
-                                          ),
-                                          const SizedBox(height: 20),
-                                          ElevatedButton.icon(
-                                            onPressed: () {
-                                              context.push(
-                                                  '/create-event/${widget.organizationId}');
-                                            },
-                                            icon: const Icon(Icons.add),
-                                            label: const Text('Add Event'),
-                                          ),
-                                          const SizedBox(height: 10),
-                                          FutureBuilder<List<EventModel>>(
-                                            future: _eventListFuture,
-                                            builder: (context, snapshot) {
-                                              if (snapshot.connectionState ==
-                                                  ConnectionState.waiting) {
-                                                return const Center(
-                                                    child:
-                                                        CircularProgressIndicator());
-                                              } else if (snapshot.hasError) {
-                                                return Center(
-                                                    child: Text(
-                                                        'Error: ${snapshot.error}',
-                                                        style: const TextStyle(
-                                                            color:
-                                                                Colors.red)));
-                                              } else if (!snapshot.hasData ||
-                                                  snapshot.data!.isEmpty) {
-                                                return const Center(
-                                                    child: Text(
-                                                        'No events available'));
-                                              } else {
-                                                final events = snapshot.data!;
-                                                return ListView.builder(
-                                                  shrinkWrap: true,
-                                                  physics:
-                                                      const NeverScrollableScrollPhysics(),
-                                                  itemCount: events.length,
-                                                  itemBuilder:
-                                                      (context, index) {
-                                                    final event = events[index];
-                                                    return OrgEventCard(
-                                                        event: event);
-                                                  },
-                                                );
-                                              }
-                                            },
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                  ),
 
-                                  // Tab Users
-                                  Padding(
-                                    padding: const EdgeInsets.all(16.0),
-                                    child: SingleChildScrollView(
-                                      child: Column(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.stretch,
-                                        children: [
-                                          const Text(
-                                            'Users',
-                                            style: TextStyle(
-                                              fontSize: 20,
-                                              fontWeight: FontWeight.bold,
-                                            ),
-                                          ),
-                                          const SizedBox(height: 20),
-                                          ElevatedButton.icon(
-                                            onPressed: () {
-                                              context.push(
-                                                  '/add-to-organization/${widget.organizationId}');
-                                            },
-                                            icon: const Icon(Icons.add),
-                                            label: const Text('Add User'),
-                                          ),
-                                          const SizedBox(height: 10),
-                                          FutureBuilder<List<UserModel>>(
-                                            future: _userListFuture,
-                                            builder: (context, snapshot) {
-                                              if (snapshot.connectionState ==
-                                                  ConnectionState.waiting) {
-                                                return const Center(
-                                                    child:
-                                                        CircularProgressIndicator());
-                                              } else if (snapshot.hasError) {
-                                                return Center(
-                                                    child: Text(
-                                                        'Error: ${snapshot.error}',
-                                                        style: const TextStyle(
-                                                            color:
-                                                                Colors.red)));
-                                              } else if (!snapshot.hasData ||
-                                                  snapshot.data!.isEmpty) {
-                                                return const Center(
-                                                    child: Text(
-                                                        'No users available'));
-                                              } else {
-                                                final users = snapshot.data!;
-                                                return ListView.builder(
-                                                  shrinkWrap: true,
-                                                  physics:
-                                                      const NeverScrollableScrollPhysics(),
-                                                  itemCount: users.length,
-                                                  itemBuilder:
-                                                      (context, index) {
-                                                    final user = users[index];
-                                                    return OrgUserCard(
-                                                        user: user);
-                                                  },
-                                                );
-                                              }
-                                            },
-                                          ),
-                                        ],
+            return DefaultTabController(
+              length: 3,
+              child: Scaffold(
+                appBar: AppBar(
+                  backgroundColor: isDarkMode ? Color(0xFF1E1E1E) : Colors.white,
+                  elevation: 0,
+                  automaticallyImplyLeading: true,
+                  iconTheme: IconThemeData(
+                    color: isDarkMode ? Colors.white :Colors.black,
+                  ),
+                  bottom: PreferredSize(
+                    preferredSize: const Size.fromHeight(48.0),
+                    child: Container(
+                      decoration: BoxDecoration(
+                        color: isDarkMode ? Color(0xFF1E1E1E) : Colors.white,
+                        boxShadow: [
+                          BoxShadow(
+                            color: isDarkMode ? Colors.white.withOpacity(0.2) : Colors.black.withOpacity(0.2),
+                            blurRadius: 4,
+                            offset: const Offset(0, 2),
+                          ),
+                        ],
+                      ),
+                      child: TabBar(
+                        indicator: BoxDecoration(
+                          color: isDarkMode ? Color(0xFF1E1E1E) : Colors.white,
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        labelColor: Colors.green,
+                        unselectedLabelColor: isDarkMode ? Colors.white : Colors.black,
+                        labelStyle: const TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 16,
+                        ),
+                        unselectedLabelStyle: const TextStyle(
+                          fontWeight: FontWeight.normal,
+                          fontSize: 16,
+                        ),
+                        tabs: const [
+                          Tab(text: 'Info'),
+                          Tab(text: 'Events'),
+                          Tab(text: 'Users'),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+                body: RefreshIndicator(
+                  onRefresh: _onRefresh,
+                  child: TabBarView(
+                    children: [
+                      SingleChildScrollView(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            Stack(
+                              alignment: Alignment.bottomCenter,
+                              clipBehavior: Clip.none,
+                              children: <Widget>[
+                                Container(
+                                  height: 200.0,
+                                  decoration: BoxDecoration(
+                                    image: DecorationImage(
+                                      fit: BoxFit.cover,
+                                      image: NetworkImage(
+                                        organization.banner.isNotEmpty
+                                            ? organization.banner
+                                            : bannerPlaceHolder,
                                       ),
                                     ),
                                   ),
+                                  child: Container(
+                                    color: Colors.black.withOpacity(0.3),
+                                  ),
+                                ),
+                                Positioned(
+                                  top: 150.0,
+                                  child: Container(
+                                    height: 120.0,
+                                    width: 120.0,
+                                    decoration: BoxDecoration(
+                                      shape: BoxShape.circle,
+                                      image: DecorationImage(
+                                        fit: BoxFit.cover,
+                                        image: NetworkImage(
+                                          organization.image.isNotEmpty
+                                              ? organization.image
+                                              : imagePlaceHolder,
+                                        ),
+                                      ),
+                                      border: Border.all(
+                                        color: Colors.white,
+                                        width: 3.0,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 70),
+                            Padding(
+                              padding: const EdgeInsets.all(16.0),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.center,
+                                children: [
+                                  Text(
+                                    organization.name,
+                                    style: Theme.of(context).textTheme.headlineMedium,
+                                    textAlign: TextAlign.center,
+                                  ),
+                                  const SizedBox(height: 10),
+                                  Text(
+                                    organization.description,
+                                    style: Theme.of(context).textTheme.bodyMedium,
+                                    textAlign: TextAlign.center,
+                                  ),
+                                  const SizedBox(height: 20),
+                                  Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      const Icon(Icons.location_on, color: Colors.grey),
+                                      const SizedBox(width: 5),
+                                      Text(
+                                        organization.address.isNotEmpty
+                                            ? organization.address
+                                            : 'No address provided',
+                                        style: Theme.of(context).textTheme.bodyMedium,
+                                      ),
+                                    ],
+                                  ),
+                                  const SizedBox(height: 10),
+                                  Chip(
+                                    label: Text(organization.isPrivate ? 'Private' : 'Public'),
+                                    backgroundColor: organization.isPrivate ? Colors.red : Colors.green,
+                                    labelStyle: const TextStyle(color: Colors.white),
+                                  ),
+                                  const SizedBox(height: 50),
+                                  Column(
+                                    crossAxisAlignment: CrossAxisAlignment.center,
+                                    children: [
+                                      Container(
+                                        width: MediaQuery.of(context).size.width * 0.5,
+                                        margin: const EdgeInsets.only(bottom: 16),
+                                        decoration: BoxDecoration(
+                                          color: Colors.green,
+                                          borderRadius: BorderRadius.circular(12),
+                                          border: Border.all(color: Colors.green),
+                                          boxShadow: [
+                                            BoxShadow(
+                                              color: Colors.green.withOpacity(0.2),
+                                              blurRadius: 4,
+                                              offset: const Offset(0, 2),
+                                            ),
+                                          ],
+                                        ),
+                                        child: TextButton.icon(
+                                          onPressed: () {
+                                            context.push('/edit-organization/${widget.organizationId}');
+                                          },
+                                          icon: const Icon(Icons.edit, color: Colors.white),
+                                          label: const Text(
+                                            'Edit',
+                                            style: TextStyle(color: Colors.white),
+                                          ),
+                                        ),
+                                      ),
+
+                                      Container(
+                                        width: MediaQuery.of(context).size.width * 0.5,
+                                        margin: const EdgeInsets.only(bottom: 8),
+                                        decoration: BoxDecoration(
+                                          color: Colors.green,
+                                          borderRadius: BorderRadius.circular(12),
+                                          border: Border.all(color: Colors.green),
+                                          boxShadow: [
+                                            BoxShadow(
+                                              color: Colors.green.withOpacity(0.2),
+                                              blurRadius: 4,
+                                              offset: const Offset(0, 2),
+                                            ),
+                                          ],
+                                        ),
+                                        child: TextButton.icon(
+                                          onPressed: () {
+                                            context.push('/organization-requests/${widget.organizationId}');
+                                          },
+                                          icon: const Icon(Icons.mail, color: Colors.white),
+                                          label: const Text(
+                                            'Requests',
+                                            style: TextStyle(color: Colors.white),
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  )
                                 ],
                               ),
                             ),
                           ],
                         ),
                       ),
+
+                      // **Tab Events**
+                      Padding(
+                        padding: const EdgeInsets.all(16.0),
+                        child: Stack(
+                          children: [
+                            // Danh sách sự kiện có thể cuộn
+                            Padding(
+                              padding: const EdgeInsets.only(top: 60.0),
+                              child: SingleChildScrollView(
+                                child: FutureBuilder<List<EventModel>>(
+                                  future: _eventListFuture,
+                                  builder: (context, snapshot) {
+                                    if (snapshot.connectionState == ConnectionState.waiting) {
+                                      return const Center(child: CircularProgressIndicator());
+                                    } else if (snapshot.hasError) {
+                                      return Center(child: Text('Error: ${snapshot.error}'));
+                                    } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                                      return const Center(child: Text('No events available'));
+                                    } else {
+                                      final events = snapshot.data!;
+                                      return ListView.builder(
+                                        shrinkWrap: true,
+                                        physics: const NeverScrollableScrollPhysics(),
+                                        itemCount: events.length,
+                                        itemBuilder: (context, index) {
+                                          final event = events[index];
+                                          return OrgEventCard(event: event);
+                                        },
+                                      );
+                                    }
+                                  },
+                                ),
+                              ),
+                            ),
+                            Positioned(
+                              top: 0,
+                              left: 0,
+                              right: 0,
+                              child: ElevatedButton.icon(
+                                onPressed: () {
+                                  context.push('/create-event/${widget.organizationId}');
+                                },
+                                icon: const Icon(Icons.add, color: Colors.white),
+                                label: const Text(
+                                  'Add Event',
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: Colors.green,
+                                  foregroundColor: Colors.white,
+                                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+
+                      // **Tab Users**
+                      Padding(
+                        padding: const EdgeInsets.all(16.0),
+                        child: Stack(
+                          children: [
+                            Padding(
+                              padding: const EdgeInsets.only(top: 60.0),
+                              child: SingleChildScrollView(
+                                child: FutureBuilder<List<UserModel>>(
+                                  future: _userListFuture,
+                                  builder: (context, snapshot) {
+                                    if (snapshot.connectionState == ConnectionState.waiting) {
+                                      return const Center(child: CircularProgressIndicator());
+                                    } else if (snapshot.hasError) {
+                                      return Center(child: Text('Error: ${snapshot.error}'));
+                                    } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                                      return const Center(child: Text('No users available'));
+                                    } else {
+                                      final users = snapshot.data!;
+                                      return OrgUserCard(users: users);
+                                    }
+                                  },
+                                ),
+                              ),
+                            ),
+                            Positioned(
+                              top: 0,
+                              left: 0,
+                              right: 0,
+                              child: ElevatedButton.icon(
+                                onPressed: () {
+                                  context.push('/add-to-organization/${widget.organizationId}');
+                                },
+                                icon: const Icon(Icons.add),
+                                label: const Text(
+                                  'Add User',
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: Colors.green,
+                                  foregroundColor: Colors.white,
+                                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      )
                     ],
                   ),
                 ),
