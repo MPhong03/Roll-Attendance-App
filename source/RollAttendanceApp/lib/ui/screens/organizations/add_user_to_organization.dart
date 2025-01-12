@@ -33,9 +33,9 @@ class _AddUserToOrganizationScreenState
 
     try {
       final user = await _userService
-          .getUserByEmail(_emailController.text); // API tìm kiếm
+          .getUserByEmail(_emailController.text);
       setState(() {
-        _searchResults = [user]; // Cập nhật kết quả tìm kiếm
+        _searchResults = [user];
       });
     } catch (e) {
       setState(() {
@@ -126,41 +126,84 @@ class _AddUserToOrganizationScreenState
 
   @override
   Widget build(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+
     return Scaffold(
-      appBar: AppBar(title: const Text("Add User")),
+      appBar: AppBar(
+        backgroundColor: isDarkMode ? Color(0xFF121212) : Color(0xFFE9FCe9),
+        elevation: 0,
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back, color: isDarkMode ? Colors.white : Colors.black,),
+          onPressed: () => Navigator.of(context).pop(),
+        ),
+        actions: [
+          if (_selectedUsers.isNotEmpty)
+            IconButton(
+              icon: Icon(Icons.check, color: isDarkMode ? Colors.white : Colors.black,),
+              onPressed: () {
+                _addToOrganization();
+              },
+            ),
+        ],
+      ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: SingleChildScrollView(
           child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              Row(
-                children: [
-                  Expanded(
-                    child: TextField(
-                      controller: _emailController,
-                      decoration: const InputDecoration(
-                        labelText: 'Email',
-                        hintText: 'Enter email',
-                        border: OutlineInputBorder(),
+              Center(
+                child: SizedBox(
+                  width: screenWidth * 0.8,
+                  child: TextField(
+                    controller: _emailController,
+                    decoration: InputDecoration(
+                      labelText: 'Email',
+                      labelStyle: const TextStyle(color: Colors.green),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(10.0),
+                        borderSide: const BorderSide(color: Colors.green),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(10.0),
+                        borderSide:
+                            const BorderSide(color: Colors.green, width: 2),
                       ),
                     ),
                   ),
-                  const SizedBox(width: 8),
-                  ElevatedButton(
+                ),
+              ),
+              const SizedBox(height: 16),
+
+              // Search Button
+              Center(
+                child: SizedBox(
+                  width: screenWidth * 0.8,
+                  child: ElevatedButton(
                     onPressed: _searchUserByEmail,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.green, 
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10.0),
+                      ),
+                    ),
                     child: _isLoading
                         ? const CircularProgressIndicator(
                             strokeWidth: 2,
                             color: Colors.white,
                           )
-                        : const Text("Search"),
+                        : const Text(
+                            "Search",
+                            style: TextStyle(fontSize: 16, color: Colors.white),
+                          ),
                   ),
-                ],
+                ),
               ),
               const SizedBox(height: 16),
 
-              // Hiển thị kết quả tìm kiếm
+              // Search Results
               if (_searchResults.isNotEmpty) ...[
                 const Text(
                   'Search Results:',
@@ -183,8 +226,7 @@ class _AddUserToOrganizationScreenState
                         subtitle: Text(user.email),
                         trailing: IconButton(
                           icon: _selectedUsers.contains(user)
-                              ? const Icon(Icons.check_circle,
-                                  color: Colors.green)
+                              ? const Icon(Icons.check_circle, color: Colors.green)
                               : const Icon(Icons.add_circle_outline),
                           onPressed: () => _toggleSelectUser(user),
                         ),
@@ -194,7 +236,7 @@ class _AddUserToOrganizationScreenState
                 ),
               ],
 
-              // Thông báo không tìm thấy người dùng
+              // No User Found
               if (_searchResults.isEmpty && !_isLoading) ...[
                 const Text(
                   "No user found.",
@@ -203,7 +245,7 @@ class _AddUserToOrganizationScreenState
               ],
               const SizedBox(height: 16),
 
-              // Dropdown để chọn vai trò người dùng
+              // Role Selection
               if (_selectedUsers.isNotEmpty) ...[
                 const Text(
                   'Select Role:',
@@ -226,7 +268,7 @@ class _AddUserToOrganizationScreenState
                 ),
               ],
 
-              // Hiển thị danh sách người dùng đã chọn
+              // Selected Users
               if (_selectedUsers.isNotEmpty) ...[
                 const SizedBox(height: 16),
                 const Text(
@@ -258,29 +300,6 @@ class _AddUserToOrganizationScreenState
                   }).toList(),
                 ),
               ],
-
-              const SizedBox(height: 24),
-
-              // Nút thêm người dùng
-              Center(
-                child: ElevatedButton(
-                  onPressed: () {
-                    if (_selectedUsers.isNotEmpty) {
-                      _addToOrganization();
-                    } else {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                            content: Text('Please select at least one user')),
-                      );
-                    }
-                  },
-                  style: ElevatedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 32, vertical: 12),
-                  ),
-                  child: const Text('Add User(s)'),
-                ),
-              ),
             ],
           ),
         ),

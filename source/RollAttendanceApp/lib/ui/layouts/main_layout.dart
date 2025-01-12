@@ -256,7 +256,7 @@ Widget build(BuildContext context) {
               Text(
                 label,
                 style: TextStyle(
-                  fontSize: getResponsiveFontSize(12),
+                  fontSize: getResponsiveFontSize(10),
                   color: isSelected ? selectedTextColor : unselectedTextColor,
                 ),
               ),

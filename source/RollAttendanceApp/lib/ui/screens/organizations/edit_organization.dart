@@ -291,131 +291,374 @@ class _EditOrganizationScreenState extends State<EditOrganizationScreen> {
   }
 
   @override
-  Widget build(BuildContext context) {
-    return BlurryModalProgressHUD(
-      inAsyncCall: _isLoading,
-      opacity: 0.3,
-      blurEffectIntensity: 5,
-      child: Scaffold(
-        appBar: AppBar(
-          title: const Text('Create Organization'),
-        ),
-        body: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Form(
-            key: _formKey,
-            child: SingleChildScrollView(
+Widget build(BuildContext context) {
+  final screenHeight = MediaQuery.of(context).size.height;
+  final screenWidth = MediaQuery.of(context).size.width;
+  final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+
+  double getResponsiveFontSize(double baseFontSize) =>
+      screenWidth > 480 ? baseFontSize * 1.2 : baseFontSize;
+
+  return BlurryModalProgressHUD(
+    inAsyncCall: _isLoading,
+    opacity: 0.3,
+    blurEffectIntensity: 5,
+    child: Scaffold(
+      body: Stack(
+        children: [
+          Container(color: Theme.of(context).scaffoldBackgroundColor),
+          Positioned(
+            top: screenHeight * 0.05,
+            left: 16,
+            right: 16,
+            child: Container(
+              height: screenHeight * 0.9,
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: isDarkMode ? const Color(0xFF1E1E1E) : Colors.white,
+                borderRadius: BorderRadius.circular(12),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.2),
+                    blurRadius: 6,
+                    spreadRadius: 2,
+                  ),
+                ],
+              ),
               child: Column(
-                mainAxisSize: MainAxisSize.min,
                 children: [
-                  Align(
-                    alignment: Alignment.centerLeft,
-                    child: Container(
-                      width: double.infinity,
-                      child: ElevatedButton.icon(
-                        onPressed: () => _uploadImageFromGallery(false),
-                        icon: const Icon(Icons.image),
-                        label: const Text('Choose Image'),
-                        style: ElevatedButton.styleFrom(
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 20, vertical: 10),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
+                  _buildHeader(context, getResponsiveFontSize, isDarkMode),
+                  const SizedBox(height: 20),
+                  _buildBannerAndAvatar(),
+                  const SizedBox(height: 120),
+                  Expanded(
+                    child: SingleChildScrollView(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          _buildTextField("Organization Name", _nameController,
+                              getResponsiveFontSize, isDarkMode),
+                          const SizedBox(height: 20),
+                          _buildTextField("Description", _descriptionController,
+                              getResponsiveFontSize, isDarkMode,
+                              maxLines: 3),
+                          const SizedBox(height: 20),
+                          _buildTextField("Address", _addressController,
+                              getResponsiveFontSize, isDarkMode),
+                          const SizedBox(height: 30),
+                          _buildSwitch(
+                            "Private",
+                            _isPrivate,
+                            (value) => setState(() => _isPrivate = value),
+                            getResponsiveFontSize,
                           ),
-                        ),
+                          const SizedBox(height: 70),
+                          _buildSaveButton(getResponsiveFontSize),
+                        ],
                       ),
                     ),
-                  ),
-                  const SizedBox(height: 16),
-                  selectedImageFile != null || selectedImageUrl != null
-                      ? displayImage(selectedImageFile ?? selectedImageUrl)
-                      : const SizedBox(),
-                  const SizedBox(height: 16),
-                  Align(
-                    alignment: Alignment.centerLeft,
-                    child: Container(
-                      width: double.infinity,
-                      child: ElevatedButton.icon(
-                        onPressed: () => _uploadImageFromGallery(true),
-                        icon: const Icon(Icons.image),
-                        label: const Text('Choose Banner'),
-                        style: ElevatedButton.styleFrom(
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 20, vertical: 10),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                  selectedBannerFile != null || selectedBannerUrl != null
-                      ? displayImage(selectedBannerFile ?? selectedBannerUrl)
-                      : const SizedBox(),
-                  const SizedBox(height: 16),
-                  TextFormField(
-                    controller: _nameController,
-                    decoration: InputDecoration(
-                      labelText: 'Organization Name',
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(10.0),
-                      ),
-                    ),
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'Please enter organization name';
-                      }
-                      return null;
-                    },
-                  ),
-                  const SizedBox(height: 16),
-                  TextFormField(
-                    controller: _descriptionController,
-                    decoration: InputDecoration(
-                      labelText: 'Description',
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(10.0),
-                      ),
-                    ),
-                    maxLines: 3,
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'Please enter description';
-                      }
-                      return null;
-                    },
-                  ),
-                  const SizedBox(height: 16),
-                  TextFormField(
-                    controller: _addressController,
-                    decoration: InputDecoration(
-                      labelText: 'Address (Optional)',
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(10.0),
-                      ),
-                    ),
-                  ),
-                  SwitchListTile(
-                    title: const Text('Private'),
-                    value: _isPrivate,
-                    onChanged: (bool value) {
-                      setState(() {
-                        _isPrivate = value;
-                      });
-                    },
-                  ),
-                  const SizedBox(height: 16),
-                  ElevatedButton(
-                    onPressed: _isLoading ? null : _editOrganization,
-                    child: const Text('Update'),
                   ),
                 ],
               ),
             ),
           ),
+        ],
+      ),
+    ),
+  );
+}
+
+Widget _buildHeader(
+    BuildContext context, double Function(double) fontSize, bool isDarkMode) {
+  return Row(
+    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+    children: [
+      IconButton(
+        icon: Icon(
+          Icons.arrow_back,
+          color: isDarkMode ? Colors.white : Colors.black,
+          size: fontSize(30.0),
+        ),
+        onPressed: () => context.pop(),
+      ),
+      Expanded(
+        child: Center(
+          child: Text(
+            "EDIT ORGANIZATION",
+            style: TextStyle(
+              fontSize: fontSize(22),
+              fontWeight: FontWeight.bold,
+              color: Colors.green,
+            ),
+          ),
         ),
       ),
-    );
+      const SizedBox(width: 48), // Placeholder for alignment
+    ],
+  );
+}
+
+Widget _buildBannerAndAvatar() {
+  return Stack(
+    alignment: Alignment.bottomCenter,
+    clipBehavior: Clip.none,
+    children: [
+      GestureDetector(
+        onTap: () => _uploadImageFromGallery(true),
+        child: Container(
+          height: 200,
+          decoration: BoxDecoration(
+            image: DecorationImage(
+              fit: BoxFit.cover,
+              image: _getImageProvider(selectedBannerFile, selectedBannerUrl,
+                  'assets/images/banner_placeholder.jpg'),
+            ),
+          ),
+        ),
+      ),
+      Positioned(
+        top: 140,
+        child: GestureDetector(
+          onTap: () => _uploadImageFromGallery(false),
+          child: Container(
+            height: 120,
+            width: 120,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              image: DecorationImage(
+                fit: BoxFit.cover,
+                image: _getImageProvider(selectedImageFile, selectedImageUrl,
+                    'assets/images/avatar_placeholder.jpg'),
+              ),
+              border: Border.all(color: Colors.grey, width: 2.0),
+            ),
+          ),
+        ),
+      ),
+    ],
+  );
+}
+
+ImageProvider _getImageProvider(dynamic file, String? url, String placeholder) {
+  if (file != null) {
+    return kIsWeb ? MemoryImage(file) : FileImage(file) as ImageProvider;
   }
+  if (url != null) return NetworkImage(url);
+  return AssetImage(placeholder);
+}
+
+Widget _buildTextField(String label, TextEditingController controller,
+    double Function(double) fontSize, bool isDarkMode,
+    {int maxLines = 1}) {
+  return Column(
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: [
+      Text(
+        label,
+        style: TextStyle(
+          fontSize: fontSize(16),
+          fontWeight: FontWeight.bold,
+          color: Colors.green,
+        ),
+      ),
+      const SizedBox(height: 8),
+      TextFormField(
+        controller: controller,
+        maxLines: maxLines,
+        decoration: InputDecoration(
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(5.0),
+          ),
+          enabledBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(5.0),
+            borderSide: BorderSide(
+              color: isDarkMode ? Colors.white : Colors.black,
+              width: 1.0,
+            ),
+          ),
+          focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(5.0),
+            borderSide: const BorderSide(color: Colors.green, width: 2.0),
+          ),
+          contentPadding: const EdgeInsets.symmetric(
+            horizontal: 10.0,
+            vertical: 12.0,
+          ),
+        ),
+        validator: (value) =>
+            (value == null || value.isEmpty) ? 'Please enter $label' : null,
+      ),
+    ],
+  );
+}
+
+Widget _buildSwitch(String label, bool value, ValueChanged<bool> onChanged,
+    double Function(double) fontSize) {
+  return Row(
+    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+    children: [
+      Text(
+        label,
+        style: TextStyle(
+          fontSize: fontSize(16),
+          fontWeight: FontWeight.bold,
+          color: Colors.green,
+        ),
+      ),
+      Switch(value: value, onChanged: onChanged, activeColor: Colors.green),
+    ],
+  );
+}
+
+Widget _buildSaveButton(double Function(double) fontSize) {
+  return ElevatedButton(
+    onPressed: _isLoading ? null : _editOrganization,
+    style: ElevatedButton.styleFrom(
+      minimumSize: const Size(double.infinity, 50),
+      padding: const EdgeInsets.symmetric(vertical: 14),
+      backgroundColor: Colors.green,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+      ),
+    ),
+    child: Text(
+      "UPDATE",
+      style: TextStyle(
+        color: Colors.white,
+        fontSize: fontSize(18),
+        fontWeight: FontWeight.bold,
+      ),
+    ),
+  );
+}
+
+
+  // @override
+  // Widget build(BuildContext context) {
+  //   return BlurryModalProgressHUD(
+  //     inAsyncCall: _isLoading,
+  //     opacity: 0.3,
+  //     blurEffectIntensity: 5,
+  //     child: Scaffold(
+  //       appBar: AppBar(
+  //         title: const Text('Create Organization'),
+  //       ),
+  //       body: Padding(
+  //         padding: const EdgeInsets.all(16.0),
+  //         child: Form(
+  //           key: _formKey,
+  //           child: SingleChildScrollView(
+  //             child: Column(
+  //               mainAxisSize: MainAxisSize.min,
+  //               children: [
+  //                 Align(
+  //                   alignment: Alignment.centerLeft,
+  //                   child: Container(
+  //                     width: double.infinity,
+  //                     child: ElevatedButton.icon(
+  //                       onPressed: () => _uploadImageFromGallery(false),
+  //                       icon: const Icon(Icons.image),
+  //                       label: const Text('Choose Image'),
+  //                       style: ElevatedButton.styleFrom(
+  //                         padding: const EdgeInsets.symmetric(
+  //                             horizontal: 20, vertical: 10),
+  //                         shape: RoundedRectangleBorder(
+  //                           borderRadius: BorderRadius.circular(12),
+  //                         ),
+  //                       ),
+  //                     ),
+  //                   ),
+  //                 ),
+  //                 const SizedBox(height: 16),
+  //                 selectedImageFile != null || selectedImageUrl != null
+  //                     ? displayImage(selectedImageFile ?? selectedImageUrl)
+  //                     : const SizedBox(),
+  //                 const SizedBox(height: 16),
+  //                 Align(
+  //                   alignment: Alignment.centerLeft,
+  //                   child: Container(
+  //                     width: double.infinity,
+  //                     child: ElevatedButton.icon(
+  //                       onPressed: () => _uploadImageFromGallery(true),
+  //                       icon: const Icon(Icons.image),
+  //                       label: const Text('Choose Banner'),
+  //                       style: ElevatedButton.styleFrom(
+  //                         padding: const EdgeInsets.symmetric(
+  //                             horizontal: 20, vertical: 10),
+  //                         shape: RoundedRectangleBorder(
+  //                           borderRadius: BorderRadius.circular(12),
+  //                         ),
+  //                       ),
+  //                     ),
+  //                   ),
+  //                 ),
+  //                 const SizedBox(height: 16),
+  //                 selectedBannerFile != null || selectedBannerUrl != null
+  //                     ? displayImage(selectedBannerFile ?? selectedBannerUrl)
+  //                     : const SizedBox(),
+  //                 const SizedBox(height: 16),
+  //                 TextFormField(
+  //                   controller: _nameController,
+  //                   decoration: InputDecoration(
+  //                     labelText: 'Organization Name',
+  //                     border: OutlineInputBorder(
+  //                       borderRadius: BorderRadius.circular(10.0),
+  //                     ),
+  //                   ),
+  //                   validator: (value) {
+  //                     if (value == null || value.isEmpty) {
+  //                       return 'Please enter organization name';
+  //                     }
+  //                     return null;
+  //                   },
+  //                 ),
+  //                 const SizedBox(height: 16),
+  //                 TextFormField(
+  //                   controller: _descriptionController,
+  //                   decoration: InputDecoration(
+  //                     labelText: 'Description',
+  //                     border: OutlineInputBorder(
+  //                       borderRadius: BorderRadius.circular(10.0),
+  //                     ),
+  //                   ),
+  //                   maxLines: 3,
+  //                   validator: (value) {
+  //                     if (value == null || value.isEmpty) {
+  //                       return 'Please enter description';
+  //                     }
+  //                     return null;
+  //                   },
+  //                 ),
+  //                 const SizedBox(height: 16),
+  //                 TextFormField(
+  //                   controller: _addressController,
+  //                   decoration: InputDecoration(
+  //                     labelText: 'Address (Optional)',
+  //                     border: OutlineInputBorder(
+  //                       borderRadius: BorderRadius.circular(10.0),
+  //                     ),
+  //                   ),
+  //                 ),
+  //                 SwitchListTile(
+  //                   title: const Text('Private'),
+  //                   value: _isPrivate,
+  //                   onChanged: (bool value) {
+  //                     setState(() {
+  //                       _isPrivate = value;
+  //                     });
+  //                   },
+  //                 ),
+  //                 const SizedBox(height: 16),
+  //                 ElevatedButton(
+  //                   onPressed: _isLoading ? null : _editOrganization,
+  //                   child: const Text('Update'),
+  //                 ),
+  //               ],
+  //             ),
+  //           ),
+  //         ),
+  //       ),
+  //     ),
+  //   );
+  // }
 }
