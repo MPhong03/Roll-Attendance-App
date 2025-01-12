@@ -158,7 +158,7 @@ namespace RollAttendanceServer.Controllers
             }
         }
 
-        [HttpGet]
+        [HttpGet("invite-list")]
         public async Task<IActionResult> GetParticipationRequests([FromQuery] InvitionQuery query)
         {
             var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
@@ -208,7 +208,7 @@ namespace RollAttendanceServer.Controllers
             }
         }
 
-        [HttpPost("accept/{invitationId}")]
+        [HttpPut("invite/accept/{invitationId}")]
         public async Task<IActionResult> AcceptInvitation(string invitationId)
         {
             try
@@ -222,7 +222,7 @@ namespace RollAttendanceServer.Controllers
             }
         }
 
-        [HttpPost("reject/{invitationId}")]
+        [HttpPut("invite/reject/{invitationId}")]
         public async Task<IActionResult> RejectInvitation(string invitationId)
         {
             try
@@ -236,7 +236,7 @@ namespace RollAttendanceServer.Controllers
             }
         }
 
-        [HttpPost("cancel/{invitationId}")]
+        [HttpPut("invite/cancel/{invitationId}")]
         public async Task<IActionResult> CancelInvitation(string invitationId)
         {
             try

@@ -80,9 +80,9 @@ namespace RollAttendanceServer.Services.Systems
                 var existingUser = await _context.Users
                     .FirstOrDefaultAsync(u => u.Uid == invitedUser.UserId);
 
-                if (existingUser != null)
+                if (existingUser == null)
                 {
-                    throw new Exception($"User {invitedUser.UserId} already exists in the system.");
+                    throw new Exception($"User {invitedUser.UserId} doesn't exists in the system.");
                 }
 
                 var invitation = new InviteRequest
@@ -117,7 +117,7 @@ namespace RollAttendanceServer.Services.Systems
                 var organization = await _context.Organizations
                     .FirstOrDefaultAsync(o => o.Id == invitation.OrganizationId && !o.IsDeleted);
                 var user = await _context.Users
-                    .FirstOrDefaultAsync(u => u.Uid == invitation.UserId);
+                    .FirstOrDefaultAsync(u => u.Id == invitation.UserId);
 
                 if (user == null) throw new Exception("User not found");
                 if (organization == null) throw new Exception("Organization not found");

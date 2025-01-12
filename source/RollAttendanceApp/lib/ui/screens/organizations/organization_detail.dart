@@ -136,7 +136,8 @@ class _OrganizationDetailScreenState extends State<OrganizationDetailScreen> {
             return const Center(child: CircularProgressIndicator());
           } else if (snapshot.hasError) {
             return Center(
-              child: Text('Error: ${snapshot.error}', style: const TextStyle(color: Colors.red)),
+              child: Text('Error: ${snapshot.error}',
+                  style: const TextStyle(color: Colors.red)),
             );
           } else if (!snapshot.hasData) {
             return const Center(child: Text('No data available'));
@@ -147,11 +148,12 @@ class _OrganizationDetailScreenState extends State<OrganizationDetailScreen> {
               length: 3,
               child: Scaffold(
                 appBar: AppBar(
-                  backgroundColor: isDarkMode ? Color(0xFF1E1E1E) : Colors.white,
+                  backgroundColor:
+                      isDarkMode ? Color(0xFF1E1E1E) : Colors.white,
                   elevation: 0,
                   automaticallyImplyLeading: true,
                   iconTheme: IconThemeData(
-                    color: isDarkMode ? Colors.white :Colors.black,
+                    color: isDarkMode ? Colors.white : Colors.black,
                   ),
                   bottom: PreferredSize(
                     preferredSize: const Size.fromHeight(48.0),
@@ -160,7 +162,9 @@ class _OrganizationDetailScreenState extends State<OrganizationDetailScreen> {
                         color: isDarkMode ? Color(0xFF1E1E1E) : Colors.white,
                         boxShadow: [
                           BoxShadow(
-                            color: isDarkMode ? Colors.white.withOpacity(0.2) : Colors.black.withOpacity(0.2),
+                            color: isDarkMode
+                                ? Colors.white.withOpacity(0.2)
+                                : Colors.black.withOpacity(0.2),
                             blurRadius: 4,
                             offset: const Offset(0, 2),
                           ),
@@ -172,7 +176,8 @@ class _OrganizationDetailScreenState extends State<OrganizationDetailScreen> {
                           borderRadius: BorderRadius.circular(8),
                         ),
                         labelColor: Colors.green,
-                        unselectedLabelColor: isDarkMode ? Colors.white : Colors.black,
+                        unselectedLabelColor:
+                            isDarkMode ? Colors.white : Colors.black,
                         labelStyle: const TextStyle(
                           fontWeight: FontWeight.bold,
                           fontSize: 16,
@@ -250,49 +255,67 @@ class _OrganizationDetailScreenState extends State<OrganizationDetailScreen> {
                                 children: [
                                   Text(
                                     organization.name,
-                                    style: Theme.of(context).textTheme.headlineMedium,
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .headlineMedium,
                                     textAlign: TextAlign.center,
                                   ),
                                   const SizedBox(height: 10),
                                   Text(
                                     organization.description,
-                                    style: Theme.of(context).textTheme.bodyMedium,
+                                    style:
+                                        Theme.of(context).textTheme.bodyMedium,
                                     textAlign: TextAlign.center,
                                   ),
                                   const SizedBox(height: 20),
                                   Row(
                                     mainAxisAlignment: MainAxisAlignment.center,
                                     children: [
-                                      const Icon(Icons.location_on, color: Colors.grey),
+                                      const Icon(Icons.location_on,
+                                          color: Colors.grey),
                                       const SizedBox(width: 5),
                                       Text(
                                         organization.address.isNotEmpty
                                             ? organization.address
                                             : 'No address provided',
-                                        style: Theme.of(context).textTheme.bodyMedium,
+                                        style: Theme.of(context)
+                                            .textTheme
+                                            .bodyMedium,
                                       ),
                                     ],
                                   ),
                                   const SizedBox(height: 10),
                                   Chip(
-                                    label: Text(organization.isPrivate ? 'Private' : 'Public'),
-                                    backgroundColor: organization.isPrivate ? Colors.red : Colors.green,
-                                    labelStyle: const TextStyle(color: Colors.white),
+                                    label: Text(organization.isPrivate
+                                        ? 'Private'
+                                        : 'Public'),
+                                    backgroundColor: organization.isPrivate
+                                        ? Colors.red
+                                        : Colors.green,
+                                    labelStyle:
+                                        const TextStyle(color: Colors.white),
                                   ),
                                   const SizedBox(height: 50),
                                   Column(
-                                    crossAxisAlignment: CrossAxisAlignment.center,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.center,
                                     children: [
                                       Container(
-                                        width: MediaQuery.of(context).size.width * 0.5,
-                                        margin: const EdgeInsets.only(bottom: 16),
+                                        width:
+                                            MediaQuery.of(context).size.width *
+                                                0.5,
+                                        margin:
+                                            const EdgeInsets.only(bottom: 16),
                                         decoration: BoxDecoration(
                                           color: Colors.green,
-                                          borderRadius: BorderRadius.circular(12),
-                                          border: Border.all(color: Colors.green),
+                                          borderRadius:
+                                              BorderRadius.circular(12),
+                                          border:
+                                              Border.all(color: Colors.green),
                                           boxShadow: [
                                             BoxShadow(
-                                              color: Colors.green.withOpacity(0.2),
+                                              color:
+                                                  Colors.green.withOpacity(0.2),
                                               blurRadius: 4,
                                               offset: const Offset(0, 2),
                                             ),
@@ -300,26 +323,34 @@ class _OrganizationDetailScreenState extends State<OrganizationDetailScreen> {
                                         ),
                                         child: TextButton.icon(
                                           onPressed: () {
-                                            context.push('/edit-organization/${widget.organizationId}');
+                                            context.push(
+                                                '/edit-organization/${widget.organizationId}');
                                           },
-                                          icon: const Icon(Icons.edit, color: Colors.white),
+                                          icon: const Icon(Icons.edit,
+                                              color: Colors.white),
                                           label: const Text(
                                             'Edit',
-                                            style: TextStyle(color: Colors.white),
+                                            style:
+                                                TextStyle(color: Colors.white),
                                           ),
                                         ),
                                       ),
-
                                       Container(
-                                        width: MediaQuery.of(context).size.width * 0.5,
-                                        margin: const EdgeInsets.only(bottom: 8),
+                                        width:
+                                            MediaQuery.of(context).size.width *
+                                                0.5,
+                                        margin:
+                                            const EdgeInsets.only(bottom: 16),
                                         decoration: BoxDecoration(
                                           color: Colors.green,
-                                          borderRadius: BorderRadius.circular(12),
-                                          border: Border.all(color: Colors.green),
+                                          borderRadius:
+                                              BorderRadius.circular(12),
+                                          border:
+                                              Border.all(color: Colors.green),
                                           boxShadow: [
                                             BoxShadow(
-                                              color: Colors.green.withOpacity(0.2),
+                                              color:
+                                                  Colors.green.withOpacity(0.2),
                                               blurRadius: 4,
                                               offset: const Offset(0, 2),
                                             ),
@@ -327,12 +358,51 @@ class _OrganizationDetailScreenState extends State<OrganizationDetailScreen> {
                                         ),
                                         child: TextButton.icon(
                                           onPressed: () {
-                                            context.push('/organization-requests/${widget.organizationId}');
+                                            context.push(
+                                                '/organization-requests/${widget.organizationId}');
                                           },
-                                          icon: const Icon(Icons.mail, color: Colors.white),
+                                          icon: const Icon(Icons.mail,
+                                              color: Colors.white),
                                           label: const Text(
                                             'Requests',
-                                            style: TextStyle(color: Colors.white),
+                                            style:
+                                                TextStyle(color: Colors.white),
+                                          ),
+                                        ),
+                                      ),
+                                      Container(
+                                        width:
+                                            MediaQuery.of(context).size.width *
+                                                0.5,
+                                        margin:
+                                            const EdgeInsets.only(bottom: 8),
+                                        decoration: BoxDecoration(
+                                          color: Colors.green,
+                                          borderRadius:
+                                              BorderRadius.circular(12),
+                                          border:
+                                              Border.all(color: Colors.green),
+                                          boxShadow: [
+                                            BoxShadow(
+                                              color:
+                                                  Colors.green.withOpacity(0.2),
+                                              blurRadius: 4,
+                                              offset: const Offset(0, 2),
+                                            ),
+                                          ],
+                                        ),
+                                        child: TextButton.icon(
+                                          onPressed: () {
+                                            context.push(
+                                                '/organization-invitations/${widget.organizationId}');
+                                          },
+                                          icon: const Icon(
+                                              Icons.mark_email_unread_rounded,
+                                              color: Colors.white),
+                                          label: const Text(
+                                            'Invitations',
+                                            style:
+                                                TextStyle(color: Colors.white),
                                           ),
                                         ),
                                       ),
@@ -357,17 +427,24 @@ class _OrganizationDetailScreenState extends State<OrganizationDetailScreen> {
                                 child: FutureBuilder<List<EventModel>>(
                                   future: _eventListFuture,
                                   builder: (context, snapshot) {
-                                    if (snapshot.connectionState == ConnectionState.waiting) {
-                                      return const Center(child: CircularProgressIndicator());
+                                    if (snapshot.connectionState ==
+                                        ConnectionState.waiting) {
+                                      return const Center(
+                                          child: CircularProgressIndicator());
                                     } else if (snapshot.hasError) {
-                                      return Center(child: Text('Error: ${snapshot.error}'));
-                                    } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                                      return const Center(child: Text('No events available'));
+                                      return Center(
+                                          child:
+                                              Text('Error: ${snapshot.error}'));
+                                    } else if (!snapshot.hasData ||
+                                        snapshot.data!.isEmpty) {
+                                      return const Center(
+                                          child: Text('No events available'));
                                     } else {
                                       final events = snapshot.data!;
                                       return ListView.builder(
                                         shrinkWrap: true,
-                                        physics: const NeverScrollableScrollPhysics(),
+                                        physics:
+                                            const NeverScrollableScrollPhysics(),
                                         itemCount: events.length,
                                         itemBuilder: (context, index) {
                                           final event = events[index];
@@ -385,9 +462,11 @@ class _OrganizationDetailScreenState extends State<OrganizationDetailScreen> {
                               right: 0,
                               child: ElevatedButton.icon(
                                 onPressed: () {
-                                  context.push('/create-event/${widget.organizationId}');
+                                  context.push(
+                                      '/create-event/${widget.organizationId}');
                                 },
-                                icon: const Icon(Icons.add, color: Colors.white),
+                                icon:
+                                    const Icon(Icons.add, color: Colors.white),
                                 label: const Text(
                                   'Add Event',
                                   style: TextStyle(
@@ -398,7 +477,8 @@ class _OrganizationDetailScreenState extends State<OrganizationDetailScreen> {
                                 style: ElevatedButton.styleFrom(
                                   backgroundColor: Colors.green,
                                   foregroundColor: Colors.white,
-                                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 20, vertical: 12),
                                   shape: RoundedRectangleBorder(
                                     borderRadius: BorderRadius.circular(12),
                                   ),
@@ -420,12 +500,18 @@ class _OrganizationDetailScreenState extends State<OrganizationDetailScreen> {
                                 child: FutureBuilder<List<UserModel>>(
                                   future: _userListFuture,
                                   builder: (context, snapshot) {
-                                    if (snapshot.connectionState == ConnectionState.waiting) {
-                                      return const Center(child: CircularProgressIndicator());
+                                    if (snapshot.connectionState ==
+                                        ConnectionState.waiting) {
+                                      return const Center(
+                                          child: CircularProgressIndicator());
                                     } else if (snapshot.hasError) {
-                                      return Center(child: Text('Error: ${snapshot.error}'));
-                                    } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                                      return const Center(child: Text('No users available'));
+                                      return Center(
+                                          child:
+                                              Text('Error: ${snapshot.error}'));
+                                    } else if (!snapshot.hasData ||
+                                        snapshot.data!.isEmpty) {
+                                      return const Center(
+                                          child: Text('No users available'));
                                     } else {
                                       final users = snapshot.data!;
                                       return OrgUserCard(users: users);
@@ -440,7 +526,8 @@ class _OrganizationDetailScreenState extends State<OrganizationDetailScreen> {
                               right: 0,
                               child: ElevatedButton.icon(
                                 onPressed: () {
-                                  context.push('/add-to-organization/${widget.organizationId}');
+                                  context.push(
+                                      '/add-to-organization/${widget.organizationId}');
                                 },
                                 icon: const Icon(Icons.add),
                                 label: const Text(
@@ -453,7 +540,8 @@ class _OrganizationDetailScreenState extends State<OrganizationDetailScreen> {
                                 style: ElevatedButton.styleFrom(
                                   backgroundColor: Colors.green,
                                   foregroundColor: Colors.white,
-                                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 20, vertical: 12),
                                   shape: RoundedRectangleBorder(
                                     borderRadius: BorderRadius.circular(12),
                                   ),
