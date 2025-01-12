@@ -81,18 +81,38 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final bool isDarkMode = Theme.of(context).brightness == Brightness.dark;
+
+    double getResponsiveFontSize(double baseFontSize) {
+      if (screenWidth > 480) {
+        return baseFontSize * 1.2;
+      } else {
+        return baseFontSize;
+      }
+    }
+
     return BlurryModalProgressHUD(
       inAsyncCall: _isLoading,
       opacity: 0.3,
       blurEffectIntensity: 5,
       child: Scaffold(
+        appBar: AppBar(
+          leading: IconButton(
+            icon: Icon(Icons.arrow_back, color: isDarkMode ? Colors.white : Colors.black),
+            onPressed: () {
+              Navigator.pop(context);
+            },
+          ),
+          backgroundColor: isDarkMode ? Color(0xFF121212) : Color(0xFFE9FCe9),
+          elevation: 0,
+        ),
         body: SingleChildScrollView(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Padding(
-                padding:
-                    const EdgeInsets.only(top: 30.0, left: 30.0, right: 30.0),
+                padding: const EdgeInsets.only(top: 30.0, left: 30.0, right: 30.0),
                 child: Column(
                   textDirection: TextDirection.ltr,
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -100,11 +120,11 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                     const SizedBox(
                       height: 20,
                     ),
-                    const Text(
+                    Text(
                       'Reset Password',
                       style: TextStyle(
-                        color: Color(0xFF755DC1),
-                        fontSize: 27,
+                        color: Colors.green,
+                        fontSize: getResponsiveFontSize(27),
                         fontFamily: 'Poppins',
                         fontWeight: FontWeight.w500,
                       ),
@@ -115,16 +135,16 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                     TextField(
                       controller: _emailController,
                       textAlign: TextAlign.left,
-                      style: const TextStyle(
-                        fontSize: 13,
+                      style: TextStyle(
+                        fontSize: getResponsiveFontSize(13),
                         fontFamily: 'Poppins',
                         fontWeight: FontWeight.w400,
                       ),
-                      decoration: const InputDecoration(
-                        labelText: 'Email',
+                      decoration: InputDecoration(
+                        labelText: 'Enter Your Email...',
                         labelStyle: TextStyle(
-                          color: Color(0xFF755DC1),
-                          fontSize: 15,
+                          color: Colors.grey,
+                          fontSize: getResponsiveFontSize(15),
                           fontFamily: 'Poppins',
                           fontWeight: FontWeight.w600,
                         ),
@@ -145,7 +165,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                       ),
                     ),
                     const SizedBox(
-                      height: 25,
+                      height: 40,
                     ),
                     ClipRRect(
                       borderRadius: const BorderRadius.all(Radius.circular(10)),
@@ -155,55 +175,19 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                         child: ElevatedButton(
                           onPressed: _sendPasswordResetEmail,
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: const Color(0xFF9F7BFF),
+                            backgroundColor: Colors.green,
                           ),
-                          child: const Text(
+                          child: Text(
                             'Submit',
                             style: TextStyle(
                               color: Colors.white,
-                              fontSize: 15,
+                              fontSize: getResponsiveFontSize(15),
                               fontFamily: 'Poppins',
                               fontWeight: FontWeight.w500,
                             ),
                           ),
                         ),
                       ),
-                    ),
-                    const SizedBox(
-                      height: 15,
-                    ),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        const Text(
-                          'Remember your password?',
-                          style: TextStyle(
-                            color: Color(0xFF837E93),
-                            fontSize: 13,
-                            fontFamily: 'Poppins',
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
-                        const SizedBox(
-                          width: 2.5,
-                        ),
-                        InkWell(
-                          onTap: () {
-                            widget.controller.animateToPage(0,
-                                duration: const Duration(milliseconds: 500),
-                                curve: Curves.ease);
-                          },
-                          child: const Text(
-                            'Sign In',
-                            style: TextStyle(
-                              color: Color(0xFF755DC1),
-                              fontSize: 13,
-                              fontFamily: 'Poppins',
-                              fontWeight: FontWeight.w500,
-                            ),
-                          ),
-                        ),
-                      ],
                     ),
                   ],
                 ),
@@ -214,4 +198,5 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
       ),
     );
   }
+
 }

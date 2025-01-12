@@ -348,7 +348,6 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                       },
                     ),
                   ),
-                  // Tiêu đề "EDIT PROFILE"
                   Positioned(
                     top: 16,
                     left: 0,
@@ -418,13 +417,14 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                       ],
                     ),
                   ),
-                  // Nút Change Password
                   Positioned(
                     top: screenHeight * 0.5,
                     left: screenWidth * 0.1,
                     right: screenWidth * 0.1,
                     child: ElevatedButton(
-                      onPressed: () {},
+                      onPressed: () {
+                        context.push('/forgot-password');
+                      },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.blue,
                         minimumSize: const Size(0, 50),
@@ -470,7 +470,6 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     );
   }
 
-  // Widget xây dựng dòng thông tin
   Widget _buildInfoRow(String label, String value, double screenWidth) {
     final screenHeight = MediaQuery.of(context).size.height;
     final screenWidth = MediaQuery.of(context).size.width;

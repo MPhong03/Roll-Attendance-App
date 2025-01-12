@@ -152,6 +152,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
   @override
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
+    final bool isDarkMode = Theme.of(context).brightness == Brightness.dark;
     
     double getResponsiveFontSize(double baseFontSize) {
         if (screenWidth > 480) {
@@ -166,7 +167,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
       opacity: 0.3,
       blurEffectIntensity: 5,
       child: Scaffold(
-        backgroundColor: const Color.fromRGBO(197, 240, 200, 1),
+        backgroundColor: isDarkMode ? Color(0xFF1E1E1E) : Color.fromRGBO(197, 240, 200, 1),
         body: SingleChildScrollView(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -251,7 +252,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                         child: Text(
                           'Already have an account? Log in now',
                           style: TextStyle(
-                            color: Color(0xFF000000),
+                            color: isDarkMode ? Colors.white : Colors.black,
                             fontSize: getResponsiveFontSize(14),
                             fontFamily: 'Baloo',
                             fontWeight: FontWeight.w700,
