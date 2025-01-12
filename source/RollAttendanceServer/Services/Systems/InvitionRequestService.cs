@@ -1,4 +1,6 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Google.Api.Gax.ResourceNames;
+using Microsoft.EntityFrameworkCore;
+using RollAttendanceServer.Controllers;
 using RollAttendanceServer.Data;
 using RollAttendanceServer.Data.Enum;
 using RollAttendanceServer.Data.Responses;
@@ -65,7 +67,7 @@ namespace RollAttendanceServer.Services.Systems
                 PageSize = pageSize
             };
         }
-        public async Task InviteUsersAsync(string organizationId, List<InviteRequest> inviteRequests)
+        public async Task InviteUsersAsync(string organizationId, InvitedList request)
         {
             var organization = await _context.Organizations
                 .FirstOrDefaultAsync(o => o.Id == organizationId && !o.IsDeleted);
@@ -73,19 +75,29 @@ namespace RollAttendanceServer.Services.Systems
 
             var newInvites = new List<InviteRequest>();
 
-            foreach (var invite in inviteRequests)
+            foreach (var invitedUser in request.Users)
             {
                 var existingUser = await _context.Users
-                    .FirstOrDefaultAsync(u => u.Uid == invite.UserId);
+                    .FirstOrDefaultAsync(u => u.Uid == invitedUser.UserId);
 
                 if (existingUser != null)
                 {
-                    throw new Exception($"User {invite.UserId} already exists in the system.");
+                    throw new Exception($"User {invitedUser.UserId} already exists in the system.");
                 }
 
-                invite.OrganizationId = organization.Id;
-                invite.RequestStatus = (short)Status.INVITION_WAITING;
-                newInvites.Add(invite);
+                var invitation = new InviteRequest
+                {
+                    UserId = existingUser.Id,
+                    UserName = existingUser.DisplayName,
+                    UserEmail = existingUser.Email,
+                    OrganizationId = organization.Id,
+                    OrganizationName = organization.Name,
+                    Notes = request.Notes,
+                    Role = invitedUser.Role,
+                    RequestStatus = (short)Status.INVITION_WAITING,
+                };
+
+                newInvites.Add(invitation);
             }
 
             _context.InviteRequests.AddRange(newInvites);

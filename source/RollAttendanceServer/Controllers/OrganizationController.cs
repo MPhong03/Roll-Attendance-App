@@ -195,12 +195,12 @@ namespace RollAttendanceServer.Controllers
         }
 
         [HttpPost("invite/{organizationId}")]
-        public async Task<IActionResult> InviteUser(string organizationId, [FromBody] List<InviteRequest> inviteRequests)
+        public async Task<IActionResult> InviteUser(string organizationId, [FromBody] InvitedList request)
         {
             try
             {
-                await _invitionRequestService.InviteUsersAsync(organizationId, inviteRequests);
-                return Ok(new { organizationId, inviteRequests });
+                await _invitionRequestService.InviteUsersAsync(organizationId, request);
+                return Ok(new { organizationId, request });
             }
             catch (Exception ex)
             {
@@ -302,5 +302,17 @@ namespace RollAttendanceServer.Controllers
         public int Status { get; set; }
         public int PageIndex { get; set; } = 1;
         public int PageSize { get; set; } = 10;
+    }
+
+    public class InvitedList
+    {
+        public List<InvitedUsers> Users { get; set; }
+        public string? Notes { get; set; }
+    }
+
+    public class InvitedUsers
+    {
+        public string? UserId { get; set; }
+        public short Role { get; set; }
     }
 }
