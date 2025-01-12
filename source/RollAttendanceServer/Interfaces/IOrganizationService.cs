@@ -14,6 +14,8 @@ namespace RollAttendanceServer.Interfaces
         Task<Organization> CreateOrganizationAsync(OrganizationDTO dto, Stream bannerStream, Stream imageStream);
         Task<Organization> UpdateOrganizationAsync(string organizationId, OrganizationDTO dto, Stream? bannerStream, Stream? imageStream);
         Task AddUserToRoleAsync(string organizationId, AddToRoleRequest request);
+        Task AddUsersAsync(string organizationId, List<AddToRoleRequest> requests);
+        Task RemoveUsersAsync(string organizationId, RemoveUsersRequest request);
         Task DeleteOrganizationAsync(string id);
         Task<IEnumerable<UserOrganizationDTO?>> GetOrganizationUsersAsync(string id, string keyword, int pageIndex, int pageSize);
     }

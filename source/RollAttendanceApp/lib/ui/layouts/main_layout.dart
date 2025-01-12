@@ -128,95 +128,96 @@ class _MainLayoutState extends State<MainLayout> {
   }
 
   @override
-Widget build(BuildContext context) {
-  final screenWidth = MediaQuery.of(context).size.width;
-  final bool isDarkMode = Theme.of(context).brightness == Brightness.dark;
-  final Color selectedBackgroundColor = const Color(0xFF1E8925);
-  final Color selectedTextColor = Colors.white;
-  final Color unselectedBackgroundColor =
-      isDarkMode ? const Color(0xFF121212) : Colors.white;
-  final Color unselectedTextColor = const Color(0xFF1E8925);
-  final Color borderColor =
-      isDarkMode ? Colors.white : Colors.black.withOpacity(0.1);
+  Widget build(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final bool isDarkMode = Theme.of(context).brightness == Brightness.dark;
+    final Color selectedBackgroundColor = const Color(0xFF1E8925);
+    final Color selectedTextColor = Colors.white;
+    final Color unselectedBackgroundColor =
+        isDarkMode ? const Color(0xFF121212) : Colors.white;
+    final Color unselectedTextColor = const Color(0xFF1E8925);
+    final Color borderColor =
+        isDarkMode ? Colors.white : Colors.black.withOpacity(0.1);
 
-  double getResponsiveFontSize(double baseFontSize) {
-    if (screenWidth > 480) {
-      return baseFontSize * 1.25;
-    } else {
-      return baseFontSize;
+    double getResponsiveFontSize(double baseFontSize) {
+      if (screenWidth > 480) {
+        return baseFontSize * 1.25;
+      } else {
+        return baseFontSize;
+      }
     }
-  }
 
-  return Scaffold(
-    key: _scaffoldKey,
-    body: widget.child,
-    bottomNavigationBar: Container(
-      decoration: BoxDecoration(
-        color: const Color.fromARGB(255, 90, 90, 90),
-        boxShadow: [
-          BoxShadow(
-            color: borderColor.withOpacity(0.2),
-            spreadRadius: 3,
-            blurRadius: 4,
-            offset: const Offset(0, -2),
-          ),
-        ],
+    return Scaffold(
+      key: _scaffoldKey,
+      body: widget.child,
+      bottomNavigationBar: Container(
+        decoration: BoxDecoration(
+          color: const Color.fromARGB(255, 90, 90, 90),
+          boxShadow: [
+            BoxShadow(
+              color: borderColor.withOpacity(0.1),
+              spreadRadius: 1,
+              blurRadius: 1,
+              offset: const Offset(0, 0),
+            ),
+          ],
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceAround,
+          children: [
+            _buildNavButton(
+              context,
+              iconPath: 'assets/icons/home_icon.png',
+              label: 'Home',
+              isSelected: _selectedIndex == 0,
+              selectedBackgroundColor: selectedBackgroundColor,
+              selectedTextColor: selectedTextColor,
+              unselectedBackgroundColor: unselectedBackgroundColor,
+              unselectedTextColor: unselectedTextColor,
+              onTap: () => _onItemTapped(0),
+              getResponsiveFontSize: getResponsiveFontSize,
+            ),
+            _buildNavButton(
+              context,
+              iconPath: 'assets/icons/join_icon.png',
+              label: 'Join',
+              isSelected: _selectedIndex == 1,
+              selectedBackgroundColor: selectedBackgroundColor,
+              selectedTextColor: selectedTextColor,
+              unselectedBackgroundColor: unselectedBackgroundColor,
+              unselectedTextColor: unselectedTextColor,
+              onTap: () => _onItemTapped(1),
+              getResponsiveFontSize: getResponsiveFontSize,
+            ),
+            _buildNavButton(
+              context,
+              iconPath: 'assets/icons/organization_icon.png',
+              label: 'Organization',
+              isSelected: _selectedIndex == 2,
+              selectedBackgroundColor: selectedBackgroundColor,
+              selectedTextColor: selectedTextColor,
+              unselectedBackgroundColor: unselectedBackgroundColor,
+              unselectedTextColor: unselectedTextColor,
+              onTap: () => _onItemTapped(2),
+              getResponsiveFontSize: getResponsiveFontSize,
+            ),
+            _buildNavButton(
+              context,
+              iconPath: 'assets/icons/profile_icon.png',
+              label: 'Profile',
+              isSelected: _selectedIndex == 3,
+              selectedBackgroundColor: selectedBackgroundColor,
+              selectedTextColor: selectedTextColor,
+              unselectedBackgroundColor: unselectedBackgroundColor,
+              unselectedTextColor: unselectedTextColor,
+              onTap: () => _onItemTapped(3),
+              getResponsiveFontSize: getResponsiveFontSize,
+            ),
+          ],
+        ),
       ),
-      child: Row(
-        children: [
-          _buildNavButton(
-            context,
-            iconPath: 'assets/icons/home_icon.png',
-            label: 'HOME',
-            isSelected: _selectedIndex == 0,
-            selectedBackgroundColor: selectedBackgroundColor,
-            selectedTextColor: selectedTextColor,
-            unselectedBackgroundColor: unselectedBackgroundColor,
-            unselectedTextColor: unselectedTextColor,
-            onTap: () => _onItemTapped(0),
-            getResponsiveFontSize: getResponsiveFontSize,
-          ),
-          _buildNavButton(
-            context,
-            iconPath: 'assets/icons/join_icon.png',
-            label: 'JOIN',
-            isSelected: _selectedIndex == 1,
-            selectedBackgroundColor: selectedBackgroundColor,
-            selectedTextColor: selectedTextColor,
-            unselectedBackgroundColor: unselectedBackgroundColor,
-            unselectedTextColor: unselectedTextColor,
-            onTap: () => _onItemTapped(1),
-            getResponsiveFontSize: getResponsiveFontSize,
-          ),
-          _buildNavButton(
-            context,
-            iconPath: 'assets/icons/organization_icon.png',
-            label: 'ORGANIZATION',
-            isSelected: _selectedIndex == 2,
-            selectedBackgroundColor: selectedBackgroundColor,
-            selectedTextColor: selectedTextColor,
-            unselectedBackgroundColor: unselectedBackgroundColor,
-            unselectedTextColor: unselectedTextColor,
-            onTap: () => _onItemTapped(2),
-            getResponsiveFontSize: getResponsiveFontSize,
-          ),
-          _buildNavButton(
-            context,
-            iconPath: 'assets/icons/profile_icon.png',
-            label: 'PROFILE',
-            isSelected: _selectedIndex == 3,
-            selectedBackgroundColor: selectedBackgroundColor,
-            selectedTextColor: selectedTextColor,
-            unselectedBackgroundColor: unselectedBackgroundColor,
-            unselectedTextColor: unselectedTextColor,
-            onTap: () => _onItemTapped(3),
-            getResponsiveFontSize: getResponsiveFontSize,
-          ),
-        ],
-      ),
-    ),
-  );
-}
+    );
+  }
 
   Widget _buildNavButton(
     BuildContext context, {
@@ -238,9 +239,6 @@ Widget build(BuildContext context) {
             color: isSelected
                 ? selectedBackgroundColor
                 : unselectedBackgroundColor,
-            border: Border(
-              right: BorderSide(color: Colors.white.withOpacity(0.2), width: 1),
-            ),
           ),
           padding: const EdgeInsets.symmetric(vertical: 10),
           child: Column(
@@ -249,14 +247,18 @@ Widget build(BuildContext context) {
               Image.asset(
                 iconPath, // Sử dụng icon từ assets
                 color: isSelected ? selectedTextColor : unselectedTextColor,
-                height: getResponsiveFontSize(20),
-                width: getResponsiveFontSize(20),
+                height: getResponsiveFontSize(18), // Giảm kích thước icon
+                width: getResponsiveFontSize(18), // Giảm kích thước icon
               ),
               const SizedBox(height: 5),
               Text(
                 label,
                 style: TextStyle(
+<<<<<<< HEAD
                   fontSize: getResponsiveFontSize(10),
+=======
+                  fontSize: getResponsiveFontSize(10), // Giảm kích thước chữ
+>>>>>>> 0c771df7b3fe15117f81e104759bca473418922f
                   color: isSelected ? selectedTextColor : unselectedTextColor,
                 ),
               ),

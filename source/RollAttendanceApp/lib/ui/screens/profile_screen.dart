@@ -465,6 +465,26 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         },
                       ),
                       ListTile(
+                        leading: const Icon(Icons.lock),
+                        title: Text(
+                          'Requests',
+                          style: TextStyle(fontSize: getResponsiveFontSize(16)),
+                        ),
+                        onTap: () {
+                          context.push("/my-requests");
+                        },
+                      ),
+                      ListTile(
+                        leading: const Icon(Icons.lock),
+                        title: Text(
+                          'Invitations',
+                          style: TextStyle(fontSize: getResponsiveFontSize(16)),
+                        ),
+                        onTap: () {
+                          context.push("/my-invitations");
+                        },
+                      ),
+                      ListTile(
                         leading: const Icon(Icons.notifications),
                         title: Text(
                           'Notifications',
