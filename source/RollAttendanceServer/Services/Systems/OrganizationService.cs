@@ -193,6 +193,67 @@ namespace RollAttendanceServer.Services.Systems
             await _context.SaveChangesAsync();
         }
 
+        public async Task AddUsersAsync(string organizationId, List<AddToRoleRequest> requests)
+        {
+            var organization = await _context.Organizations
+                .FirstOrDefaultAsync(o => o.Id == organizationId && !o.IsDeleted);
+
+            if (organization == null) throw new Exception("Organization not found");
+
+            var userIds = requests.Select(r => r.UserId).ToList();
+
+            var users = await _context.Users
+                .Where(u => userIds.Contains(u.Uid))
+                .ToDictionaryAsync(u => u.Uid);
+
+            var existingRoles = await _context.UserOrganizationRoles
+                .Where(uor => uor.OrganizationId == organizationId)
+                .ToDictionaryAsync(uor => uor.UserId ?? string.Empty);
+
+            var newRoles = new List<UserOrganizationRole>();
+
+            foreach (var request in requests)
+            {
+                if (!users.TryGetValue(request.UserId, out var user))
+                {
+                    throw new Exception($"User with ID {request.UserId} not found");
+                }
+
+                if (existingRoles.ContainsKey(user.Id))
+                {
+                    throw new Exception($"User {request.UserId} already has a role in this organization.");
+                }
+
+                newRoles.Add(new UserOrganizationRole
+                {
+                    UserId = user.Id,
+                    OrganizationId = organization.Id,
+                    Role = request.Role
+                });
+            }
+
+            _context.UserOrganizationRoles.AddRange(newRoles);
+            await _context.SaveChangesAsync();
+        }
+
+        public async Task RemoveUsersAsync(string organizationId, RemoveUsersRequest request)
+        {
+            var organization = await _context.Organizations
+                .FirstOrDefaultAsync(o => o.Id == organizationId && !o.IsDeleted);
+
+            if (organization == null) throw new Exception("Organization not found");
+
+            var rolesToRemove = await _context.UserOrganizationRoles
+                .Where(uor => uor.OrganizationId == organizationId && request.UserIds.Contains(uor.UserId))
+                .ToListAsync();
+
+            if (!rolesToRemove.Any())
+                throw new Exception("No roles found for the specified users in this organization.");
+
+            _context.UserOrganizationRoles.RemoveRange(rolesToRemove);
+            await _context.SaveChangesAsync();
+        }
+
         public async Task DeleteOrganizationAsync(string id)
         {
             var organization = await _context.Organizations.FindAsync(id);
