@@ -197,6 +197,31 @@ namespace RollAttendanceServer.Controllers
             }
         }
 
+        [HttpPost("{eventId}/check-in-by-face")]
+        public async Task<IActionResult> CheckInByFace(string eventId, [FromBody] FaceCheckInRequest request)
+        {
+            try
+            {
+                var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+                if (string.IsNullOrEmpty(userId))
+                {
+                    return Unauthorized("Invalid user.");
+                }
+
+                if (string.IsNullOrEmpty(request.FaceData))
+                {
+                    return NotFound("Face data not found!");
+                }
+
+                await _eventService.FaceCheckIn(eventId, request.FaceData, request.AttendanceAttempt);
+                return Ok("Successfully check in!");
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+        }
+
         [HttpPost("{eventId}/add-attempt")]
         public async Task<IActionResult> AddAttendanceAttempt(string eventId)
         {

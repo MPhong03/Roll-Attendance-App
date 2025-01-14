@@ -18,5 +18,6 @@ namespace RollAttendanceServer.Interfaces
         Task AddAttendanceAttemptAsync(string eventId);
         Task<Event> CompleteEventAsync(string eventId);
         Task<IEnumerable<UserDTO>> GetEventUsersAsync(string eventId);
+        Task<BiometricCheckInResultDTO> FaceCheckIn(string eventId, string faceData, int attendanceAttempt);
     }
 }
