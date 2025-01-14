@@ -1,0 +1,73 @@
+﻿@page "/organization-management"
+
+<PageTitle>Organization Management</PageTitle>
+
+<MudText Typo="Typo.h4" Class="pb-3">Organization Management</MudText>
+
+<MudTextField Class="pb-3" @bind-Value="_searchKeyword" Label="Search Organizations" Variant="Variant.Outlined" Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Immediate="true" OnBlur="@ReloadOrganizations" />
+
+<MudTable Items="_organizations" ServerData="@LoadOrganizations" Elevation="2" Dense="true" Sortable="true" Class="mt-4">
+    <ToolBarContent>
+        <MudText Typo="Typo.h5">Organizations</MudText>
+    </ToolBarContent>
+    <HeaderContent>
+        <MudTh>Name</MudTh>
+        <MudTh>Description</MudTh>
+        <MudTh>Address</MudTh>
+        <MudTh>Private</MudTh>
+        <MudTh>Actions</MudTh>
+    </HeaderContent>
+    <RowTemplate>
+        <MudTd>@context.Name</MudTd>
+        <MudTd>@context.Description</MudTd>
+        <MudTd>@context.Address</MudTd>
+        <MudTd>@context.IsPrivate</MudTd>
+        <MudTd>
+            <MudButton OnClick="@(() => OpenDetailsDialog(context.Id))" Variant="Variant.Filled" Color="Color.Primary" Size="Size.Small">
+                Details
+            </MudButton>
+        </MudTd>
+    </RowTemplate>
+    <PagerContent>
+        <MudTablePager />
+    </PagerContent>
+</MudTable>
+
+@code {
+    private string? _searchKeyword;
+    private MudTable<Organization>? _table;
+    private List<Organization>? _organizations = new();
+    private int _totalOrganizations;
+
+    private async Task<TableData<Organization>> LoadOrganizations(TableState state)
+    {
+        var pageIndex = state.Page;
+        var pageSize = state.PageSize;
+
+        var result = await _organizationService.GetAll(_searchKeyword, pageIndex, pageSize);
+        _organizations = result.ToList();
+        _totalOrganizations = result.Count();
+
+        return new TableData<Organization>
+            {
+                Items = _organizations,
+                TotalItems = _totalOrganizations
+            };
+    }
+
+    private async Task ReloadOrganizations()
+    {
+        if (_table != null)
+        {
+            await _table.ReloadServerData();
+        }
+    }
+
+    private void OpenDetailsDialog(string organizationId)
+    {
+        _dialogService.Show<OrganizationDetail>("Organization Details", new DialogParameters
+            {
+                ["OrganizationId"] = organizationId
+            });
+    }
+}

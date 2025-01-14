@@ -20,6 +20,22 @@ namespace RollAttendanceServer.Services.Systems
             _cloudinaryService = cloudinaryService;
         }
 
+        public async Task<IEnumerable<Organization>> GetAll(string? keyword, int pageIndex = 0, int pageSize = 10)
+        {
+            var query = _context.Organizations.AsQueryable();
+
+            if (!string.IsNullOrEmpty(keyword))
+            {
+                query = query.Where(org => org.Name.Contains(keyword) || org.Description.Contains(keyword));
+            }
+
+            var organizations = await query.Skip(pageIndex * pageSize)
+                                           .Take(pageSize)
+                                           .ToListAsync();
+
+            return organizations;
+        }
+
         public async Task<IEnumerable<PublicOrganizationDTO>> SearchOrganizationsAsync(string? keyword, int pageIndex = 0, int pageSize = 10)
         {
             var query = _context.Organizations
