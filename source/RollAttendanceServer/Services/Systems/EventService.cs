@@ -451,5 +451,95 @@ namespace RollAttendanceServer.Services.Systems
             }).ToList();
         }
 
+        public async Task<BiometricCheckInResultDTO> FaceCheckIn(string eventId, string faceData, int attendanceAttempt)
+        {
+            var eventEntity = await _context.Events
+                                            .Include(e => e.EventUsers)
+                                            .Include(e => e.Organization)
+                                            .Include(e => e.Histories)
+                                            .ThenInclude(h => h.HistoryDetails)
+                                            .FirstOrDefaultAsync(e => e.Id == eventId);
+
+            if (eventEntity == null || eventEntity.EventStatus != (short)Status.EVENT_IN_PROGRESS)
+                throw new Exception("Event not found or not active.");
+
+            Dictionary<string, string> userFaceData;
+
+            if (eventEntity.IsPrivate)
+            {
+                userFaceData = eventEntity.EventUsers.ToDictionary(eu => eu.UserId, eu => eu.User.FaceData);
+            }
+            else
+            {
+                var organizationId = eventEntity.OrganizationId;
+                if (organizationId == null)
+                    throw new Exception("Organization not associated with the event.");
+
+                var organization = await _context.Organizations
+                    .Include(o => o.UserOrganizationRoles)
+                    .ThenInclude(ur => ur.User)
+                    .FirstOrDefaultAsync(o => o.Id == organizationId);
+
+                if (organization == null)
+                    throw new Exception("Organization not found.");
+
+                userFaceData = organization.UserOrganizationRoles
+                    .ToDictionary(ur => ur.UserId, ur => ur.User.FaceData);
+            }
+
+            if (!userFaceData.Any())
+                throw new Exception("No users found for this event.");
+
+            var matchedUserId = Tools.FindMatchingUser(faceData, userFaceData);
+
+            if (matchedUserId == null)
+                throw new Exception("Face not recognized.");
+
+            var user = await _context.Users.FirstOrDefaultAsync(u => u.Id == matchedUserId);
+            if (user == null)
+                throw new Exception("Matched user not found.");
+
+            // Xử lý điểm danh
+            var history = eventEntity.Histories.FirstOrDefault();
+            if (history == null) throw new Exception("History not found for the event.");
+
+            var userDetail = history.HistoryDetails.FirstOrDefault(d => d.UserId == matchedUserId);
+            if (userDetail == null)
+            {
+                userDetail = new HistoryDetail
+                {
+                    UserId = matchedUserId,
+                    UserAvatar = user.Avatar,
+                    UserEmail = user.Email,
+                    UserName = user.DisplayName,
+                    AttendanceCount = 1,
+                    AbsentTime = DateTime.UtcNow,
+                    AttendanceStatus = attendanceAttempt <= history.AttendanceTimes ? (short)Status.USER_PRESENTED : (short)Status.USER_LATED
+                };
+                history.HistoryDetails.Add(userDetail);
+            }
+            else
+            {
+                if (attendanceAttempt == history.AttendanceTimes)
+                    throw new Exception("You have already checked in!");
+                userDetail.AttendanceCount++;
+                userDetail.LeaveTime = DateTime.UtcNow;
+            }
+
+            if (attendanceAttempt == 1)
+                history.PresentCount++;
+
+            await _context.SaveChangesAsync();
+
+            return new BiometricCheckInResultDTO
+            {
+                UserId = user.Id,
+                Email = user.Email,
+                Name = user.DisplayName,
+                EventId = eventId,
+                Method = "FACE_DETECTION",
+                Prediction = 1.0
+            };
+        }
     }
 }

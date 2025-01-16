@@ -5,6 +5,7 @@ import 'package:blurry_modal_progress_hud/blurry_modal_progress_hud.dart';
 import 'package:go_router/go_router.dart';
 import 'package:itproject/enums/event_status.dart';
 import 'package:itproject/models/event_history_model.dart';
+import 'package:itproject/models/event_history_model.dart';
 import 'package:itproject/models/event_model.dart';
 import 'package:intl/intl.dart';
 import 'package:itproject/services/api_service.dart';

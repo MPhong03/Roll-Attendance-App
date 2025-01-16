@@ -9,6 +9,7 @@ import 'package:itproject/ui/screens/events/event_access_list.dart';
 import 'package:itproject/ui/screens/events/event_attendance_list.dart';
 import 'package:itproject/ui/screens/events/event_check_in_screen.dart';
 import 'package:itproject/ui/screens/events/event_detail.dart';
+import 'package:itproject/ui/screens/events/event_face_check_in_screen.dart';
 import 'package:itproject/ui/screens/home_screen.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -17,6 +18,7 @@ import 'package:itproject/ui/screens/organizations/add_user_to_organization.dart
 import 'package:itproject/ui/screens/organizations/create_organization.dart';
 import 'package:itproject/ui/screens/organizations/edit_organization.dart';
 import 'package:itproject/ui/screens/organizations/organization_detail.dart';
+import 'package:itproject/ui/screens/organizations/organization_invite_requests.dart';
 import 'package:itproject/ui/screens/organizations/organization_join_requests.dart';
 import 'package:itproject/ui/screens/organizations/organization_list.dart';
 import 'package:itproject/ui/screens/organizations/public/organization_public_search.dart';
@@ -24,6 +26,7 @@ import 'package:itproject/ui/screens/organizations/public/public_organization_de
 import 'package:itproject/ui/screens/profile_screen.dart';
 import 'package:itproject/ui/screens/edit_profile_screen.dart';
 import 'package:itproject/ui/screens/forgot_password_screen.dart';
+import 'package:itproject/ui/screens/settings/my_invitation_screen.dart';
 import 'package:itproject/ui/screens/settings/my_request_screen.dart';
 import 'package:itproject/ui/screens/settings/update_face_data_screen.dart';
 import 'firebase_options.dart';
@@ -178,6 +181,15 @@ class MyApp extends StatelessWidget {
               },
             ),
             GoRoute(
+              path: '/event-face-check-in/:id/:attempt',
+              builder: (context, state) {
+                final id = state.pathParameters['id']!;
+                final attempt = state.pathParameters['attempt']!;
+                return EventFaceCheckInScreen(
+                    eventId: id, attempt: int.parse(attempt));
+              },
+            ),
+            GoRoute(
               path: '/event-access-list/:id',
               builder: (context, state) {
                 final id = state.pathParameters['id']!;
@@ -203,10 +215,21 @@ class MyApp extends StatelessWidget {
               builder: (context, state) => const MyRequestsScreen(),
             ),
             GoRoute(
+              path: '/my-invitations',
+              builder: (context, state) => const MyInvitationsScreen(),
+            ),
+            GoRoute(
               path: '/organization-requests/:id',
               builder: (context, state) {
                 final id = state.pathParameters['id']!;
                 return OrganizationJoinRequestsScreen(organizationId: id);
+              },
+            ),
+            GoRoute(
+              path: '/organization-invitations/:id',
+              builder: (context, state) {
+                final id = state.pathParameters['id']!;
+                return OrganizationInviteRequestsScreen(organizationId: id);
               },
             ),
           ],

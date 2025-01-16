@@ -214,7 +214,7 @@ class _EventCheckInScreenState extends State<EventCheckInScreen> {
                         height: screenHeight * 0.8,
                         padding: const EdgeInsets.all(16.0),
                         decoration: BoxDecoration(
-                          color: isDarkMode ? Color(0xFF1E1E1E): Colors.white,
+                          color: isDarkMode ? Color(0xFF1E1E1E) : Colors.white,
                           borderRadius: BorderRadius.circular(12),
                           boxShadow: [
                             BoxShadow(
@@ -329,8 +329,8 @@ class _EventCheckInScreenState extends State<EventCheckInScreen> {
                               const SizedBox(height: 20),
                               Center(
                                 child: SizedBox(
-                                  width: screenWidth * 0.5,
-                                  height: screenHeight * 0.05,
+                                  // width: screenWidth * 0.5,
+                                  // height: screenHeight * 0.05,
                                   child: ElevatedButton(
                                     onPressed: () {
                                       _showQrCodeScanner(
@@ -353,6 +353,49 @@ class _EventCheckInScreenState extends State<EventCheckInScreen> {
                                         const SizedBox(width: 8),
                                         Text(
                                           "QR SCAN",
+                                          style: TextStyle(
+                                            color: Colors.white,
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: getResponsiveFontSize(16),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(height: 20),
+                              Center(
+                                child: SizedBox(
+                                  // width: screenWidth * 0.5,
+                                  // height: screenHeight * 0.05,
+                                  child: ElevatedButton(
+                                    onPressed: () {
+                                      if (mounted) {
+                                        ScaffoldMessenger.of(context)
+                                            .showSnackBar(
+                                          const SnackBar(
+                                              content: Text("Developing...")),
+                                        );
+                                      }
+                                    },
+                                    style: ElevatedButton.styleFrom(
+                                      backgroundColor: const Color(0xFF0FB900),
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(25),
+                                      ),
+                                    ),
+                                    child: Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
+                                      children: [
+                                        const Icon(
+                                          Icons.face,
+                                          color: Colors.white,
+                                        ),
+                                        const SizedBox(width: 8),
+                                        Text(
+                                          "BIOMETRICS",
                                           style: TextStyle(
                                             color: Colors.white,
                                             fontWeight: FontWeight.bold,

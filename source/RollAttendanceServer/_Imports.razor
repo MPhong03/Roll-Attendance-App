@@ -9,14 +9,19 @@
 @using Microsoft.JSInterop
 @using RollAttendanceServer
 @using RollAttendanceServer.Authentication
+@using RollAttendanceServer.Interfaces
 @using RollAttendanceServer.Services.Configs
+@using RollAttendanceServer.Services.Systems
 @using RollAttendanceServer.Shared
 @using RollAttendanceServer.DTOs
 @using RollAttendanceServer.Data
+@using RollAttendanceServer.Models
 @using MudBlazor
 @inject NavigationManager NavigationManager
 @inject ISnackbar Snackbar
 @inject CustomAuthenticationStateProvider _authenticationStateProvider
 @inject LoadingService LoadingService
+@inject IDialogService _dialogService
 @inject IAuthorizationService AuthorizationService
-
+@inject IOrganizationService _organizationService
+@inject IEventService _eventService

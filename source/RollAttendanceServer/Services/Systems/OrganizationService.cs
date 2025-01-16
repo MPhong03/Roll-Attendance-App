@@ -20,6 +20,22 @@ namespace RollAttendanceServer.Services.Systems
             _cloudinaryService = cloudinaryService;
         }
 
+        public async Task<IEnumerable<Organization>> GetAll(string? keyword, int pageIndex = 0, int pageSize = 10)
+        {
+            var query = _context.Organizations.AsQueryable();
+
+            if (!string.IsNullOrEmpty(keyword))
+            {
+                query = query.Where(org => org.Name.Contains(keyword) || org.Description.Contains(keyword));
+            }
+
+            var organizations = await query.Skip(pageIndex * pageSize)
+                                           .Take(pageSize)
+                                           .ToListAsync();
+
+            return organizations;
+        }
+
         public async Task<IEnumerable<PublicOrganizationDTO>> SearchOrganizationsAsync(string? keyword, int pageIndex = 0, int pageSize = 10)
         {
             var query = _context.Organizations
@@ -190,6 +206,67 @@ namespace RollAttendanceServer.Services.Systems
             };
 
             _context.UserOrganizationRoles.Add(userRole);
+            await _context.SaveChangesAsync();
+        }
+
+        public async Task AddUsersAsync(string organizationId, List<AddToRoleRequest> requests)
+        {
+            var organization = await _context.Organizations
+                .FirstOrDefaultAsync(o => o.Id == organizationId && !o.IsDeleted);
+
+            if (organization == null) throw new Exception("Organization not found");
+
+            var userIds = requests.Select(r => r.UserId).ToList();
+
+            var users = await _context.Users
+                .Where(u => userIds.Contains(u.Uid))
+                .ToDictionaryAsync(u => u.Uid);
+
+            var existingRoles = await _context.UserOrganizationRoles
+                .Where(uor => uor.OrganizationId == organizationId)
+                .ToDictionaryAsync(uor => uor.UserId ?? string.Empty);
+
+            var newRoles = new List<UserOrganizationRole>();
+
+            foreach (var request in requests)
+            {
+                if (!users.TryGetValue(request.UserId, out var user))
+                {
+                    throw new Exception($"User with ID {request.UserId} not found");
+                }
+
+                if (existingRoles.ContainsKey(user.Id))
+                {
+                    throw new Exception($"User {request.UserId} already has a role in this organization.");
+                }
+
+                newRoles.Add(new UserOrganizationRole
+                {
+                    UserId = user.Id,
+                    OrganizationId = organization.Id,
+                    Role = request.Role
+                });
+            }
+
+            _context.UserOrganizationRoles.AddRange(newRoles);
+            await _context.SaveChangesAsync();
+        }
+
+        public async Task RemoveUsersAsync(string organizationId, RemoveUsersRequest request)
+        {
+            var organization = await _context.Organizations
+                .FirstOrDefaultAsync(o => o.Id == organizationId && !o.IsDeleted);
+
+            if (organization == null) throw new Exception("Organization not found");
+
+            var rolesToRemove = await _context.UserOrganizationRoles
+                .Where(uor => uor.OrganizationId == organizationId && request.UserIds.Contains(uor.UserId))
+                .ToListAsync();
+
+            if (!rolesToRemove.Any())
+                throw new Exception("No roles found for the specified users in this organization.");
+
+            _context.UserOrganizationRoles.RemoveRange(rolesToRemove);
             await _context.SaveChangesAsync();
         }
 

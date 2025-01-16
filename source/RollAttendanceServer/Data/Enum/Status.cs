@@ -20,5 +20,11 @@
         REQUEST_APPROVED = 1,
         REQUEST_REJECTED = 2,
         REQUEST_CANCELLED = 3,
+
+        // INVITE
+        INVITION_WAITING = 0,
+        INVITION_APPROVED = 1,
+        INVITION_REJECTED = 2,
+        INVITION_CANCELLED = 3,
     }
 }

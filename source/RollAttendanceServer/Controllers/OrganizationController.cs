@@ -12,6 +12,7 @@ using RollAttendanceServer.Models;
 using RollAttendanceServer.Services.Systems;
 using System.Diagnostics;
 using System.Drawing.Printing;
+using System.Security.Claims;
 
 namespace RollAttendanceServer.Controllers
 {
@@ -21,10 +22,12 @@ namespace RollAttendanceServer.Controllers
     public class OrganizationController : ControllerBase
     {
         private readonly IOrganizationService _organizationService;
+        private readonly IInvitionRequestService _invitionRequestService;
 
-        public OrganizationController(IOrganizationService organizationService)
+        public OrganizationController(IOrganizationService organizationService, IInvitionRequestService invitionRequestService)
         {
             _organizationService = organizationService;
+            _invitionRequestService = invitionRequestService;
         }
 
         [HttpGet]
@@ -155,6 +158,98 @@ namespace RollAttendanceServer.Controllers
             }
         }
 
+        [HttpGet("invite-list")]
+        public async Task<IActionResult> GetParticipationRequests([FromQuery] InvitionQuery query)
+        {
+            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (string.IsNullOrEmpty(userId))
+            {
+                return Unauthorized("Không thể xác thực người dùng.");
+            }
+
+            try
+            {
+                var result = await _invitionRequestService.GetInviteRequestsAsync(
+                    query.UserId ?? userId,
+                    query.OrganizationId,
+                    query.Keyword,
+                    query.Status,
+                    query.PageIndex,
+                    query.PageSize,
+                    query.ForUser
+                );
+
+                return Ok(new
+                {
+                    Message = "Danh sách thư mời tham gia",
+                    Data = result.Items,
+                    result.TotalRecords,
+                    result.PageIndex,
+                    result.PageSize
+                });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { Message = ex.Message });
+            }
+        }
+
+        [HttpPost("invite/{organizationId}")]
+        public async Task<IActionResult> InviteUser(string organizationId, [FromBody] InvitedList request)
+        {
+            try
+            {
+                await _invitionRequestService.InviteUsersAsync(organizationId, request);
+                return Ok(new { organizationId, request });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+        [HttpPut("invite/accept/{invitationId}")]
+        public async Task<IActionResult> AcceptInvitation(string invitationId)
+        {
+            try
+            {
+                await _invitionRequestService.UpdateInvitationStatusAsync(invitationId, (short)Status.INVITION_APPROVED);
+                return Ok(new { invitationId, status = Status.INVITION_APPROVED });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+        [HttpPut("invite/reject/{invitationId}")]
+        public async Task<IActionResult> RejectInvitation(string invitationId)
+        {
+            try
+            {
+                await _invitionRequestService.UpdateInvitationStatusAsync(invitationId, (short)Status.INVITION_REJECTED);
+                return Ok(new { invitationId, status = Status.INVITION_REJECTED });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+        [HttpPut("invite/cancel/{invitationId}")]
+        public async Task<IActionResult> CancelInvitation(string invitationId)
+        {
+            try
+            {
+                await _invitionRequestService.UpdateInvitationStatusAsync(invitationId, (short)Status.INVITION_CANCELLED);
+                return Ok(new { invitationId, status = Status.INVITION_CANCELLED });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
         [HttpPost("Add/{organizationId}")]
         public async Task<IActionResult> AddToRole(string organizationId, [FromBody] AddToRoleRequest request)
         {
@@ -168,5 +263,56 @@ namespace RollAttendanceServer.Controllers
                 return BadRequest(ex.Message);
             }
         }
+
+        [HttpPost("add-list/{organizationId}")]
+        public async Task<IActionResult> AddToRoles(string organizationId, [FromBody] AddListToRoleRequest request)
+        {
+            try
+            {
+                await _organizationService.AddUsersAsync(organizationId, request.Requests);
+                return Ok(new { organizationId, request.Requests });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+        [HttpPut("remove-list/{organizationId}")]
+        public async Task<IActionResult> RemoveFromOrg(string organizationId, [FromBody] RemoveUsersRequest request)
+        {
+            try
+            {
+                await _organizationService.RemoveUsersAsync(organizationId, request);
+                return Ok(new { organizationId, request.UserIds });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+    }
+
+    public class InvitionQuery
+    {
+        public bool ForUser { get; set; } = true;
+        public string? UserId { get; set; }
+        public string? OrganizationId { get; set; }
+        public string? Keyword { get; set; }
+        public int Status { get; set; }
+        public int PageIndex { get; set; } = 1;
+        public int PageSize { get; set; } = 10;
+    }
+
+    public class InvitedList
+    {
+        public List<InvitedUsers> Users { get; set; }
+        public string? Notes { get; set; }
+    }
+
+    public class InvitedUsers
+    {
+        public string? UserId { get; set; }
+        public short Role { get; set; }
     }
 }
