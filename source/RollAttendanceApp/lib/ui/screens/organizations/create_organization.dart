@@ -95,7 +95,7 @@ class _CreateOrganizationScreenState extends State<CreateOrganizationScreen> {
   }
 
   Future<void> _createOrganization() async {
-    if (!_formKey.currentState!.validate()) return;
+    //if (!_formKey.currentState!.validate()) return;
 
     setState(() {
       _isLoading = true;

@@ -171,7 +171,7 @@ class _EditOrganizationScreenState extends State<EditOrganizationScreen> {
   }
 
   Future<void> _editOrganization() async {
-    if (!_formKey.currentState!.validate()) return;
+    //if (!_formKey.currentState!.validate()) return;
 
     setState(() {
       _isLoading = true;
