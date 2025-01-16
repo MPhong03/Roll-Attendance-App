@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:blurry_modal_progress_hud/blurry_modal_progress_hud.dart';
 import 'package:go_router/go_router.dart';
 import 'package:itproject/enums/event_status.dart';
+import 'package:itproject/models/event_history_model.dart';
 import 'package:itproject/models/event_model.dart';
 import 'package:itproject/services/api_service.dart';
 import 'package:itproject/ui/components/events/preview_event_modal.dart';
@@ -22,7 +23,9 @@ class EventDetailScreen extends StatefulWidget {
 class _EventDetailScreenState extends State<EventDetailScreen> {
   final ApiService _apiService = ApiService();
   bool _isLoading = false;
+  late Future<List<dynamic>> _combinedFuture;
   late Future<EventModel> _eventFuture;
+  late Future<HistoryModel> _historyFuture;
 
   // ASYNCHRONOUS METHODS
   Future<EventModel> getDetail(id) async {
@@ -152,7 +155,32 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
   Future<void> _onRefresh() async {
     setState(() {
       _eventFuture = getDetail(widget.eventId);
+      _historyFuture = getHistory(widget.eventId);
     });
+  }
+
+  Future<HistoryModel> getHistory(id) async {
+    try {
+      setState(() {
+        _isLoading = true;
+      });
+
+      final response = await _apiService.get('api/histories/$id');
+
+      if (response.statusCode == 200) {
+        final history = HistoryModel.fromMap(jsonDecode(response.body));
+        return history;
+      } else {
+        return HistoryModel();
+      }
+    } catch (e) {
+      print('Failed to load event: $e');
+      return HistoryModel();
+    } finally {
+      setState(() {
+        _isLoading = false;
+      });
+    }
   }
 
   // METHOD
@@ -199,6 +227,9 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
   void initState() {
     super.initState();
     _eventFuture = getDetail(widget.eventId);
+    _historyFuture = getHistory(widget.eventId);
+
+    _combinedFuture = Future.wait([_eventFuture, _historyFuture]);
   }
 
   @override
@@ -215,8 +246,8 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
         inAsyncCall: _isLoading,
         opacity: 0.3,
         blurEffectIntensity: 5,
-        child: FutureBuilder<EventModel>(
-          future: _eventFuture,
+        child: FutureBuilder<List<dynamic>>(
+          future: _combinedFuture,
           builder: (context, snapshot) {
             if (snapshot.connectionState == ConnectionState.waiting) {
               return const Center(child: CircularProgressIndicator());
@@ -230,7 +261,9 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
             } else if (!snapshot.hasData) {
               return const Center(child: Text('No data available'));
             } else {
-              final event = snapshot.data!;
+              final event = snapshot.data![0] as EventModel;
+              final history = snapshot.data![1] as HistoryModel;
+
               return RefreshIndicator(
                 onRefresh: _onRefresh,
                 child: SingleChildScrollView(
@@ -419,6 +452,8 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
                                 title: const Text("Biometrics"),
                                 onTap: () {
                                   // Handle biometrics action (Develop later)
+                                  context.push(
+                                      '/event-face-check-in/${event.id}/${history.attendanceTimes}');
                                 },
                               ),
                               const Divider(),

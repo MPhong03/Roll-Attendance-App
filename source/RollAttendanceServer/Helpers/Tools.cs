@@ -1,4 +1,5 @@
 ﻿using Newtonsoft.Json;
+using System.Diagnostics;
 
 namespace RollAttendanceServer.Helpers
 {
@@ -15,7 +16,7 @@ namespace RollAttendanceServer.Helpers
 
         public static string? FindMatchingUser(string inputFaceData, Dictionary<string, string> userFaceData)
         {
-            var inputVector = JsonConvert.DeserializeObject<List<float>>(inputFaceData);
+            var inputVector = JsonConvert.DeserializeObject<List<List<float>>>(inputFaceData);
             if (inputVector == null) return null;
 
             string? bestMatchUserId = null;
@@ -23,10 +24,12 @@ namespace RollAttendanceServer.Helpers
 
             foreach (var (userId, faceVectorData) in userFaceData)
             {
-                var userVector = JsonConvert.DeserializeObject<List<float>>(faceVectorData);
+                var userVector = JsonConvert.DeserializeObject<List<List<float>>>(faceVectorData);
                 if (userVector == null) continue;
-
-                var similarity = CalculateCosineSimilarity(inputVector, userVector);
+                Debug.WriteLine("VECTOR 1: ", inputVector);
+                Debug.WriteLine("VECTOR 2: ", userVector);
+                var similarity = CalculateCosineSimilarity(inputVector[0], userVector[0]);
+                Debug.WriteLine("NUM: ", similarity);
                 if (similarity > highestSimilarity)
                 {
                     highestSimilarity = similarity;
@@ -34,7 +37,10 @@ namespace RollAttendanceServer.Helpers
                 }
             }
 
-            return highestSimilarity > 0.9 ? bestMatchUserId : null;
+            Debug.WriteLine("SIMILITARI: ", highestSimilarity);
+            Debug.WriteLine("USERID: ", bestMatchUserId);
+
+            return highestSimilarity > 0.8 ? bestMatchUserId : null;
         }
 
         // Hàm tính cosine similarity

@@ -9,6 +9,7 @@ import 'package:itproject/ui/screens/events/event_access_list.dart';
 import 'package:itproject/ui/screens/events/event_attendance_list.dart';
 import 'package:itproject/ui/screens/events/event_check_in_screen.dart';
 import 'package:itproject/ui/screens/events/event_detail.dart';
+import 'package:itproject/ui/screens/events/event_face_check_in_screen.dart';
 import 'package:itproject/ui/screens/home_screen.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -177,6 +178,15 @@ class MyApp extends StatelessWidget {
               builder: (context, state) {
                 final id = state.pathParameters['id']!;
                 return EventCheckInScreen(eventId: id);
+              },
+            ),
+            GoRoute(
+              path: '/event-face-check-in/:id/:attempt',
+              builder: (context, state) {
+                final id = state.pathParameters['id']!;
+                final attempt = state.pathParameters['attempt']!;
+                return EventFaceCheckInScreen(
+                    eventId: id, attempt: int.parse(attempt));
               },
             ),
             GoRoute(

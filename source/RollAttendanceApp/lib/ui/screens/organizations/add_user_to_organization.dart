@@ -80,40 +80,43 @@ class _AddUserToOrganizationScreenState
       builder: (context) {
         return StatefulBuilder(
           builder: (context, setState) {
-            return Padding(
-              padding: const EdgeInsets.all(32.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Text(
-                    'Select Role for User',
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                  ),
-                  const SizedBox(height: 16),
-                  DropdownButton<UserRole>(
-                    value: selectedRole,
-                    onChanged: (UserRole? role) {
-                      if (role != null) {
-                        setState(() {
-                          selectedRole = role;
-                        });
-                      }
-                    },
-                    items: UserRole.values.map((UserRole role) {
-                      return DropdownMenuItem<UserRole>(
-                        value: role,
-                        child: Text(getRoleName(role)),
-                      );
-                    }).toList(),
-                  ),
-                  const SizedBox(height: 16),
-                  ElevatedButton(
-                    onPressed: () {
-                      Navigator.pop(context, selectedRole);
-                    },
-                    child: const Text('Set Role'),
-                  ),
-                ],
+            return Scaffold(
+              body: Padding(
+                padding: const EdgeInsets.all(32.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      'Select Role for User',
+                      style:
+                          TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                    ),
+                    const SizedBox(height: 16),
+                    DropdownButton<UserRole>(
+                      value: selectedRole,
+                      onChanged: (UserRole? role) {
+                        if (role != null) {
+                          setState(() {
+                            selectedRole = role;
+                          });
+                        }
+                      },
+                      items: UserRole.values.map((UserRole role) {
+                        return DropdownMenuItem<UserRole>(
+                          value: role,
+                          child: Text(getRoleName(role)),
+                        );
+                      }).toList(),
+                    ),
+                    const SizedBox(height: 16),
+                    ElevatedButton(
+                      onPressed: () {
+                        Navigator.pop(context, selectedRole);
+                      },
+                      child: const Text('Set Role'),
+                    ),
+                  ],
+                ),
               ),
             );
           },
