@@ -178,152 +178,192 @@ class _EditEventScreenState extends State<EditEventScreen> {
   }
 
   @override
-  Widget build(BuildContext context) {
-    return BlurryModalProgressHUD(
-      inAsyncCall: _isLoading,
-      opacity: 0.3,
-      blurEffectIntensity: 5,
-      child: Scaffold(
-        appBar: AppBar(
-          title: const Text('Edit Event'),
-          centerTitle: true,
+Widget build(BuildContext context) {
+  final screenHeight = MediaQuery.of(context).size.height;
+  final screenWidth = MediaQuery.of(context).size.width;
+  final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+
+  return BlurryModalProgressHUD(
+    inAsyncCall: _isLoading,
+    opacity: 0.3,
+    blurEffectIntensity: 5,
+    child: Scaffold(
+      appBar: AppBar(
+        backgroundColor: isDarkMode ? Color(0xFF121212) : Color(0xFFE9FCe9),
+        elevation: 0,
+        leading: IconButton(
+          icon: Icon(
+            Icons.arrow_back,
+            color: isDarkMode ? Colors.white : Colors.black,
+          ),
+          onPressed: () => Navigator.of(context).pop(),
         ),
-        body: RefreshIndicator(
-          onRefresh: _onRefresh,
-          child: FutureBuilder<EventModel>(
-            future: _eventFuture,
-            builder: (context, snapshot) {
-              if (snapshot.connectionState == ConnectionState.waiting) {
-                return const Center(child: CircularProgressIndicator());
-              } else if (snapshot.hasError) {
-                return Center(
-                  child: Text(
-                    'Error: ${snapshot.error}',
-                    style: const TextStyle(color: Colors.red),
+      ),
+      body: Center(
+        child: Container(
+          margin: EdgeInsets.only(top: 0),
+          height: screenHeight * 0.8,
+          width: screenWidth * 0.9,
+          padding: const EdgeInsets.all(16.0),
+          decoration: BoxDecoration(
+            color: isDarkMode ? const Color(0xFF1E1E1E) : Colors.white,
+            borderRadius: BorderRadius.circular(12.0),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.2),
+                blurRadius: 6.0,
+                spreadRadius: 2.0,
+              ),
+            ],
+          ),
+          child: Form(
+            key: _formKey,
+            child: SingleChildScrollView(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Event Name
+                  _buildTextFieldWithTitle(
+                    title: "Event Name",
+                    controller: _eventNameController,
                   ),
-                );
-              } else if (snapshot.hasData) {
-                return Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: Form(
-                    key: _formKey,
-                    child: SingleChildScrollView(
-                      child: Column(
-                        children: [
-                          TextFormField(
-                            controller: _eventNameController,
-                            decoration: InputDecoration(
-                              labelText: 'Event Name',
-                              border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(10.0),
-                              ),
-                              prefixIcon: const Icon(Icons.event),
-                            ),
-                            validator: (value) {
-                              if (value == null || value.isEmpty) {
-                                return 'Please enter event name';
-                              }
-                              return null;
-                            },
-                          ),
-                          const SizedBox(height: 16),
-                          TextFormField(
-                            controller: _eventDescriptionController,
-                            decoration: InputDecoration(
-                              labelText: 'Event Description',
-                              border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(10.0),
-                              ),
-                              prefixIcon: const Icon(Icons.description),
-                            ),
-                            validator: (value) {
-                              if (value == null || value.isEmpty) {
-                                return 'Please enter event description';
-                              }
-                              return null;
-                            },
-                          ),
-                          const SizedBox(height: 16),
-                          GestureDetector(
-                            onTap: () =>
-                                _selectTime(context, _startTimeController),
-                            child: AbsorbPointer(
-                              child: TextFormField(
-                                controller: _startTimeController,
-                                decoration: InputDecoration(
-                                  labelText: 'Start Time',
-                                  border: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(10.0),
-                                  ),
-                                  hintText: 'Select start time',
-                                  prefixIcon: const Icon(Icons.access_time),
-                                ),
-                              ),
-                            ),
-                          ),
-                          const SizedBox(height: 16),
-                          GestureDetector(
-                            onTap: () =>
-                                _selectTime(context, _endTimeController),
-                            child: AbsorbPointer(
-                              child: TextFormField(
-                                controller: _endTimeController,
-                                decoration: InputDecoration(
-                                  labelText: 'End Time',
-                                  border: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(10.0),
-                                  ),
-                                  hintText: 'Select end time',
-                                  prefixIcon: const Icon(Icons.access_time),
-                                ),
-                              ),
-                            ),
-                          ),
-                          const SizedBox(height: 16),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              const Text(
-                                'Private Event',
-                                style: TextStyle(fontSize: 16),
-                              ),
-                              Switch(
-                                value: _isPrivate,
-                                onChanged: (value) {
-                                  setState(() {
-                                    _isPrivate = value;
-                                  });
-                                },
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 20),
-                          ElevatedButton.icon(
-                            onPressed: () {
-                              if (_formKey.currentState?.validate() ?? false) {
-                                _editEvent();
-                              }
-                            },
-                            icon: const Icon(Icons.save),
-                            label: const Text('Edit Event'),
-                            style: ElevatedButton.styleFrom(
-                              minimumSize: const Size(double.infinity, 50),
-                            ),
-                          ),
-                        ],
+                  const SizedBox(height: 16),
+
+                  // Event Description
+                  _buildTextFieldWithTitle(
+                    title: "Event Description",
+                    controller: _eventDescriptionController,
+                    maxLines: 3,
+                  ),
+                  const SizedBox(height: 16),
+
+                  // Start Time
+                  _buildTextFieldWithTitle(
+                    title: "Start Time",
+                    controller: _startTimeController,
+                    isReadOnly: true,
+                    onTap: () => _selectTime(context, _startTimeController),
+                  ),
+                  const SizedBox(height: 16),
+
+                  // End Time
+                  _buildTextFieldWithTitle(
+                    title: "End Time",
+                    controller: _endTimeController,
+                    isReadOnly: true,
+                    onTap: () => _selectTime(context, _endTimeController),
+                  ),
+                  const SizedBox(height: 16),
+
+                  // Private Event Switch
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      const Text(
+                        'Private Event',
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.green,
+                        ),
+                      ),
+                      Switch(
+                        value: _isPrivate,
+                        onChanged: (value) {
+                          setState(() {
+                            _isPrivate = value;
+                          });
+                        },
+                        activeColor: Colors.green,
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 30),
+
+                  // Save Button
+                  Center(
+                    child: ElevatedButton(
+                      onPressed: () {
+                        if (_formKey.currentState?.validate() ?? false) {
+                          _editEvent(); // Gọi hàm chỉnh sửa sự kiện
+                        }
+                      },
+                      style: ElevatedButton.styleFrom(
+                        minimumSize: const Size(double.infinity, 50),
+                        backgroundColor: Colors.green,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
+                      child: const Text(
+                        "SAVE",
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 16,
+                        ),
                       ),
                     ),
                   ),
-                );
-              } else {
-                return const Center(
-                  child: Text('No data found'),
-                );
-              }
-            },
+                ],
+              ),
+            ),
           ),
         ),
       ),
+    ),
+  );
+}
+Widget _buildTextFieldWithTitle({
+    required String title,
+    required TextEditingController controller,
+    bool isReadOnly = false,
+    int maxLines = 1,
+    VoidCallback? onTap,
+  }) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          title,
+          style: const TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.bold,
+            color: Colors.green,
+          ),
+        ),
+        const SizedBox(height: 8),
+        GestureDetector(
+          onTap: onTap,
+          child: AbsorbPointer(
+            absorbing: isReadOnly,
+            child: TextFormField(
+              controller: controller,
+              readOnly: isReadOnly,
+              maxLines: maxLines,
+              decoration: InputDecoration(
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(10.0),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(10.0),
+                  borderSide: const BorderSide(
+                    color: Colors.green,
+                    width: 2.0,
+                  ),
+                ),
+              ),
+              cursorColor: Colors.green,
+              validator: (value) {
+                if (value == null || value.isEmpty) {
+                  return 'Please enter $title';
+                }
+                return null;
+              },
+            ),
+          ),
+        ),
+      ],
     );
   }
 }

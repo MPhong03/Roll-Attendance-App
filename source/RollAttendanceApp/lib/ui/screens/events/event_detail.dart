@@ -379,7 +379,7 @@ Widget build(BuildContext context) {
         Text(
           isPrivate ? "Private Event" : "Public Event",
           style: TextStyle(
-            color: isPrivate ? Colors.red : theme.primaryColor,
+            color: isPrivate ? Colors.red : Colors.green,
             fontSize: fontSize(16),
           ),
         ),
@@ -448,7 +448,7 @@ Widget build(BuildContext context) {
           if (action['condition'])
             Padding(
               padding: EdgeInsets.symmetric(
-                vertical: action['isLarge'] == true ? 16.0 : 8.0, // Khoảng cách lớn hơn cho nút chính
+                vertical: action['isLarge'] == true ? 16.0 : 8.0,
               ),
               child: Center(
                 child: SizedBox(

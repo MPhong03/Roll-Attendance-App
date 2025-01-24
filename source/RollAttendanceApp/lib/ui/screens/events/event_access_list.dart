@@ -131,121 +131,109 @@ class _EventAccessListScreenState extends State<EventAccessListScreen> {
   }
 
   @override
-  Widget build(BuildContext context) {
-    return BlurryModalProgressHUD(
-      inAsyncCall: _isLoading,
-      opacity: 0.3,
-      blurEffectIntensity: 5,
-      child: Scaffold(
-        appBar: AppBar(
-          title: const Text('Event Access List'),
-          actions: [
-            IconButton(
-              icon: const Icon(Icons.add),
-              onPressed: _openUserSelectionSheet,
-            ),
-          ],
-        ),
-        body: RefreshIndicator(
-          onRefresh: _onRefresh,
-          child: FutureBuilder<List<UserModel>>(
-            future: _usersFuture,
-            builder: (context, snapshot) {
-              if (snapshot.connectionState == ConnectionState.waiting) {
-                return const Center(
-                  child: Text(
-                    'Loading',
-                  ),
-                );
-              } else if (snapshot.hasError) {
-                return Center(
-                  child: Text(
-                    'Error: ${snapshot.error}',
-                    style: const TextStyle(color: Colors.red),
-                  ),
-                );
-              } else if (snapshot.hasData) {
-                final users = snapshot.data!;
-                if (users.isEmpty) {
-                  return const Center(
-                    child: Text('No users have access to this event.'),
-                  );
-                }
+Widget build(BuildContext context) {
+  final isDarkMode = Theme.of(context).brightness == Brightness.dark;
 
-                return ListView.builder(
-                  padding: const EdgeInsets.all(8.0),
-                  itemCount: users.length,
-                  itemBuilder: (context, index) {
-                    final user = users[index];
-                    return Card(
-                      elevation: 4.0,
-                      margin: const EdgeInsets.symmetric(vertical: 8.0),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8.0),
-                      ),
-                      child: Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: Row(
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          children: [
-                            CircleAvatar(
-                              radius: 40,
-                              backgroundImage: NetworkImage(user.avatar),
-                              onBackgroundImageError: (_, __) =>
-                                  const Icon(Icons.person, size: 40),
-                            ),
-                            const SizedBox(width: 16),
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    user.displayName,
-                                    style: const TextStyle(
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 16,
-                                    ),
-                                    textAlign: TextAlign.left,
-                                  ),
-                                  const SizedBox(height: 4),
-                                  Text(
-                                    user.email,
-                                    style: const TextStyle(
-                                      fontSize: 14,
-                                      color: Colors.grey,
-                                    ),
-                                    textAlign: TextAlign.left,
-                                  ),
-                                ],
-                              ),
-                            ),
-                            IconButton(
-                              icon: const Icon(Icons.more_vert),
-                              onPressed: () {
-                                // Handle more options for user
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(
-                                    content: Text(
-                                        'Options for ${user.displayName} pressed'),
-                                  ),
-                                );
-                              },
-                            ),
-                          ],
-                        ),
-                      ),
-                    );
-                  },
-                );
-              } else {
+  return BlurryModalProgressHUD(
+    inAsyncCall: _isLoading,
+    opacity: 0.3,
+    blurEffectIntensity: 5,
+    child: Scaffold(
+      appBar: AppBar(
+        backgroundColor: isDarkMode ? const Color(0xFF121212) : const Color(0xFFE9FCE9),
+        elevation: 0,
+        leading: IconButton(
+          icon: Icon(
+            Icons.arrow_back,
+            color: isDarkMode ? Colors.white : Colors.black,
+          ),
+          onPressed: () => Navigator.of(context).pop(),
+        ),
+        actions: [
+          IconButton(
+            icon: Icon(
+              Icons.add,
+              color: isDarkMode ? Colors.white : Colors.black,
+            ),
+            onPressed: _openUserSelectionSheet,
+          ),
+        ],
+      ),
+      body: RefreshIndicator(
+        onRefresh: _onRefresh,
+        child: FutureBuilder<List<UserModel>>(
+          future: _usersFuture,
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return const Center(
+                child: CircularProgressIndicator(),
+              );
+            } else if (snapshot.hasError) {
+              return Center(
+                child: Text(
+                  'Error: ${snapshot.error}',
+                  style: const TextStyle(color: Colors.red),
+                ),
+              );
+            } else if (snapshot.hasData) {
+              final users = snapshot.data!;
+              if (users.isEmpty) {
                 return const Center(
-                  child: Text('No data found'),
+                  child: Text('No users have access to this event.'),
                 );
               }
-            },
-          ),
+
+              return ListView.builder(
+                padding: const EdgeInsets.all(8.0),
+                itemCount: users.length,
+                itemBuilder: (context, index) {
+                  final user = users[index];
+                  return Card(
+                    margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+                    elevation: 3,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: ListTile(
+                      contentPadding: const EdgeInsets.all(16),
+                      leading: CircleAvatar(
+                        backgroundImage: NetworkImage(user.avatar),
+                        radius: 25,
+                      ),
+                      title: Text(
+                        user.displayName,
+                        style: const TextStyle(fontWeight: FontWeight.bold),
+                      ),
+                      subtitle: Text(
+                        user.email,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      trailing: IconButton(
+                        icon: const Icon(Icons.more_vert),
+                        onPressed: () {
+                          // Handle more options for user
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text('Options for ${user.displayName} pressed'),
+                            ),
+                          );
+                        },
+                      ),
+                    ),
+                  );
+                },
+              );
+            } else {
+              return const Center(
+                child: Text('No data found'),
+              );
+            }
+          },
         ),
       ),
-    );
-  }
+    ),
+  );
+}
+
 }

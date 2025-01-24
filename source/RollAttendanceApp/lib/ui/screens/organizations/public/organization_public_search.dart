@@ -70,48 +70,58 @@ class _OrganizationPublicSearchScreenState
 
   @override
   Widget build(BuildContext context) {
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+
     return Scaffold(
       appBar: AppBar(
+        backgroundColor: isDarkMode ? const Color(0xFF121212) : const Color(0xFFE9FCE9),
+        elevation: 0,
+        leading: IconButton(
+          icon: Icon(
+            Icons.arrow_back,
+            color: isDarkMode ? Colors.white : Colors.black,
+          ),
+          onPressed: () => Navigator.of(context).pop(),
+        ),
         title: Padding(
-          padding: const EdgeInsets.only(right: 16.0),
-          child: Column(
-            children: [
-              TextField(
-                controller: _searchController,
-                decoration: InputDecoration(
-                  hintText: 'Search...',
-                  suffixIcon: IconButton(
-                    icon: const Icon(Icons.search),
-                    onPressed: () {
-                      setState(() {
-                        _keyword = _searchController.text;
-                        _publicOrganizationFuture = getPublicOrganization();
-                      });
-                    },
-                  ),
-                ),
-                onChanged: (value) {
-                  setState(() {
-                    getSuggestions(value);
-                  });
-                },
-                onSubmitted: (value) {
-                  setState(() {
-                    _keyword = value;
-                    _publicOrganizationFuture = getPublicOrganization();
-                  });
-                },
+          padding: const EdgeInsets.symmetric(horizontal: 16.0),
+          child: TextField(
+            controller: _searchController,
+            style: TextStyle(
+              color: isDarkMode ? Colors.white : Colors.black,
+            ),
+            cursorColor: Colors.green,
+            decoration: InputDecoration(
+              hintText: 'Search organizations...',
+              hintStyle: TextStyle(color: isDarkMode ? Colors.grey : Colors.black54),
+              filled: true,
+              fillColor: isDarkMode ? const Color(0xFF1E1E1E) : Colors.white,
+              contentPadding: const EdgeInsets.symmetric(vertical: 10, horizontal: 15),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(20),
+                borderSide: BorderSide.none,
               ),
-            ],
+              prefixIcon: Icon(Icons.search, color: isDarkMode ? Colors.white : Colors.black),
+            ),
+            selectionControls: materialTextSelectionControls,
+            onChanged: (value) {
+              setState(() {
+                getSuggestions(value);
+              });
+            },
+            onSubmitted: (value) {
+              setState(() {
+                _keyword = value;
+                _publicOrganizationFuture = getPublicOrganization();
+              });
+            },
           ),
         ),
-        backgroundColor: Colors.transparent,
-        elevation: 0,
       ),
       body: Stack(
         children: [
           Padding(
-            padding: const EdgeInsets.all(16.0),
+            padding: const EdgeInsets.symmetric(horizontal: 16.0),
             child: Column(
               children: [
                 Expanded(
@@ -119,12 +129,20 @@ class _OrganizationPublicSearchScreenState
                     future: _publicOrganizationFuture,
                     builder: (context, snapshot) {
                       if (snapshot.connectionState == ConnectionState.waiting) {
-                        return const Center(child: CircularProgressIndicator());
+                        return const Center(
+                          child: CircularProgressIndicator(),
+                        );
                       } else if (snapshot.hasError) {
-                        return Center(child: Text('Error: ${snapshot.error}'));
+                        return Center(
+                          child: Text(
+                            'Error: ${snapshot.error}',
+                            style: const TextStyle(color: Colors.red),
+                          ),
+                        );
                       } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
                         return const Center(
-                            child: Text('No organizations found.'));
+                          child: Text('No organizations found.'),
+                        );
                       }
 
                       final organizations = snapshot.data!;
@@ -139,35 +157,42 @@ class _OrganizationPublicSearchScreenState
                             },
                             child: Card(
                               margin: const EdgeInsets.symmetric(vertical: 8),
+                              elevation: 3,
                               shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(12),
+                                borderRadius: BorderRadius.circular(10),
                               ),
-                              elevation: 4,
                               child: ListTile(
+                                contentPadding: const EdgeInsets.all(16),
                                 leading: ClipRRect(
                                   borderRadius: BorderRadius.circular(8),
                                   child: Image.network(
-                                    org.image ??
-                                        'https://via.placeholder.com/150',
+                                    org.image ?? 'https://via.placeholder.com/150',
                                     fit: BoxFit.cover,
                                     width: 50,
                                     height: 50,
                                   ),
                                 ),
-                                title: Text(org.name ?? 'N/A'),
-                                subtitle: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                title: Text(
+                                  org.name ?? 'N/A',
+                                  style: const TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 16,
+                                  ),
+                                ),
+                                subtitle: Row(
                                   children: [
-                                    Text(org.description ?? 'No description'),
-                                    const SizedBox(height: 5),
-                                    Text('Address: ${org.address ?? 'N/A'}'),
-                                    const SizedBox(height: 5),
-                                    Row(
-                                      children: [
-                                        Text('Users: ${org.users}'),
-                                        const SizedBox(width: 10),
-                                        Text('Events: ${org.events}'),
-                                      ],
+                                    const Icon(Icons.person, size: 16, color: Colors.grey),
+                                    const SizedBox(width: 5),
+                                    Text(
+                                      '${org.users}',
+                                      style: const TextStyle(color: Colors.grey),
+                                    ),
+                                    const SizedBox(width: 10),
+                                    const Icon(Icons.event, size: 16, color: Colors.grey),
+                                    const SizedBox(width: 5),
+                                    Text(
+                                      '${org.events}',
+                                      style: const TextStyle(color: Colors.grey),
                                     ),
                                   ],
                                 ),
@@ -179,59 +204,33 @@ class _OrganizationPublicSearchScreenState
                     },
                   ),
                 ),
-                Row(
-                  children: [
-                    IconButton(
-                      icon: const Icon(Icons.arrow_back),
-                      onPressed: _page > 0
-                          ? () {
-                              setState(() {
-                                _page--;
-                              });
-                            }
-                          : null,
-                    ),
-                    const Spacer(),
-                    IconButton(
-                      icon: const Icon(Icons.arrow_forward),
-                      onPressed: () {
-                        setState(() {
-                          _page++;
-                        });
-                      },
-                    ),
-                  ],
-                ),
               ],
             ),
           ),
           if (_suggestions.isNotEmpty)
             Positioned(
-              top: 3,
+              top: kToolbarHeight,
               left: 16,
               right: 16,
               child: Material(
                 elevation: 4,
-                child: Container(
-                  child: ListView.builder(
-                    shrinkWrap: true,
-                    physics: const NeverScrollableScrollPhysics(),
-                    itemCount: _suggestions.length,
-                    itemBuilder: (context, index) {
-                      return ListTile(
-                        leading: const Icon(Icons.search),
-                        title: Text(_suggestions[index]),
-                        onTap: () {
-                          _searchController.text = _suggestions[index];
-                          setState(() {
-                            _keyword = _suggestions[index];
-                            _publicOrganizationFuture = getPublicOrganization();
-                            _suggestions.clear();
-                          });
-                        },
-                      );
-                    },
-                  ),
+                child: ListView.builder(
+                  shrinkWrap: true,
+                  itemCount: _suggestions.length,
+                  itemBuilder: (context, index) {
+                    return ListTile(
+                      leading: const Icon(Icons.search),
+                      title: Text(_suggestions[index]),
+                      onTap: () {
+                        _searchController.text = _suggestions[index];
+                        setState(() {
+                          _keyword = _suggestions[index];
+                          _publicOrganizationFuture = getPublicOrganization();
+                          _suggestions.clear();
+                        });
+                      },
+                    );
+                  },
                 ),
               ),
             ),

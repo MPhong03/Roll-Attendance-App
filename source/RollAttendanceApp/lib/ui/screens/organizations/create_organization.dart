@@ -226,38 +226,43 @@ class _CreateOrganizationScreenState extends State<CreateOrganizationScreen> {
                     ),
                   ],
                 ),
-                child: SingleChildScrollView(
-                  child: Column(
-                    children: [
-                      _buildHeader(context, getResponsiveFontSize, isDarkMode),
-                      const SizedBox(height: 20),
-                      _buildBannerAndAvatar(),
-                      const SizedBox(height: 120),
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          _buildTextField("Organization Name", _nameController,
-                              getResponsiveFontSize, isDarkMode),
-                          const SizedBox(height: 20),
-                          _buildTextField("Description", _descriptionController,
-                              getResponsiveFontSize, isDarkMode,
-                              maxLines: 3),
-                          const SizedBox(height: 20),
-                          _buildTextField("Address", _addressController,
-                              getResponsiveFontSize, isDarkMode),
-                          const SizedBox(height: 30),
-                          _buildSwitch(
-                            "Private",
-                            _isPrivate,
-                            (value) => setState(() => _isPrivate = value),
-                            getResponsiveFontSize,
-                          ),
-                          const SizedBox(height: 70),
-                          _buildCreateButton(getResponsiveFontSize),
-                        ],
+                child: Column(
+                  children: [
+                    _buildHeader(context, getResponsiveFontSize, isDarkMode),
+                    const SizedBox(height: 20),
+                    Expanded(
+                      child: SingleChildScrollView(
+                        child: Column(
+                          children: [
+                            _buildBannerAndAvatar(),
+                            const SizedBox(height: 120),
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                _buildTextField("Organization Name", _nameController,
+                                    getResponsiveFontSize, isDarkMode),
+                                const SizedBox(height: 20),
+                                _buildTextField("Description", _descriptionController,
+                                    getResponsiveFontSize, isDarkMode, maxLines: 3),
+                                const SizedBox(height: 20),
+                                _buildTextField("Address", _addressController,
+                                    getResponsiveFontSize, isDarkMode),
+                                const SizedBox(height: 30),
+                                _buildSwitch(
+                                  "Private",
+                                  _isPrivate,
+                                  (value) => setState(() => _isPrivate = value),
+                                  getResponsiveFontSize,
+                                ),
+                                const SizedBox(height: 70),
+                                _buildCreateButton(getResponsiveFontSize),
+                              ],
+                            ),
+                          ],
+                        ),
                       ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
               ),
             ),
@@ -285,7 +290,7 @@ class _CreateOrganizationScreenState extends State<CreateOrganizationScreen> {
             child: Text(
               "CREATE ORGANIZATION",
               style: TextStyle(
-                fontSize: fontSize(22),
+                fontSize: fontSize(18),
                 fontWeight: FontWeight.bold,
                 color: Colors.green,
               ),

@@ -226,6 +226,7 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
                               _isPrivate = value;
                             });
                           },
+                          activeColor: Colors.green,
                         ),
                       ],
                     ),

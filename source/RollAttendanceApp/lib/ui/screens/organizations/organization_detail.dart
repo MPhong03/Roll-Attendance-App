@@ -199,10 +199,17 @@ class _OrganizationDetailScreenState extends State<OrganizationDetailScreen> {
               length: 3,
               child: Scaffold(
                 appBar: AppBar(
-                  backgroundColor:
-                      isDarkMode ? Color(0xFF1E1E1E) : Colors.white,
+                  backgroundColor: isDarkMode ? const Color(0xFF1E1E1E) : Colors.white,
                   elevation: 0,
-                  automaticallyImplyLeading: true,
+                  leading: IconButton(
+                    icon: Icon(
+                      Icons.arrow_back,
+                      color: isDarkMode ? Colors.white : Colors.black,
+                    ),
+                    onPressed: () {
+                      GoRouter.of(context).go('/organization');
+                    },
+                  ),
                   iconTheme: IconThemeData(
                     color: isDarkMode ? Colors.white : Colors.black,
                   ),
@@ -608,7 +615,7 @@ class _OrganizationDetailScreenState extends State<OrganizationDetailScreen> {
                                       _onRefresh();
                                     }
                                   },
-                                  icon: const Icon(Icons.delete),
+                                  icon: const Icon(Icons.delete, color: Colors.white),
                                   label: const Text(
                                     'Remove',
                                     style: TextStyle(
@@ -636,7 +643,8 @@ class _OrganizationDetailScreenState extends State<OrganizationDetailScreen> {
                                   context.push(
                                       '/add-to-organization/${widget.organizationId}');
                                 },
-                                icon: const Icon(Icons.add),
+                                icon:
+                                    const Icon(Icons.add, color: Colors.white),
                                 label: const Text(
                                   'Add User',
                                   style: TextStyle(

@@ -434,7 +434,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                       ),
                       child: Text(
                         "Change Password",
-                        style: TextStyle(fontSize: getResponsiveFontSize(16)),
+                        style: TextStyle(fontSize: getResponsiveFontSize(16), color: Colors.white),
                       ),
                     ),
                   ),
