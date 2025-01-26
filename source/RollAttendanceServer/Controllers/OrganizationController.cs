@@ -291,6 +291,21 @@ namespace RollAttendanceServer.Controllers
                 return BadRequest(ex.Message);
             }
         }
+
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> DeleteOrganization(string id)
+        {
+            try
+            {
+                await _organizationService.DeleteOrganizationAsync(id);
+
+                return Ok(new { organizationId = id, message = "Successfully delete organization" });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, ex.Message);
+            }
+        }
     }
 
     public class InvitionQuery

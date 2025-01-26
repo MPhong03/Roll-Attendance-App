@@ -39,6 +39,12 @@
     private List<Organization>? _organizations = new();
     private int _totalOrganizations;
 
+    protected override void OnInitialized()
+    {
+        _eventService.IsAdmin = true;
+        _organizationService.IsAdmin = true;
+    }
+
     private async Task<TableData<Organization>> LoadOrganizations(TableState state)
     {
         var pageIndex = state.Page;

@@ -7,6 +7,7 @@ namespace RollAttendanceServer.Interfaces
 {
     public interface IOrganizationService
     {
+        bool IsAdmin { get; set; }
         Task<IEnumerable<Organization>> GetAll(string? keyword, int pageIndex = 0, int pageSize = 10);
         Task<IEnumerable<string>> SuggestOrganizationNamesAsync(string keyword, int maxSuggestions = 10);
         Task<IEnumerable<PublicOrganizationDTO>> SearchOrganizationsAsync(string? keyword, int pageIndex = 0, int pageSize = 10);

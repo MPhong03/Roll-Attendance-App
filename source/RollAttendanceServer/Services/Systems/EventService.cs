@@ -12,6 +12,7 @@ namespace RollAttendanceServer.Services.Systems
 {
     public class EventService : IEventService
     {
+        public bool IsAdmin { get; set; } = false;
         private readonly ApplicationDbContext _context;
 
         public EventService(ApplicationDbContext context)
@@ -23,6 +24,7 @@ namespace RollAttendanceServer.Services.Systems
         {
             return await _context.Events
                 .Include(e => e.Organization)
+                .Where(e => e.Organization != null && !e.Organization.IsDeleted)
                 .FirstOrDefaultAsync(e => e.Id == eventId);
         }
 
@@ -60,7 +62,7 @@ namespace RollAttendanceServer.Services.Systems
                 };
             }
 
-             return new CheckInStateDTO
+            return new CheckInStateDTO
             {
                 UserId = userHistoryDetail.UserId,
                 DisplayName = userHistoryDetail.UserName,
@@ -76,7 +78,7 @@ namespace RollAttendanceServer.Services.Systems
         public async Task<IEnumerable<ActiveEventDTO>> GetUserActiveEvents(string userId, DateTime? date, short status, int pageIndex, int pageSize)
         {
             var organizationIds = await _context.UserOrganizationRoles
-                .Where(uor => uor.UserId == userId)
+                .Where(uor => uor.UserId == userId && !_context.Organizations.Any(o => o.Id == uor.OrganizationId && o.IsDeleted))
                 .Select(uor => uor.OrganizationId)
                 .ToListAsync();
 
@@ -94,6 +96,11 @@ namespace RollAttendanceServer.Services.Systems
             if (date.HasValue)
             {
                 query = query.Where(e => e.StartTime.Value.Date <= date.Value.Date && e.EndTime.Value.Date >= date.Value.Date);
+            }
+
+            if (!IsAdmin)
+            {
+                query = query.Where(e => !e.IsDeleted);
             }
 
             query = query.Where(e => e.EventStatus == status);
@@ -308,6 +315,11 @@ namespace RollAttendanceServer.Services.Systems
                 query = query.Where(e => e.EndTime <= endDate.Value);
             }
 
+            if (!IsAdmin)
+            {
+                query = query.Where(e => !e.IsDeleted);
+            }
+
             query = query.Skip((pageIndex - 1) * pageSize).Take(pageSize);
 
             return await query.ToListAsync();
@@ -426,6 +438,16 @@ namespace RollAttendanceServer.Services.Systems
 
             await _context.SaveChangesAsync();
             return eventEntity;
+        }
+
+        public async Task DeleteEventAsync(string id)
+        {
+            var ev = await _context.Events.FindAsync(id);
+            if (ev == null) throw new Exception("Event not found");
+
+            ev.IsDeleted = true;
+
+            await _context.SaveChangesAsync();
         }
 
         public async Task<IEnumerable<UserDTO>> GetEventUsersAsync(string eventId)

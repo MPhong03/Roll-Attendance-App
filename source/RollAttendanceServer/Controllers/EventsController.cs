@@ -5,6 +5,7 @@ using RollAttendanceServer.Data;
 using RollAttendanceServer.Data.Requests;
 using RollAttendanceServer.DTOs;
 using RollAttendanceServer.Interfaces;
+using RollAttendanceServer.Services.Systems;
 using System.Security.Claims;
 
 namespace RollAttendanceServer.Controllers
@@ -250,5 +251,19 @@ namespace RollAttendanceServer.Controllers
             }
         }
 
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> DeleteEvent(string id)
+        {
+            try
+            {
+                await _eventService.DeleteEventAsync(id);
+
+                return Ok(new { eventId = id, message = "Successfully delete event" });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, ex.Message);
+            }
+        }
     }
 }

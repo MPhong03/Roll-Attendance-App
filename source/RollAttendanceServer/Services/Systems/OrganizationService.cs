@@ -11,6 +11,8 @@ namespace RollAttendanceServer.Services.Systems
 {
     public class OrganizationService : IOrganizationService
     {
+        public bool IsAdmin { get; set; } = false;
+
         private readonly ApplicationDbContext _context;
         private readonly ICloudinaryService _cloudinaryService;
 
@@ -27,6 +29,11 @@ namespace RollAttendanceServer.Services.Systems
             if (!string.IsNullOrEmpty(keyword))
             {
                 query = query.Where(org => org.Name.Contains(keyword) || org.Description.Contains(keyword));
+            }
+
+            if (!IsAdmin)
+            {
+                query = query.Where(org => !org.IsDeleted);
             }
 
             var organizations = await query.Skip(pageIndex * pageSize)
