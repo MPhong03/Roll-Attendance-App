@@ -153,24 +153,25 @@ class _SignUpScreenState extends State<SignUpScreen> {
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
     final bool isDarkMode = Theme.of(context).brightness == Brightness.dark;
-    
+
     double getResponsiveFontSize(double baseFontSize) {
-        if (screenWidth > 480) {
-          return baseFontSize * 1.2;
-        } else {
-          return baseFontSize;
-        }
+      if (screenWidth > 480) {
+        return baseFontSize * 1.2;
+      } else {
+        return baseFontSize;
       }
+    }
 
     return BlurryModalProgressHUD(
       inAsyncCall: _isLoading,
       opacity: 0.3,
       blurEffectIntensity: 5,
       child: Scaffold(
-        backgroundColor: isDarkMode ? Color(0xFF1E1E1E) : Color.fromRGBO(197, 240, 200, 1),
+        backgroundColor:
+            isDarkMode ? Color(0xFF1E1E1E) : Color.fromRGBO(197, 240, 200, 1),
         body: SingleChildScrollView(
           child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               Center(
                 child: Padding(
@@ -187,6 +188,15 @@ class _SignUpScreenState extends State<SignUpScreen> {
                 ),
               ),
               const SizedBox(height: 15),
+              const Text(
+                "Apelo",
+                style: TextStyle(
+                  fontSize: 32,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.green,
+                ),
+                textAlign: TextAlign.center,
+              ),
               Padding(
                 padding: EdgeInsets.symmetric(horizontal: screenWidth * 0.1),
                 child: Column(
@@ -207,9 +217,9 @@ class _SignUpScreenState extends State<SignUpScreen> {
                     }),
                     const SizedBox(height: 30),
                     // Confirm Password TextBox
-                    _buildResponsiveTextBox(
-                        context, _repassController, Icons.lock, 'Confirm Password',
-                        isObscure: true, toggleObscure: () {
+                    _buildResponsiveTextBox(context, _repassController,
+                        Icons.lock, 'Confirm Password', isObscure: true,
+                        toggleObscure: () {
                       setState(() {
                         _isConfirmPasswordHidden = !_isConfirmPasswordHidden;
                       });
@@ -283,12 +293,12 @@ class _SignUpScreenState extends State<SignUpScreen> {
     final bool isDarkMode = Theme.of(context).brightness == Brightness.dark;
 
     double getResponsiveFontSize(double baseFontSize) {
-        if (screenWidth > 480) {
-          return baseFontSize * 1.2;
-        } else {
-          return baseFontSize;
-        }
+      if (screenWidth > 480) {
+        return baseFontSize * 1.2;
+      } else {
+        return baseFontSize;
       }
+    }
 
     return Stack(
       clipBehavior: Clip.none,

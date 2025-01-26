@@ -135,7 +135,7 @@ flutter:
   # see https://flutter.dev/to/font-from-package
 
 launcher_name:
-  default: "ITPApp"
+  default: "Apelo"
 
 flutter_icons:
   android: "launcher_icon"

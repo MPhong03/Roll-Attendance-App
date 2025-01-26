@@ -223,11 +223,12 @@ class _LoginScreenState extends State<LoginScreen> {
       opacity: 0.3,
       blurEffectIntensity: 5,
       child: Scaffold(
-        backgroundColor: isDarkMode ? Color(0xFF1E1E1E) : Color.fromRGBO(197, 240, 200, 1),
+        backgroundColor:
+            isDarkMode ? Color(0xFF1E1E1E) : Color.fromRGBO(197, 240, 200, 1),
         body: SingleChildScrollView(
           controller: _scrollController,
           child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               Center(
                 child: Padding(
@@ -243,6 +244,25 @@ class _LoginScreenState extends State<LoginScreen> {
                 ),
               ),
               const SizedBox(height: 5),
+              const Text(
+                "Apelo",
+                style: TextStyle(
+                  fontSize: 32,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.green,
+                ),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 8),
+              const Text(
+                "From here, light will be shining everywhere in the universe",
+                style: TextStyle(
+                  fontSize: 13,
+                  fontStyle: FontStyle.italic,
+                  color: Colors.grey,
+                ),
+                textAlign: TextAlign.center,
+              ),
               Padding(
                 padding: EdgeInsets.symmetric(horizontal: screenWidth * 0.1),
                 child: Column(
@@ -271,14 +291,16 @@ class _LoginScreenState extends State<LoginScreen> {
                             filled: true,
                             fillColor: isDarkMode ? Colors.black : Colors.white,
                             enabledBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.all(Radius.circular(10)),
+                              borderRadius:
+                                  BorderRadius.all(Radius.circular(10)),
                               borderSide: BorderSide(
                                 width: 1,
                                 color: Color(0xFF48B02C),
                               ),
                             ),
                             focusedBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.all(Radius.circular(10)),
+                              borderRadius:
+                                  BorderRadius.all(Radius.circular(10)),
                               borderSide: BorderSide(
                                 width: 1,
                                 color: Color(0xFF48B02C),
@@ -315,7 +337,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         TextField(
                           controller: _passController,
                           obscureText: _isPasswordHidden,
-                          style:  TextStyle(
+                          style: TextStyle(
                             fontSize: getResponsiveFontSize(15),
                             fontFamily: 'Baloo',
                             color: isDarkMode ? Colors.white : Colors.black,
@@ -332,14 +354,16 @@ class _LoginScreenState extends State<LoginScreen> {
                             filled: true,
                             fillColor: isDarkMode ? Colors.black : Colors.white,
                             enabledBorder: const OutlineInputBorder(
-                              borderRadius: BorderRadius.all(Radius.circular(10)),
+                              borderRadius:
+                                  BorderRadius.all(Radius.circular(10)),
                               borderSide: BorderSide(
                                 width: 1,
                                 color: Color(0xFF48B02C),
                               ),
                             ),
                             focusedBorder: const OutlineInputBorder(
-                              borderRadius: BorderRadius.all(Radius.circular(10)),
+                              borderRadius:
+                                  BorderRadius.all(Radius.circular(10)),
                               borderSide: BorderSide(
                                 width: 1,
                                 color: Color(0xFF48B02C),
@@ -403,7 +427,8 @@ class _LoginScreenState extends State<LoginScreen> {
                     const SizedBox(height: 50),
                     Center(
                       child: ClipRRect(
-                        borderRadius: const BorderRadius.all(Radius.circular(10)),
+                        borderRadius:
+                            const BorderRadius.all(Radius.circular(10)),
                         child: SizedBox(
                           width: screenWidth * 0.7,
                           height: 60,
