@@ -440,6 +440,16 @@ namespace RollAttendanceServer.Services.Systems
             return eventEntity;
         }
 
+        public async Task CancelEventAsync(string id)
+        {
+            var ev = await _context.Events.FindAsync(id);
+            if (ev == null) throw new Exception("Event not found");
+
+            ev.EventStatus = (short)Status.EVENT_CANCELLED;
+
+            await _context.SaveChangesAsync();
+        }
+
         public async Task DeleteEventAsync(string id)
         {
             var ev = await _context.Events.FindAsync(id);

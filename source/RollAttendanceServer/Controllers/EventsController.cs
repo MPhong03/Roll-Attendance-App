@@ -265,5 +265,20 @@ namespace RollAttendanceServer.Controllers
                 return StatusCode(500, ex.Message);
             }
         }
+
+        [HttpPost("{id}/cancel")]
+        public async Task<IActionResult> CancelEvent(string id)
+        {
+            try
+            {
+                await _eventService.CancelEventAsync(id);
+
+                return Ok(new { eventId = id, message = "Successfully cancel event" });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, ex.Message);
+            }
+        }
     }
 }

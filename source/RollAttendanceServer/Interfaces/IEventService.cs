@@ -13,6 +13,7 @@ namespace RollAttendanceServer.Interfaces
         Task<IEnumerable<Event>> GetEventsByOrganizationAsync(string organizationId, string keyword, DateTime? startDate, DateTime? endDate, int pageIndex, int pageSize);
         Task<IEnumerable<ActiveEventDTO>> GetUserActiveEvents(string userId, DateTime? date, short status, int pageIndex, int pageSize);
         Task DeleteEventAsync(string id);
+        Task CancelEventAsync(string id);
 
         // CHECK IN MODULE
         Task<Event> ActivateEventAsync(string eventId);
