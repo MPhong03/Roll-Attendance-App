@@ -103,6 +103,11 @@ namespace RollAttendanceServer.Services.Systems
                 query = query.Where(org => org.Name.Contains(keyword) || org.Description.Contains(keyword));
             }
 
+            if (!IsAdmin)
+            {
+                query = query.Where(org => !org.IsDeleted);
+            }
+
             // Phân trang
             var organizations = await query.Skip(pageIndex * pageSize)
                                            .Take(pageSize)
