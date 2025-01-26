@@ -434,7 +434,7 @@ class _EventFaceCheckInScreenState extends State<EventFaceCheckInScreen> {
       blurEffectIntensity: 5,
       child: Scaffold(
         appBar: AppBar(
-          title: const Text('Update Face Data'),
+          title: const Text('Check In'),
         ),
         body: Padding(
           padding: const EdgeInsets.all(16.0),
