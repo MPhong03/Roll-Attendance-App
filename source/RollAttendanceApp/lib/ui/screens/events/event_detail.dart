@@ -30,21 +30,21 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
   late Future<HistoryModel> _historyFuture;
 
   Map<String, dynamic> getEventStatus(EventStatus status) {
-  switch (status) {
-    case EventStatus.notStarted:
-      return {"text": "Not Started", "color": Colors.orange};
-    case EventStatus.inProgress:
-      return {"text": "In Progress", "color": Colors.green};
-    case EventStatus.completed:
-      return {"text": "Completed", "color": Colors.grey};
-    case EventStatus.cancelled:
-      return {"text": "Cancelled", "color": Colors.red};
-    case EventStatus.postponed:
-      return {"text": "Postponed", "color": Colors.blue};
-    default:
-      return {"text": "Unknown", "color": Colors.black};
+    switch (status) {
+      case EventStatus.notStarted:
+        return {"text": "Not Started", "color": Colors.orange};
+      case EventStatus.inProgress:
+        return {"text": "In Progress", "color": Colors.green};
+      case EventStatus.completed:
+        return {"text": "Completed", "color": Colors.grey};
+      case EventStatus.cancelled:
+        return {"text": "Cancelled", "color": Colors.red};
+      case EventStatus.postponed:
+        return {"text": "Postponed", "color": Colors.blue};
+      default:
+        return {"text": "Unknown", "color": Colors.black};
+    }
   }
-}
 
   // ASYNCHRONOUS METHODS
   Future<EventModel> getDetail(id) async {
@@ -167,8 +167,71 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
     }
   }
 
+  Future<void> _onCancelEvent() async {
+    setState(() {
+      _isLoading = true;
+    });
+
+    try {
+      final response =
+          await _apiService.post('api/events/${widget.eventId}/cancel');
+      if (response.statusCode == 200) {
+        if (mounted) {
+          AwesomeDialog(
+            context: context,
+            dialogType: DialogType.success,
+            animType: AnimType.scale,
+            title: 'Success',
+            desc: 'Cancel successfully',
+            btnOkOnPress: () {
+              context.pop();
+            },
+          ).show();
+        }
+      } else {
+        _showErrorDialog(
+            'Failed to cancel event: ${jsonDecode(response.body)['message']}');
+      }
+    } catch (e) {
+      _showErrorDialog('Error: $e');
+    } finally {
+      setState(() {
+        _isLoading = false;
+      });
+    }
+  }
+
   Future<void> _onDeleteEvent() async {
-    // TODO:
+    setState(() {
+      _isLoading = true;
+    });
+
+    try {
+      final response = await _apiService.delete('api/events/${widget.eventId}');
+      if (response.statusCode == 200) {
+        if (mounted) {
+          AwesomeDialog(
+            context: context,
+            dialogType: DialogType.success,
+            animType: AnimType.scale,
+            title: 'Success',
+            desc: 'Delete successfully',
+            btnOkOnPress: () {
+              context.pop();
+            },
+          ).show();
+        }
+      } else {
+        _showErrorDialog(
+            'Failed to delete event: ${jsonDecode(response.body)['message']}');
+      }
+    } catch (e) {
+      _showErrorDialog('Error: $e');
+    } finally {
+      setState(() {
+        _isLoading = false;
+      });
+    }
   }
 
   Future<void> _onRefresh() async {
@@ -261,100 +324,124 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
     return DateFormat('dd/MM/yyyy').format(date);
   }
 
+  void _showErrorDialog(String message) {
+    AwesomeDialog(
+      context: context,
+      dialogType: DialogType.error,
+      animType: AnimType.bottomSlide,
+      title: 'Error',
+      desc: message,
+      btnCancelOnPress: () {},
+    ).show();
+  }
+
   @override
-Widget build(BuildContext context) {
-  final theme = Theme.of(context);
-  final screenSize = MediaQuery.of(context).size;
-  final isDarkMode = theme.brightness == Brightness.dark;
-  final textColor = isDarkMode ? theme.textTheme.bodyLarge!.color! : Colors.black54;
-  final titleColor = isDarkMode ? theme.textTheme.headlineLarge!.color! : Colors.black;
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final screenSize = MediaQuery.of(context).size;
+    final isDarkMode = theme.brightness == Brightness.dark;
+    final textColor =
+        isDarkMode ? theme.textTheme.bodyLarge!.color! : Colors.black54;
+    final titleColor =
+        isDarkMode ? theme.textTheme.headlineLarge!.color! : Colors.black;
 
-  double getResponsiveFontSize(double base) => screenSize.width > 480 ? base * 1.25 : base;
+    double getResponsiveFontSize(double base) =>
+        screenSize.width > 480 ? base * 1.25 : base;
 
-  return Scaffold(
-    appBar: AppBar(
-      backgroundColor: Colors.transparent,
-      elevation: 0,
-      leading: Padding(
-        padding: const EdgeInsets.only(top: 10),
-        child: IconButton(
-          icon: Icon(Icons.arrow_back, color: titleColor),
-          onPressed: () => context.pop(),
+    return Scaffold(
+      appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        leading: Padding(
+          padding: const EdgeInsets.only(top: 10),
+          child: IconButton(
+            icon: Icon(Icons.arrow_back, color: titleColor),
+            onPressed: () => context.pop(),
+          ),
         ),
       ),
-    ),
-    backgroundColor: theme.scaffoldBackgroundColor,
-    body: BlurryModalProgressHUD(
-      inAsyncCall: _isLoading,
-      opacity: 0.3,
-      blurEffectIntensity: 5,
-      child: FutureBuilder<EventModel>(
-        future: _eventFuture,
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(child: CircularProgressIndicator());
-          }
-          if (snapshot.hasError) {
-            return Center(
-              child: Text('Error: ${snapshot.error}',
-                  style: TextStyle(color: Colors.red, fontSize: getResponsiveFontSize(16))),
-            );
-          }
-          if (!snapshot.hasData) {
-            return Center(
-              child: Text('No data available',
-                  style: TextStyle(fontSize: getResponsiveFontSize(16))),
-            );
-          }
+      backgroundColor: theme.scaffoldBackgroundColor,
+      body: BlurryModalProgressHUD(
+        inAsyncCall: _isLoading,
+        opacity: 0.3,
+        blurEffectIntensity: 5,
+        child: FutureBuilder<EventModel>(
+          future: _eventFuture,
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return const Center(child: CircularProgressIndicator());
+            }
+            if (snapshot.hasError) {
+              return Center(
+                child: Text('Error: ${snapshot.error}',
+                    style: TextStyle(
+                        color: Colors.red,
+                        fontSize: getResponsiveFontSize(16))),
+              );
+            }
+            if (!snapshot.hasData) {
+              return Center(
+                child: Text('No data available',
+                    style: TextStyle(fontSize: getResponsiveFontSize(16))),
+              );
+            }
 
-          final event = snapshot.data!;
-          return RefreshIndicator(
-            onRefresh: _onRefresh,
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.all(16.0),
-              child: Center(
-                child: Container(
-                  width: screenSize.width * 0.9,
-                  height: screenSize.height * 0.8, // Chiều cao cố định 80%
-                  padding: const EdgeInsets.all(16.0),
-                  decoration: BoxDecoration(
-                    color: isDarkMode ? const Color(0xFF1E1E1E) : Colors.white,
-                    borderRadius: BorderRadius.circular(12),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withOpacity(0.2),
-                        spreadRadius: 3,
-                        blurRadius: 4,
-                        offset: const Offset(0, 0),
-                      ),
-                    ],
-                  ),
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(12), // Đảm bảo nội dung không tràn viền
-                    child: SingleChildScrollView(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          _buildEventTitle(event.name, titleColor, getResponsiveFontSize),
-                          _buildPrivacyRow(event.isPrivate, theme, getResponsiveFontSize),
-                          _buildDescription(event.description, textColor, getResponsiveFontSize),
-                          _buildDateTime(event, textColor, getResponsiveFontSize),
-                          _buildButtons(event, screenSize, getResponsiveFontSize),
-                        ],
+            final event = snapshot.data!;
+            return RefreshIndicator(
+              onRefresh: _onRefresh,
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.all(16.0),
+                child: Center(
+                  child: Container(
+                    width: screenSize.width * 0.9,
+                    height: screenSize.height * 0.8, // Chiều cao cố định 80%
+                    padding: const EdgeInsets.all(16.0),
+                    decoration: BoxDecoration(
+                      color:
+                          isDarkMode ? const Color(0xFF1E1E1E) : Colors.white,
+                      borderRadius: BorderRadius.circular(12),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.2),
+                          spreadRadius: 3,
+                          blurRadius: 4,
+                          offset: const Offset(0, 0),
+                        ),
+                      ],
+                    ),
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(
+                          12), // Đảm bảo nội dung không tràn viền
+                      child: SingleChildScrollView(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            _buildEventTitle(
+                                event.name, titleColor, getResponsiveFontSize),
+                            _buildPrivacyRow(
+                                event.isPrivate, theme, getResponsiveFontSize),
+                            _buildDescription(event.description, textColor,
+                                getResponsiveFontSize),
+                            _buildDateTime(
+                                event, textColor, getResponsiveFontSize),
+                            _buildButtons(
+                                event, screenSize, getResponsiveFontSize),
+                          ],
+                        ),
                       ),
                     ),
                   ),
                 ),
               ),
-            ),
-          );
-        },
+            );
+          },
+        ),
       ),
-    ),
-  );
-}
+    );
+  }
 
-  Widget _buildEventTitle(String name, Color titleColor, Function(double) fontSize) {
+  Widget _buildEventTitle(
+      String name, Color titleColor, Function(double) fontSize) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -371,7 +458,8 @@ Widget build(BuildContext context) {
     );
   }
 
-  Widget _buildPrivacyRow(bool isPrivate, ThemeData theme, Function(double) fontSize) {
+  Widget _buildPrivacyRow(
+      bool isPrivate, ThemeData theme, Function(double) fontSize) {
     return Row(
       children: [
         const Icon(Icons.lock_outline, size: 20),
@@ -388,17 +476,20 @@ Widget build(BuildContext context) {
     );
   }
 
-  Widget _buildDescription(String description, Color textColor, Function(double) fontSize) {
+  Widget _buildDescription(
+      String description, Color textColor, Function(double) fontSize) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(description, style: TextStyle(fontSize: fontSize(16), color: textColor)),
+        Text(description,
+            style: TextStyle(fontSize: fontSize(16), color: textColor)),
         const SizedBox(height: 16),
       ],
     );
   }
 
-  Widget _buildDateTime(EventModel event, Color textColor, Function(double) fontSize) {
+  Widget _buildDateTime(
+      EventModel event, Color textColor, Function(double) fontSize) {
     return Column(
       children: [
         Row(
@@ -440,7 +531,8 @@ Widget build(BuildContext context) {
     );
   }
 
-  Widget _buildButtons(EventModel event, Size screenSize, Function(double) fontSize) {
+  Widget _buildButtons(
+      EventModel event, Size screenSize, Function(double) fontSize) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
@@ -488,7 +580,7 @@ Widget build(BuildContext context) {
   }
 
   List<Map<String, dynamic>> _eventActions(EventModel event) {
-     return [
+    return [
       // Start Check-In or Complete
       {
         'label': event.eventStatus == EventStatus.inProgress
@@ -608,10 +700,9 @@ Widget build(BuildContext context) {
         },
         'condition': event.eventStatus == EventStatus.inProgress,
       },
-      // Cancel Event
       {
-        'label': 'Cancel Event',
-        'icon': Icons.delete_outline,
+        'label': 'Delete',
+        'icon': Icons.delete,
         'color': Colors.red,
         'onPressed': () {
           AwesomeDialog(
@@ -619,10 +710,30 @@ Widget build(BuildContext context) {
             dialogType: DialogType.warning,
             animType: AnimType.bottomSlide,
             title: 'Confirm Deletion',
-            desc: 'Are you sure you want to cancel this event?',
+            desc: 'Are you sure you want to delete this event?',
             btnCancelOnPress: () {},
             btnOkOnPress: () async {
               await _onDeleteEvent();
+            },
+          ).show();
+        },
+        'condition': true,
+      },
+      // Cancel Event
+      {
+        'label': 'Cancel Event',
+        'icon': Icons.cancel_outlined,
+        'color': Colors.red,
+        'onPressed': () {
+          AwesomeDialog(
+            context: context,
+            dialogType: DialogType.warning,
+            animType: AnimType.bottomSlide,
+            title: 'Confirm Cancel',
+            desc: 'Are you sure you want to cancel this event?',
+            btnCancelOnPress: () {},
+            btnOkOnPress: () async {
+              await _onCancelEvent();
             },
           ).show();
         },

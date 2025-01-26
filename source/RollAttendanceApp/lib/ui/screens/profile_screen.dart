@@ -455,9 +455,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         },
                       ),
                       ListTile(
-                        leading: const Icon(Icons.lock),
+                        leading: const Icon(Icons.sensor_occupied_rounded),
                         title: Text(
-                          'Privacy',
+                          'Biometrics',
                           style: TextStyle(fontSize: getResponsiveFontSize(16)),
                         ),
                         onTap: () {
@@ -465,7 +465,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         },
                       ),
                       ListTile(
-                        leading: const Icon(Icons.lock),
+                        leading: const Icon(Icons.send),
                         title: Text(
                           'Requests',
                           style: TextStyle(fontSize: getResponsiveFontSize(16)),
@@ -475,7 +475,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         },
                       ),
                       ListTile(
-                        leading: const Icon(Icons.lock),
+                        leading: const Icon(Icons.mail_rounded),
                         title: Text(
                           'Invitations',
                           style: TextStyle(fontSize: getResponsiveFontSize(16)),

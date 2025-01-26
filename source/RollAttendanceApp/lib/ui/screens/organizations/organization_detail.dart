@@ -129,6 +129,52 @@ class _OrganizationDetailScreenState extends State<OrganizationDetailScreen> {
     }
   }
 
+  Future<void> _deleteOrganization() async {
+    AwesomeDialog(
+      context: context,
+      dialogType: DialogType.warning,
+      animType: AnimType.scale,
+      title: 'Confirm Delete',
+      desc: 'Are you sure you want to delete this organization?',
+      btnOkText: 'Yes',
+      btnCancelText: 'No',
+      btnOkOnPress: () async {
+        setState(() {
+          _isLoading = true;
+        });
+
+        try {
+          final response = await _apiService
+              .delete('api/organization/${widget.organizationId}');
+          if (response.statusCode == 200) {
+            if (mounted) {
+              AwesomeDialog(
+                context: context,
+                dialogType: DialogType.success,
+                animType: AnimType.scale,
+                title: 'Success',
+                desc: 'Delete successfully',
+                btnOkOnPress: () {
+                  context.pop();
+                },
+              ).show();
+            }
+          } else {
+            _showErrorDialog(
+                'Failed to delete organization: ${jsonDecode(response.body)['message']}');
+          }
+        } catch (e) {
+          _showErrorDialog('Error: $e');
+        } finally {
+          setState(() {
+            _isLoading = false;
+          });
+        }
+      },
+      btnCancelOnPress: () {},
+    ).show();
+  }
+
   void _showErrorDialog(String message) {
     AwesomeDialog(
       context: context,
@@ -199,7 +245,8 @@ class _OrganizationDetailScreenState extends State<OrganizationDetailScreen> {
               length: 3,
               child: Scaffold(
                 appBar: AppBar(
-                  backgroundColor: isDarkMode ? const Color(0xFF1E1E1E) : Colors.white,
+                  backgroundColor:
+                      isDarkMode ? const Color(0xFF1E1E1E) : Colors.white,
                   elevation: 0,
                   leading: IconButton(
                     icon: Icon(
@@ -433,7 +480,7 @@ class _OrganizationDetailScreenState extends State<OrganizationDetailScreen> {
                                             MediaQuery.of(context).size.width *
                                                 0.5,
                                         margin:
-                                            const EdgeInsets.only(bottom: 8),
+                                            const EdgeInsets.only(bottom: 16),
                                         decoration: BoxDecoration(
                                           color: Colors.green,
                                           borderRadius:
@@ -459,6 +506,39 @@ class _OrganizationDetailScreenState extends State<OrganizationDetailScreen> {
                                               color: Colors.white),
                                           label: const Text(
                                             'Invitations',
+                                            style:
+                                                TextStyle(color: Colors.white),
+                                          ),
+                                        ),
+                                      ),
+                                      Container(
+                                        width:
+                                            MediaQuery.of(context).size.width *
+                                                0.5,
+                                        margin:
+                                            const EdgeInsets.only(bottom: 16),
+                                        decoration: BoxDecoration(
+                                          color: Colors.red,
+                                          borderRadius:
+                                              BorderRadius.circular(12),
+                                          border: Border.all(color: Colors.red),
+                                          boxShadow: [
+                                            BoxShadow(
+                                              color:
+                                                  Colors.red.withOpacity(0.2),
+                                              blurRadius: 4,
+                                              offset: const Offset(0, 2),
+                                            ),
+                                          ],
+                                        ),
+                                        child: TextButton.icon(
+                                          onPressed: () {
+                                            _deleteOrganization();
+                                          },
+                                          icon: const Icon(Icons.delete,
+                                              color: Colors.white),
+                                          label: const Text(
+                                            'Delete',
                                             style:
                                                 TextStyle(color: Colors.white),
                                           ),
@@ -615,7 +695,8 @@ class _OrganizationDetailScreenState extends State<OrganizationDetailScreen> {
                                       _onRefresh();
                                     }
                                   },
-                                  icon: const Icon(Icons.delete, color: Colors.white),
+                                  icon: const Icon(Icons.delete,
+                                      color: Colors.white),
                                   label: const Text(
                                     'Remove',
                                     style: TextStyle(

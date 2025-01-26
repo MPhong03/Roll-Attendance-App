@@ -248,7 +248,7 @@ class _EventCheckInScreenState extends State<EventCheckInScreen> {
                                   style: TextStyle(
                                     color: event.isPrivate
                                         ? Colors.red
-                                        : Theme.of(context).primaryColor,
+                                        : Colors.green,
                                     fontSize: getResponsiveFontSize(16),
                                   ),
                                 ),
@@ -371,13 +371,8 @@ class _EventCheckInScreenState extends State<EventCheckInScreen> {
                                   // height: screenHeight * 0.05,
                                   child: ElevatedButton(
                                     onPressed: () {
-                                      if (mounted) {
-                                        ScaffoldMessenger.of(context)
-                                            .showSnackBar(
-                                          const SnackBar(
-                                              content: Text("Developing...")),
-                                        );
-                                      }
+                                      context.push(
+                                          '/event-face-check-in/${event.id}/${history.attendanceTimes}');
                                     },
                                     style: ElevatedButton.styleFrom(
                                       backgroundColor: const Color(0xFF0FB900),

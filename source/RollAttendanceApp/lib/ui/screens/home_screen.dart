@@ -190,7 +190,7 @@ class _HomeScreenState extends State<HomeScreen> {
     final bool isDarkMode = Theme.of(context).brightness == Brightness.dark;
     final Color textColor = isDarkMode ? Colors.white70 : Colors.black54;
     final Color backgroundColor = Theme.of(context).scaffoldBackgroundColor;
-    
+
     double getResponsiveFontSize(double baseFontSize) {
       if (screenWidth > 480) {
         return baseFontSize * 1.2;
@@ -218,7 +218,7 @@ class _HomeScreenState extends State<HomeScreen> {
           child: ListView(
             padding: const EdgeInsets.all(16.0),
             children: [
-              const SizedBox(height: 10),
+              const SizedBox(height: 30),
               if (events.isEmpty)
                 Center(
                   child: Text(

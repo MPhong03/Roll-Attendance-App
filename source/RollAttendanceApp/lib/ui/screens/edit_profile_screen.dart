@@ -24,6 +24,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   final FirebaseAuth _auth = FirebaseAuth.instance;
   String uid = "";
   String name = "";
+  String phoneNumber = "";
   String email = "";
   String profileImageUrl = "";
   String noName = "";
@@ -92,6 +93,8 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
 
   Future<void> _showEditProfileBottomSheet() {
     TextEditingController nameController = TextEditingController(text: name);
+    TextEditingController phoneController =
+        TextEditingController(text: phoneNumber);
     dynamic selectedImageFile;
 
     return showModalBottomSheet(
@@ -184,14 +187,19 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                       controller: nameController,
                       decoration: const InputDecoration(labelText: 'Name'),
                     ),
+                    // const SizedBox(height: 10),
+                    // TextField(
+                    //   controller: phoneController,
+                    //   decoration: const InputDecoration(labelText: 'Phone'),
+                    // ),
                     const SizedBox(height: 20),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                       children: [
                         ElevatedButton(
                           onPressed: () async {
-                            _updateProfile(
-                                nameController.text, selectedImageFile);
+                            _updateProfile(nameController.text,
+                                phoneController.text, selectedImageFile);
                           },
                           child: const Text('Update'),
                         ),
@@ -216,8 +224,8 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     );
   }
 
-  Future<void> _updateProfile(
-      String updatedName, dynamic selectedImageFile) async {
+  Future<void> _updateProfile(String updatedName, String updatedPhone,
+      dynamic selectedImageFile) async {
     _showLoadingOverlay();
 
     try {
@@ -250,8 +258,11 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       }
 
       final user = _auth.currentUser;
-      if (updatedName != name || newProfileImageUrl != null) {
+      if (updatedName != name ||
+          updatedPhone != phoneNumber ||
+          newProfileImageUrl != null) {
         await user?.updateDisplayName(updatedName);
+        // await user?.updatePhoneNumber(phoneCredential);
         if (newProfileImageUrl != null) {
           await user?.updatePhotoURL(newProfileImageUrl);
           setState(() {
@@ -413,7 +424,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                       children: [
                         _buildInfoRow("Username", name, screenWidth),
                         _buildInfoRow("Email", email, screenWidth),
-                        _buildInfoRow("Phone", "SDT đâu Ponie?", screenWidth),
+                        // _buildInfoRow("Phone", "SDT đâu Ponie?", screenWidth),
                       ],
                     ),
                   ),
@@ -434,7 +445,9 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                       ),
                       child: Text(
                         "Change Password",
-                        style: TextStyle(fontSize: getResponsiveFontSize(16), color: Colors.white),
+                        style: TextStyle(
+                            fontSize: getResponsiveFontSize(16),
+                            color: Colors.white),
                       ),
                     ),
                   ),
