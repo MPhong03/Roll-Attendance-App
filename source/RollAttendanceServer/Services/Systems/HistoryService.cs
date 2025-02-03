@@ -14,6 +14,14 @@ namespace RollAttendanceServer.Services.Systems
             _context = context;
         }
 
+        public async Task<History> GetHistoryByEventIdAsync(string eventId)
+        {
+            var history = await _context.Histories
+                                           .Where(h => h.EventId == eventId)
+                                           .FirstOrDefaultAsync();
+            return history;
+        }
+
         public async Task<List<History>> GetHistoriesByEventIdAsync(string eventId)
         {
             var histories = await _context.Histories

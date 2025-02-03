@@ -21,13 +21,32 @@ namespace RollAttendanceServer.Controllers
         {
             try
             {
-                var history = await _historyService.GetHistoriesByEventIdAsync(eventId);
+                var history = await _historyService.GetHistoryByEventIdAsync(eventId);
                 if (history == null)
                 {
                     return NotFound("Event history detail not found.");
                 }
 
                 return Ok(history);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+        }
+
+        [HttpGet("{eventId}/all")]
+        public async Task<IActionResult> GetEventHistoriesDetail(string eventId)
+        {
+            try
+            {
+                var histories = await _historyService.GetHistoriesByEventIdAsync(eventId);
+                if (histories == null)
+                {
+                    return NotFound("Event histories not found.");
+                }
+
+                return Ok(histories);
             }
             catch (Exception ex)
             {
