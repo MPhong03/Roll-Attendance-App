@@ -21,7 +21,7 @@ namespace RollAttendanceServer.Controllers
         {
             try
             {
-                var history = await _historyService.GetHistoryByEventIdAsync(eventId);
+                var history = await _historyService.GetHistoriesByEventIdAsync(eventId);
                 if (history == null)
                 {
                     return NotFound("Event history detail not found.");

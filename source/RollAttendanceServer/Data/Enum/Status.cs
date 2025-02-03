@@ -14,6 +14,7 @@
         USER_ABSENTED = 1,
         USER_PERMITTED_ABSENTED = 2,
         USER_LATED = 3,
+        USER_PERMITTED_LATED = 4,
 
         // REQUEST
         REQUEST_WAITING = 0,
@@ -26,5 +27,9 @@
         INVITION_APPROVED = 1,
         INVITION_REJECTED = 2,
         INVITION_CANCELLED = 3,
+
+        // REQUEST TYPE
+        ABSENT_REQUEST = 0,
+        LATE_REQUEST = 1,
     }
 }

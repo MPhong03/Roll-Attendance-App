@@ -1,4 +1,5 @@
-﻿using RollAttendanceServer.DTOs;
+﻿using RollAttendanceServer.Data.Responses;
+using RollAttendanceServer.DTOs;
 using RollAttendanceServer.Models;
 
 namespace RollAttendanceServer.Interfaces
@@ -22,5 +23,11 @@ namespace RollAttendanceServer.Interfaces
         Task<Event> CompleteEventAsync(string eventId);
         Task<IEnumerable<UserDTO>> GetEventUsersAsync(string eventId);
         Task<BiometricCheckInResultDTO> FaceCheckIn(string eventId, string faceData, int attendanceAttempt);
+
+        // REQUEST
+        Task<PermissionRequest> SendRequest(string eventId, string userId, string notes, short type);
+        Task<PermissionRequest> UpdateRequestStatusAsync(string requestId, short status);
+        Task<PagedResult<PermissionRequest>> GetEventRequests(string eventId, string userId, string keyword, short type, short status, DateTime? startDate, DateTime? endDate, int pageIndex, int pageSize);
+
     }
 }

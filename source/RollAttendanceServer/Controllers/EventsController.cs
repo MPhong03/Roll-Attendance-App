@@ -282,5 +282,91 @@ namespace RollAttendanceServer.Controllers
                 return StatusCode(500, ex.Message);
             }
         }
+
+        [HttpPost("{id}/absented-request")]
+        public async Task<IActionResult> SendAbsentRequest(string id, [FromBody] AbsentedRequest request)
+        {
+            try
+            {
+                var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+                if (string.IsNullOrEmpty(userId))
+                {
+                    return Unauthorized("Invalid user.");
+                }
+
+                var newRequest = await _eventService.SendRequest(id, userId, request.Notes, 0);
+
+                return Ok(new { request = newRequest, message = "Successfully send request" });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, ex.Message);
+            }
+        }
+
+        [HttpPut("{id}/update-request")]
+        public async Task<IActionResult> UpdateAbsentRequest(string id, [FromBody] UpdateStatusRequest request)
+        {
+            try
+            {
+                var existedRequest = await _eventService.UpdateRequestStatusAsync(id, request.Status);
+
+                return Ok(new { request = existedRequest, message = "Successfully update request" });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, ex.Message);
+            }
+        }
+
+        [HttpGet("absented-requests/{eventId}")]
+        public async Task<IActionResult> GetAbsentedRequest(
+            string eventId,
+            [FromQuery] string? keyword,
+            [FromQuery] short type,
+            [FromQuery] short status,
+            [FromQuery] DateTime? startDate,
+            [FromQuery] DateTime? endDate,
+            [FromQuery] int pageIndex = 1,
+            [FromQuery] int pageSize = 10)
+        {
+            try
+            {
+                var events = await _eventService.GetEventRequests(eventId, null, keyword, type, status, startDate, endDate, pageIndex, pageSize);
+                return Ok(events);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+        }
+
+        [HttpGet("user-absented-requests/{eventId}")]
+        public async Task<IActionResult> GetUserAbsentedRequest(
+            string eventId,
+            [FromQuery] string? keyword,
+            [FromQuery] short type,
+            [FromQuery] short status,
+            [FromQuery] DateTime? startDate,
+            [FromQuery] DateTime? endDate,
+            [FromQuery] int pageIndex = 1,
+            [FromQuery] int pageSize = 10)
+        {
+            try
+            {
+                var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+                if (string.IsNullOrEmpty(userId))
+                {
+                    return Unauthorized("Invalid user.");
+                }
+
+                var events = await _eventService.GetEventRequests(eventId, userId, keyword, type, status, startDate, endDate, pageIndex, pageSize);
+                return Ok(events);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+        }
     }
 }

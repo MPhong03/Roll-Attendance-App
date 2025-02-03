@@ -1,6 +1,9 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Google.Api.Gax.ResourceNames;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using RollAttendanceServer.Data;
 using RollAttendanceServer.Data.Enum;
+using RollAttendanceServer.Data.Responses;
 using RollAttendanceServer.DTOs;
 using RollAttendanceServer.Helpers;
 using RollAttendanceServer.Interfaces;
@@ -338,6 +341,32 @@ namespace RollAttendanceServer.Services.Systems
             eventEntity.StartTime = DateTime.UtcNow;
 
             var history = new History { EventId = eventEntity.Id };
+
+            var permissionRequests = await _context.PermissionRequests
+                .Where(pr => pr.IsUsed == false &&
+                            pr.RequestStatus == (short)Status.INVITION_APPROVED &&
+                            pr.RequestType == (short)Status.ABSENT_REQUEST &&
+                            pr.EventId == eventId)
+                .ToListAsync();
+
+            foreach (var request in permissionRequests)
+            {
+                var userDetail = new HistoryDetail
+                {
+                    UserId = request.UserId,
+                    UserAvatar = request.UserAvatar,
+                    UserEmail = request.UserEmail,
+                    UserName = request.UserName,
+                    AttendanceCount = 1,
+                    AbsentTime = DateTime.UtcNow,
+                    AttendanceStatus = request.RequestType == (short)Status.ABSENT_REQUEST
+                        ? (short)Status.USER_PERMITTED_ABSENTED
+                        : (short)Status.USER_PERMITTED_LATED
+                };
+
+                history.HistoryDetails.Add(userDetail);
+            }
+
             _context.Histories.Add(history);
 
             await _context.SaveChangesAsync();
@@ -366,7 +395,10 @@ namespace RollAttendanceServer.Services.Systems
             if (eventEntity.IsPrivate && !eventEntity.EventUsers.Any(eu => eu.UserId == userId))
                 throw new Exception("User not permitted for this event.");
 
-            var history = eventEntity.Histories.FirstOrDefault();
+            var history = eventEntity.Histories
+                               .OrderByDescending(h => h.CreatedAt)
+                               .FirstOrDefault();
+
             if (history == null) throw new Exception("History not found for the event.");
 
             var userDetail = history.HistoryDetails.FirstOrDefault(d => d.UserId == userId);
@@ -383,6 +415,10 @@ namespace RollAttendanceServer.Services.Systems
                     AttendanceStatus = attendanceAttempt <= history.AttendanceTimes ? (short)Status.USER_PRESENTED : (short)Status.USER_LATED
                 };
                 history.HistoryDetails.Add(userDetail);
+            }
+            else if (userDetail.AttendanceStatus == (short)Status.USER_PERMITTED_ABSENTED)
+            {
+                userDetail.AttendanceStatus = attendanceAttempt <= history.AttendanceTimes ? (short)Status.USER_PRESENTED : (short)Status.USER_LATED;
             }
             else
             {
@@ -402,7 +438,10 @@ namespace RollAttendanceServer.Services.Systems
 
         public async Task AddAttendanceAttemptAsync(string eventId)
         {
-            var history = await _context.Histories.FirstOrDefaultAsync(h => h.EventId == eventId);
+            var history = await _context.Histories
+                                    .Where(h => h.EventId == eventId)
+                                    .OrderByDescending(h => h.CreatedAt)
+                                    .FirstOrDefaultAsync();
             if (history == null) throw new Exception("History not found.");
 
             history.AttendanceTimes++;
@@ -426,7 +465,7 @@ namespace RollAttendanceServer.Services.Systems
             eventEntity.EventStatus = (short)Status.EVENT_COMPLETED;
             eventEntity.EndTime = DateTime.UtcNow;
 
-            var history = eventEntity.Histories.FirstOrDefault();
+            var history = eventEntity.Histories.OrderByDescending(h => h.CreatedAt).FirstOrDefault();
             if (history != null)
             {
                 history.TotalCount = eventEntity.IsPrivate
@@ -533,7 +572,7 @@ namespace RollAttendanceServer.Services.Systems
                 throw new Exception("Matched user not found.");
 
             // Xử lý điểm danh
-            var history = eventEntity.Histories.FirstOrDefault();
+            var history = eventEntity.Histories.OrderByDescending(h => h.CreatedAt).FirstOrDefault();
             if (history == null) throw new Exception("History not found for the event.");
 
             var userDetail = history.HistoryDetails.FirstOrDefault(d => d.UserId == matchedUserId);
@@ -550,6 +589,10 @@ namespace RollAttendanceServer.Services.Systems
                     AttendanceStatus = attendanceAttempt <= history.AttendanceTimes ? (short)Status.USER_PRESENTED : (short)Status.USER_LATED
                 };
                 history.HistoryDetails.Add(userDetail);
+            }
+            else if (userDetail.AttendanceStatus == (short)Status.USER_PERMITTED_ABSENTED)
+            {
+                userDetail.AttendanceStatus = attendanceAttempt <= history.AttendanceTimes ? (short)Status.USER_PRESENTED : (short)Status.USER_LATED;
             }
             else
             {
@@ -572,6 +615,167 @@ namespace RollAttendanceServer.Services.Systems
                 EventId = eventId,
                 Method = "FACE_DETECTION",
                 Prediction = 1.0
+            };
+        }
+
+        public async Task<PermissionRequest> SendRequest(string eventId, string userId, string notes, short type)
+        {
+            var eventEntity = await _context.Events.FindAsync(eventId);
+            if (eventEntity == null)
+                throw new Exception("Event not found.");
+
+            var organization = await _context.Organizations.FindAsync(eventEntity.OrganizationId);
+            if (organization == null)
+                throw new Exception("Organization not found.");
+
+            var user = await _context.Users.FirstOrDefaultAsync(e => e.Id == userId);
+            if (user == null)
+                throw new Exception("User not found");
+
+            var existedRequest = await _context.PermissionRequests.FirstOrDefaultAsync(r => r.UserId == userId && r.EventId == eventId);
+            if (existedRequest == null)
+            {
+                var request = new PermissionRequest
+                {
+                    UserId = user.Id,
+                    UserName = user.DisplayName,
+                    UserEmail = user.Email,
+                    UserAvatar = user.Avatar,
+                    OrganizationId = organization.Id,
+                    OrganizationName = organization.Name,
+                    EventId = eventEntity.Id,
+                    EventName = eventEntity.Name,
+                    Notes = notes,
+                    RequestType = type,
+                    RequestStatus = (short)Status.REQUEST_WAITING,
+                };
+
+                _context.PermissionRequests.Add(request);
+                await _context.SaveChangesAsync();
+
+                return request;
+            }
+            else
+            {
+                existedRequest.Notes = notes;
+                existedRequest.RequestType = type;
+                existedRequest.RequestStatus = (short)Status.REQUEST_WAITING;
+                existedRequest.IsUsed = false;
+                existedRequest.CreatedAt = DateTime.UtcNow;
+                existedRequest.UpdatedAt = DateTime.UtcNow;
+
+                await _context.SaveChangesAsync();
+
+                return existedRequest;
+            }
+        }
+
+        public async Task<PermissionRequest> UpdateRequestStatusAsync(string requestId, short status)
+        {
+            var request = await _context.PermissionRequests.FindAsync(requestId);
+            if (request == null)
+                throw new Exception("Request not found.");
+
+            var eventEntity = await _context.Events
+                .Include(e => e.Organization)
+                .Include(e => e.Histories)
+                .ThenInclude(h => h.HistoryDetails)
+                .FirstOrDefaultAsync(e => e.Id == request.EventId);
+            if (eventEntity == null)
+                throw new Exception("Event not found.");
+
+            request.RequestStatus = status;
+            request.IsUsed = true;
+
+            if (status == (short)Status.REQUEST_APPROVED)
+            {
+                if (eventEntity.Histories.Any())
+                {
+                    var history = eventEntity.Histories.OrderByDescending(h => h.CreatedAt)
+                                   .FirstOrDefault();
+
+                    var userDetail = history.HistoryDetails.FirstOrDefault(d => d.UserId == request.UserId);
+
+                    if (userDetail == null)
+                    {
+                        userDetail = new HistoryDetail
+                        {
+                            UserId = request.UserId,
+                            UserAvatar = request.UserAvatar,
+                            UserEmail = request.UserEmail,
+                            UserName = request.UserName,
+                            AttendanceCount = 1,
+                            AbsentTime = DateTime.UtcNow,
+                            AttendanceStatus = request.RequestType == (short)Status.ABSENT_REQUEST ? (short)Status.USER_PERMITTED_ABSENTED : (short)Status.USER_PERMITTED_LATED
+                        };
+
+                        history.HistoryDetails.Add(userDetail);
+                    }
+                    else
+                    {
+                        if (userDetail.AttendanceStatus == (short)Status.USER_ABSENTED)
+                        {
+                            throw new Exception("User already absented.");
+                        }
+
+                        userDetail.AttendanceStatus = request.RequestType == (short)Status.ABSENT_REQUEST ? (short)Status.USER_PERMITTED_ABSENTED : (short)Status.USER_PERMITTED_LATED;
+                    }
+                }
+            }
+
+            await _context.SaveChangesAsync();
+
+            return request;
+        }
+
+        public async Task<PagedResult<PermissionRequest>> GetEventRequests(string eventId, string userId, string keyword, short type, short status, DateTime? startDate, DateTime? endDate, int pageIndex, int pageSize)
+        {
+            var query = _context.PermissionRequests.AsQueryable();
+
+            query = query.Where(r => r.EventId == eventId);
+
+            if (!string.IsNullOrEmpty(userId))
+            {
+                query = query.Where(r => r.UserId == userId);
+            }
+
+            if (!string.IsNullOrEmpty(keyword))
+            {
+                query = query.Where(r => r.UserName.Contains(keyword) || r.UserEmail.Contains(keyword) || r.EventName.Contains(keyword));
+            }
+
+            if (type >= 0)
+            {
+                query = query.Where(r => r.RequestType == type);
+            }
+
+            if (status >= 0)
+            {
+                query = query.Where(r => r.RequestStatus == status);
+            }
+
+            if (startDate.HasValue)
+            {
+                query = query.Where(r => r.CreatedAt >= startDate.Value);
+            }
+            if (endDate.HasValue)
+            {
+                query = query.Where(r => r.CreatedAt <= endDate.Value);
+            }
+
+            var totalCount = await query.CountAsync();
+
+            var requests = await query
+                .Skip((pageIndex - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync();
+
+            return new PagedResult<PermissionRequest>
+            {
+                TotalRecords = totalCount,
+                Items = requests,
+                PageIndex = pageIndex,
+                PageSize = pageSize
             };
         }
     }
