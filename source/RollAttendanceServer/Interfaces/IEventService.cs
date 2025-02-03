@@ -11,7 +11,7 @@ namespace RollAttendanceServer.Interfaces
         Task<Event?> GetEventByIdAsync(string eventId);
         Task<bool> AddUsersToPermitedUserAsync(string eventId, List<string> userIds);
         Task<IEnumerable<Event>> GetEventsByOrganizationAsync(string organizationId, string keyword, DateTime? startDate, DateTime? endDate, int pageIndex, int pageSize);
-        Task<IEnumerable<ActiveEventDTO>> GetUserActiveEvents(string userId, DateTime? date, short status, int pageIndex, int pageSize);
+        Task<IEnumerable<ActiveEventDTO>> GetUserActiveEvents(string userId, DateTime? startDate, DateTime? endDate, short status, int pageIndex, int pageSize);
         Task DeleteEventAsync(string id);
         Task CancelEventAsync(string id);
 

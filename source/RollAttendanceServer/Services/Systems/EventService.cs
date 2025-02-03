@@ -75,7 +75,7 @@ namespace RollAttendanceServer.Services.Systems
             };
         }
 
-        public async Task<IEnumerable<ActiveEventDTO>> GetUserActiveEvents(string userId, DateTime? date, short status, int pageIndex, int pageSize)
+        public async Task<IEnumerable<ActiveEventDTO>> GetUserActiveEvents(string userId, DateTime? startDate, DateTime? endDate, short status, int pageIndex, int pageSize)
         {
             var organizationIds = await _context.UserOrganizationRoles
                 .Where(uor => uor.UserId == userId && !_context.Organizations.Any(o => o.Id == uor.OrganizationId && o.IsDeleted))
@@ -93,9 +93,10 @@ namespace RollAttendanceServer.Services.Systems
                     (!e.IsPrivate || e.EventUsers.Any(eu => eu.UserId == userId))
                 );
 
-            if (date.HasValue)
+            if (startDate.HasValue && endDate.HasValue)
             {
-                query = query.Where(e => e.StartTime.Value.Date <= date.Value.Date && e.EndTime.Value.Date >= date.Value.Date);
+                query = query.Where(e => e.StartTime.Value.Date >= startDate.Value.Date &&
+                                         e.EndTime.Value.Date <= endDate.Value.Date);
             }
 
             if (!IsAdmin)

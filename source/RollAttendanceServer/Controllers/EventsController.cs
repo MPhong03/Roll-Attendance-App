@@ -44,7 +44,8 @@ namespace RollAttendanceServer.Controllers
 
         [HttpGet("available-events")]
         public async Task<IActionResult> GetUserAvailableEvents(
-            [FromQuery] DateTime? date,
+            [FromQuery] DateTime? startDate,
+            [FromQuery] DateTime? endDate,
             [FromQuery] short status,
             [FromQuery] int pageIndex = 1,
             [FromQuery] int pageSize = 10)
@@ -56,7 +57,7 @@ namespace RollAttendanceServer.Controllers
                 {
                     return Unauthorized("Invalid user.");
                 }
-                var events = await _eventService.GetUserActiveEvents(userId, date, status, pageIndex, pageSize);
+                var events = await _eventService.GetUserActiveEvents(userId, startDate, endDate, status, pageIndex, pageSize);
                 return Ok(events);
             }
             catch (Exception ex)
@@ -64,6 +65,7 @@ namespace RollAttendanceServer.Controllers
                 return BadRequest(new { message = ex.Message });
             }
         }
+
 
         [HttpPost("create")]
         public async Task<IActionResult> CreateEvent([FromBody] EventDTO eventDto)
