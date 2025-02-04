@@ -430,8 +430,8 @@ class _LoginScreenState extends State<LoginScreen> {
                         borderRadius:
                             const BorderRadius.all(Radius.circular(10)),
                         child: SizedBox(
-                          width: screenWidth * 0.7,
-                          height: 60,
+                          width: screenWidth * 0.8,
+                          height: 45,
                           child: ElevatedButton(
                             onPressed: _login,
                             style: ElevatedButton.styleFrom(
@@ -450,7 +450,44 @@ class _LoginScreenState extends State<LoginScreen> {
                         ),
                       ),
                     ),
-                    const SizedBox(height: 60),
+                    const SizedBox(height: 16),
+                    Center(
+                      child: ClipRRect(
+                        borderRadius:
+                            const BorderRadius.all(Radius.circular(10)),
+                        child: SizedBox(
+                          width: screenWidth * 0.8,
+                          height: 45,
+                          child: ElevatedButton(
+                            onPressed: _loginWithGoogle,
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.white,
+                              side: BorderSide(color: Colors.grey.shade300),
+                            ),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Image.asset(
+                                  'assets/images/google.png',
+                                  height: 24,
+                                ),
+                                const SizedBox(width: 10),
+                                Text(
+                                  'Sign in with Google',
+                                  style: TextStyle(
+                                    color: Colors.black87,
+                                    fontSize: getResponsiveFontSize(16),
+                                    fontFamily: 'Baloo',
+                                    fontWeight: FontWeight.w700,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 45),
                     Center(
                       child: InkWell(
                         onTap: () {

@@ -399,7 +399,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                   backgroundImage: profileImageUrl.isNotEmpty
                                       ? NetworkImage(profileImageUrl)
                                       : const AssetImage(
-                                              'images/default-avatar.jpg')
+                                              'assets/images/default-avatar.jpg')
                                           as ImageProvider,
                                   backgroundColor: Colors.grey.shade200,
                                 ),

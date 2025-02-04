@@ -231,8 +231,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
                         borderRadius:
                             const BorderRadius.all(Radius.circular(10)),
                         child: SizedBox(
-                          width: screenWidth * 0.7,
-                          height: 60,
+                          width: screenWidth * 0.8,
+                          height: 45,
                           child: ElevatedButton(
                             onPressed: _register,
                             style: ElevatedButton.styleFrom(
