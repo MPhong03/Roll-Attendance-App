@@ -333,8 +333,8 @@ namespace RollAttendanceServer.Services.Systems
         public async Task<Event> ActivateEventAsync(string eventId)
         {
             var eventEntity = await _context.Events.FindAsync(eventId);
-            if (eventEntity == null || eventEntity.EventStatus != (short)Status.EVENT_NOT_STARTED)
-                throw new Exception("Event not found or already started.");
+            if (eventEntity == null || eventEntity.EventStatus == (short)Status.EVENT_IN_PROGRESS)
+                throw new Exception("Event not found or pending.");
 
             eventEntity.EventStatus = (short)Status.EVENT_IN_PROGRESS;
             eventEntity.CurrentQR = Tools.GenerateUniqueCode();
