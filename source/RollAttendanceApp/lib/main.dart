@@ -96,6 +96,11 @@ class MyApp extends StatelessWidget {
                   path: '/profile',
                   builder: (context, state) => const ProfileScreen(),
                 ),
+                GoRoute(
+                  path: '/search-organization',
+                  builder: (context, state) =>
+                      const OrganizationPublicSearchScreen(),
+                ),
               ],
             ),
             GoRoute(
@@ -146,11 +151,6 @@ class MyApp extends StatelessWidget {
                 final id = state.pathParameters['id']!;
                 return PublicOrganizationDetailScreen(organizationId: id);
               },
-            ),
-            GoRoute(
-              path: '/search-organization',
-              builder: (context, state) =>
-                  const OrganizationPublicSearchScreen(),
             ),
             GoRoute(
               path: '/create-event/:id',

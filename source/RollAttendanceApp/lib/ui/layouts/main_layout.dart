@@ -112,6 +112,8 @@ class _MainLayoutState extends State<MainLayout> {
         context.push('/home');
         break;
       case 1:
+        context.push('/search-organization');
+        break;
       case 2:
         context.push('/organization');
         break;

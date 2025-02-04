@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:intl/intl.dart';
 
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -28,6 +29,9 @@ class _HomeScreenState extends State<HomeScreen> {
   int pageEventIndex = 1;
   int pageEventSize = 10;
   bool hasMoreEventData = true;
+
+  DateTime selectedDate = DateTime.now();
+  String filterType = 'Today';
 
   String imagePlaceHolder =
       'https://yt3.ggpht.com/a/AGF-l78urB8ASkb0JO2a6AB0UAXeEHe6-pc9UJqxUw=s900-mo-c-c0xffffffff-rj-k-no';
@@ -109,33 +113,54 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Future<void> fetchUserAvailableEvents(
-      {int pageEventIndex = 1,
-      int pageEventSize = 10,
-      int status = 1,
-      DateTime? date}) async {
+      {int pageEventIndex = 1, int pageEventSize = 10, int status = 1}) async {
     if (_isLoading) return;
     try {
       setState(() {
         _isLoading = true;
       });
 
-      date ??= DateTime.now();
+      DateTime now = DateTime.now();
+      DateTime startDate, endDate;
+
+      if (filterType == 'Today') {
+        startDate = DateTime(now.year, now.month, now.day, 0, 0, 0);
+        endDate = DateTime(now.year, now.month, now.day, 23, 59, 59);
+      } else if (filterType == 'Week') {
+        int currentWeekday = now.weekday; // Monday = 1, Sunday = 7
+        startDate = now.subtract(Duration(days: currentWeekday - 1));
+        startDate =
+            DateTime(startDate.year, startDate.month, startDate.day, 0, 0, 0);
+
+        endDate = startDate.add(const Duration(days: 6));
+        endDate =
+            DateTime(endDate.year, endDate.month, endDate.day, 23, 59, 59);
+      } else if (filterType == 'Month') {
+        startDate = DateTime(now.year, now.month, 1, 0, 0, 0);
+
+        endDate = DateTime(now.year, now.month + 1, 0, 23, 59, 59);
+      } else {
+        throw Exception("Invalid filter type");
+      }
+
+      final dateFormat = DateFormat('yyyy-MM-dd HH:mm:ss');
 
       final response = await _apiService.get(
-        'api/events/available-events?pageIndex=$pageEventIndex&pageSize=$pageEventSize&date=$date&status=$status',
+        'api/events/available-events?pageIndex=$pageEventIndex&pageSize=$pageEventSize&status=$status'
+        '&startDate=${dateFormat.format(startDate)}&endDate=${dateFormat.format(endDate)}',
       );
 
       if (response.statusCode == 200) {
         if (mounted) {
           setState(() {
             List<dynamic> responseBody = jsonDecode(response.body);
-            if (pageIndex == 0) {
+            if (pageEventIndex == 1) {
               events = responseBody
-                  .map((orgData) => AvailableEventModel.fromMap(orgData))
+                  .map((eventData) => AvailableEventModel.fromMap(eventData))
                   .toList();
             } else {
               events.addAll(responseBody
-                  .map((orgData) => AvailableEventModel.fromMap(orgData))
+                  .map((eventData) => AvailableEventModel.fromMap(eventData))
                   .toList());
             }
 
@@ -147,23 +172,15 @@ class _HomeScreenState extends State<HomeScreen> {
       } else {
         Fluttertoast.showToast(
           msg: "No events found",
-          toastLength: Toast.LENGTH_SHORT,
-          gravity: ToastGravity.BOTTOM,
-          timeInSecForIosWeb: 1,
           backgroundColor: Colors.black,
           textColor: Colors.white,
-          fontSize: 16.0,
         );
       }
     } catch (e) {
       Fluttertoast.showToast(
         msg: "Failed to fetch events, $e",
-        toastLength: Toast.LENGTH_SHORT,
-        gravity: ToastGravity.BOTTOM,
-        timeInSecForIosWeb: 1,
         backgroundColor: Colors.black,
         textColor: Colors.white,
-        fontSize: 16.0,
       );
     } finally {
       setState(() {
@@ -219,6 +236,30 @@ class _HomeScreenState extends State<HomeScreen> {
             padding: const EdgeInsets.all(16.0),
             children: [
               const SizedBox(height: 30),
+              Align(
+                alignment: Alignment.centerRight,
+                child: DropdownButton<String>(
+                  value: filterType,
+                  onChanged: (String? newValue) {
+                    if (newValue != null) {
+                      setState(() {
+                        filterType = newValue;
+                        pageEventIndex = 1;
+                        hasMoreEventData = true;
+                      });
+                      fetchUserAvailableEvents();
+                    }
+                  },
+                  items: <String>['Today', 'Week', 'Month']
+                      .map<DropdownMenuItem<String>>((String value) {
+                    return DropdownMenuItem<String>(
+                      value: value,
+                      child: Text(value),
+                    );
+                  }).toList(),
+                ),
+              ),
+              const SizedBox(height: 10),
               if (events.isEmpty)
                 Center(
                   child: Text(

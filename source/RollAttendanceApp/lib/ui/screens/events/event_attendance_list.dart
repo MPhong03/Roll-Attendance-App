@@ -8,6 +8,8 @@ import 'package:itproject/enums/user_attendance_status.dart';
 import 'package:itproject/models/event_history_detail_model.dart';
 import 'package:itproject/models/event_history_model.dart';
 import 'package:itproject/services/api_service.dart';
+import 'package:itproject/ui/widgets/info_chip.dart';
+import 'package:itproject/utils/format_value.dart';
 
 class EventAttendanceListScreen extends StatefulWidget {
   final String eventId;
@@ -21,96 +23,48 @@ class EventAttendanceListScreen extends StatefulWidget {
 
 class _EventAttendanceListScreenState extends State<EventAttendanceListScreen> {
   final ApiService _apiService = ApiService();
-
   bool _isLoading = false;
+  late Future<List<HistoryModel>> _historiesFuture;
+  Map<String, Future<List<HistoryDetailModel>>> _historyDetailsMap = {};
+  Set<String> _expandedHistories = {};
 
-  late Future<HistoryModel> _historyFuture;
-  late Future<List<HistoryDetailModel>> _historyDetailModels;
-
-  // Hàm gọi getHistory và lấy historyId từ kết quả
-  Future<HistoryModel> getHistory(id) async {
+  Future<List<HistoryModel>> getHistories(String id) async {
     try {
-      setState(() {
-        _isLoading = true;
-      });
-
-      final response = await _apiService.get('api/histories/$id');
+      setState(() => _isLoading = true);
+      final response = await _apiService.get('api/histories/$id/all');
 
       if (response.statusCode == 200) {
-        final history = HistoryModel.fromMap(jsonDecode(response.body));
-        // Sau khi lấy được history, gọi getHistoryDetail với id của history
-        _historyDetailModels = getHistoryDetail(
-            history.id!); // Lưu _historyDetailModels với danh sách detail
-        return history;
+        final List<dynamic> data = jsonDecode(response.body);
+        return data.map((e) => HistoryModel.fromMap(e)).toList();
       } else {
-        throw Exception('Failed to load event');
+        throw Exception('Failed to load histories');
       }
     } catch (e) {
-      throw Exception('Failed to load event: $e');
+      throw Exception('Failed to load histories: $e');
     } finally {
-      setState(() {
-        _isLoading = false;
-      });
+      setState(() => _isLoading = false);
     }
   }
 
-  // Lấy danh sách chi tiết từ id của history
-  Future<List<HistoryDetailModel>> getHistoryDetail(String id) async {
+  Future<List<HistoryDetailModel>> getHistoryDetail(String historyId) async {
     try {
-      setState(() {
-        _isLoading = true;
-      });
-
-      final response = await _apiService.get('api/histories/details/$id');
-
+      final response =
+          await _apiService.get('api/histories/details/$historyId');
       if (response.statusCode == 200) {
-        final List<dynamic> historyList = jsonDecode(response.body);
-        final List<HistoryDetailModel> historyDetails =
-            List<HistoryDetailModel>.from(
-                historyList.map((item) => HistoryDetailModel.fromMap(item)));
-        return historyDetails;
+        final List<dynamic> data = jsonDecode(response.body);
+        return data.map((e) => HistoryDetailModel.fromMap(e)).toList();
       } else {
-        throw Exception('Failed to load history');
+        throw Exception('Failed to load history details');
       }
     } catch (e) {
-      throw Exception('Failed to load history: $e');
-    } finally {
-      setState(() {
-        _isLoading = false;
-      });
+      throw Exception('Failed to load history details: $e');
     }
-  }
-
-  void _showErrorDialog(String message) {
-    AwesomeDialog(
-      context: context,
-      dialogType: DialogType.error,
-      animType: AnimType.bottomSlide,
-      title: 'Error',
-      desc: message,
-      btnCancelOnPress: () {},
-    ).show();
-  }
-
-  String formatDateTime(DateTime? dateTime) {
-    if (dateTime == null) {
-      return 'N/A';
-    }
-    final DateFormat formatter = DateFormat('dd-MM-yyyy HH:mm:ss');
-    return formatter.format(dateTime);
-  }
-
-  Future<void> _onRefresh() async {
-    setState(() {
-      _historyFuture = getHistory(widget.eventId);
-    });
   }
 
   @override
   void initState() {
     super.initState();
-    // _eventFuture = getDetail(widget.eventId);
-    _historyFuture = getHistory(widget.eventId);
+    _historiesFuture = getHistories(widget.eventId);
   }
 
   @override
@@ -120,131 +74,171 @@ class _EventAttendanceListScreenState extends State<EventAttendanceListScreen> {
       opacity: 0.3,
       blurEffectIntensity: 5,
       child: Scaffold(
-        appBar: AppBar(
-          title: const Text('History'),
-        ),
+        appBar: AppBar(title: const Text('Histories')),
         body: RefreshIndicator(
-          onRefresh: _onRefresh,
-          child: FutureBuilder<HistoryModel>(
-            future: _historyFuture,
+          onRefresh: () async {
+            setState(() => _historiesFuture = getHistories(widget.eventId));
+          },
+          child: FutureBuilder<List<HistoryModel>>(
+            future: _historiesFuture,
             builder: (context, snapshot) {
               if (snapshot.connectionState == ConnectionState.waiting) {
-                return const Center(
-                  child: Text(
-                    'Loading',
-                  ),
-                );
+                return const Center(child: CircularProgressIndicator());
               } else if (snapshot.hasError) {
-                return Center(
-                  child: Text(
-                    'Error: ${snapshot.error}',
-                    style: const TextStyle(color: Colors.red),
-                  ),
-                );
+                return Center(child: Text('Error: ${snapshot.error}'));
               } else if (snapshot.hasData) {
-                final history = snapshot.data!;
+                final histories = snapshot.data!;
+                if (histories.isEmpty)
+                  return const Center(child: Text('No history available'));
 
-                return Column(
-                  children: [
-                    // Display history summary
-                    Padding(
-                      padding: const EdgeInsets.all(8.0),
+                return ListView.builder(
+                  itemCount: histories.length,
+                  itemBuilder: (context, index) {
+                    final history = histories[index];
+                    final isExpanded = _expandedHistories.contains(history.id);
+
+                    return Card(
+                      margin: const EdgeInsets.symmetric(
+                          horizontal: 12, vertical: 8),
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12)),
+                      elevation: 4,
                       child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const Text(
-                            'Event History Summary',
-                            style: TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold,
+                          ListTile(
+                            title: Text(
+                              'History ${index + 1}',
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 18,
+                              ),
                             ),
+                            subtitle: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  '${FormatUtils.formatDateTime(history.startTime)} - ${FormatUtils.formatDateTime(history.endTime)}',
+                                  style: TextStyle(color: Colors.grey[700]),
+                                ),
+                                const SizedBox(height: 8),
+                                Wrap(
+                                  spacing: 8,
+                                  runSpacing: 4,
+                                  children: [
+                                    InfoChip(
+                                        icon: Icons.people,
+                                        label: 'Total',
+                                        count: history.totalCount ?? 0),
+                                    InfoChip(
+                                        icon: Icons.check_circle,
+                                        label: 'Present',
+                                        count: history.presentCount ?? 0,
+                                        color: Colors.green),
+                                    InfoChip(
+                                        icon: Icons.timer,
+                                        label: 'Late',
+                                        count: history.lateCount ?? 0,
+                                        color: Colors.orange),
+                                  ],
+                                ),
+                                const SizedBox(height: 6),
+                                Row(
+                                  children: [
+                                    Icon(Icons.access_time,
+                                        color: Colors.blue, size: 18),
+                                    const SizedBox(width: 6),
+                                    Text(
+                                      'Attendance Times: ${history.attendanceTimes}',
+                                      style: TextStyle(
+                                          fontSize: 14, color: Colors.blue),
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            ),
+                            trailing: Icon(
+                              isExpanded
+                                  ? Icons.expand_less
+                                  : Icons.expand_more,
+                              color: Colors.blueAccent,
+                            ),
+                            onTap: () {
+                              setState(() {
+                                if (isExpanded) {
+                                  _expandedHistories.remove(history.id);
+                                } else {
+                                  _expandedHistories.add(history.id ?? '');
+                                  _historyDetailsMap[history.id!] =
+                                      getHistoryDetail(history.id!);
+                                }
+                              });
+                            },
                           ),
-                          const SizedBox(height: 8),
-                          Text('Total Count: ${history.totalCount}'),
-                          Text('Present Count: ${history.presentCount}'),
-                          Text('Late Count: ${history.lateCount}'),
-                          Text('Attendance Times: ${history.attendanceTimes}'),
+                          if (isExpanded)
+                            FutureBuilder<List<HistoryDetailModel>>(
+                              future: _historyDetailsMap[history.id!],
+                              builder: (context, detailSnapshot) {
+                                if (detailSnapshot.connectionState ==
+                                    ConnectionState.waiting) {
+                                  return const Padding(
+                                    padding: EdgeInsets.all(16),
+                                    child: CircularProgressIndicator(),
+                                  );
+                                } else if (detailSnapshot.hasError) {
+                                  return Padding(
+                                    padding: const EdgeInsets.all(16),
+                                    child:
+                                        Text('Error: ${detailSnapshot.error}'),
+                                  );
+                                } else if (detailSnapshot.hasData) {
+                                  final details = detailSnapshot.data!;
+                                  return Column(
+                                    children: details.map((detail) {
+                                      final attendanceStatus = getRoleFromValue(
+                                          detail.attendanceStatus ?? -1);
+                                      return ListTile(
+                                        leading: CircleAvatar(
+                                            backgroundImage: NetworkImage(
+                                                detail.userAvatar ?? '')),
+                                        title:
+                                            Text(detail.userName ?? 'Unknown'),
+                                        subtitle: Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          children: [
+                                            Text('Email: ${detail.userEmail}'),
+                                            Text(
+                                                'Absent: ${FormatUtils.formatDateTime(detail.absentTime)}'),
+                                            Text(
+                                                'Leave: ${FormatUtils.formatDateTime(detail.leaveTime)}'),
+                                            Text(
+                                                'Count: ${detail.attendanceCount}'),
+                                            Text(
+                                              'Status: ${attendanceStatus['text']}',
+                                              style: TextStyle(
+                                                  color: attendanceStatus[
+                                                      'color']),
+                                            ),
+                                          ],
+                                        ),
+                                      );
+                                    }).toList(),
+                                  );
+                                } else {
+                                  return const Padding(
+                                    padding: EdgeInsets.all(16),
+                                    child: Text('No details available'),
+                                  );
+                                }
+                              },
+                            ),
                         ],
                       ),
-                    ),
-                    // List of history details
-                    Expanded(
-                      child: FutureBuilder<List<HistoryDetailModel>>(
-                        future: _historyDetailModels,
-                        builder: (context, snapshot) {
-                          if (snapshot.connectionState ==
-                              ConnectionState.waiting) {
-                            return const Center(
-                              child: CircularProgressIndicator(),
-                            );
-                          } else if (snapshot.hasError) {
-                            return Center(
-                              child: Text(
-                                'Error: ${snapshot.error}',
-                                style: const TextStyle(color: Colors.red),
-                              ),
-                            );
-                          } else if (snapshot.hasData) {
-                            final histories = snapshot.data!;
-                            if (histories.isEmpty) {
-                              return const Center(
-                                child: Text('No details available.'),
-                              );
-                            }
-
-                            return ListView.builder(
-                              padding: const EdgeInsets.all(8.0),
-                              itemCount: histories.length,
-                              itemBuilder: (context, index) {
-                                final item = histories[index];
-                                final attendanceStatus = getRoleFromValue(
-                                    item.attendanceStatus ?? -1);
-
-                                return Card(
-                                  margin:
-                                      const EdgeInsets.symmetric(vertical: 8.0),
-                                  child: ListTile(
-                                    leading: CircleAvatar(
-                                      backgroundImage:
-                                          NetworkImage(item.userAvatar ?? ''),
-                                    ),
-                                    title: Text(item.userName ?? 'No Name'),
-                                    subtitle: Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: [
-                                        Text('Email: ${item.userEmail}'),
-                                        Text(
-                                            'Absent Time: ${item.absentTime != null ? formatDateTime(item.absentTime) : 'N/A'}'),
-                                        Text(
-                                            'Leave Time: ${item.leaveTime != null ? formatDateTime(item.leaveTime) : 'N/A'}'),
-                                        Text(
-                                            'Attendance Count: ${item.attendanceCount}'),
-                                        Text(
-                                          'Status: ${attendanceStatus['text']}',
-                                          style: TextStyle(
-                                              color: attendanceStatus['color']),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                );
-                              },
-                            );
-                          } else {
-                            return const Center(
-                              child: Text('No data found'),
-                            );
-                          }
-                        },
-                      ),
-                    ),
-                  ],
+                    );
+                  },
                 );
               } else {
-                return const Center(
-                  child: Text('No data found'),
-                );
+                return const Center(child: Text('No data found'));
               }
             },
           ),
