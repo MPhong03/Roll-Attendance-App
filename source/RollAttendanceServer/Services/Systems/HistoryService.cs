@@ -18,6 +18,7 @@ namespace RollAttendanceServer.Services.Systems
         {
             var history = await _context.Histories
                                            .Where(h => h.EventId == eventId)
+                                           .OrderByDescending(h => h.CreatedAt)
                                            .FirstOrDefaultAsync();
             return history;
         }

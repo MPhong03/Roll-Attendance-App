@@ -468,6 +468,14 @@ namespace RollAttendanceServer.Services.Systems
             var history = eventEntity.Histories.OrderByDescending(h => h.CreatedAt).FirstOrDefault();
             if (history != null)
             {
+                foreach (var detail in history.HistoryDetails)
+                {
+                    if (detail.LeaveTime == null)
+                    {
+                        detail.LeaveTime = DateTime.UtcNow;
+                    }
+                }
+
                 history.TotalCount = eventEntity.IsPrivate
                     ? eventEntity.EventUsers.Count
                     : history.HistoryDetails.Count;
