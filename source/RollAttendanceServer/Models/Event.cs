@@ -15,6 +15,8 @@ namespace RollAttendanceServer.Models
         public DateTime? EndTime { get; set; }
         public string CurrentLocation { get; set; } = string.Empty;
         public decimal CurrentLocationRadius { get; set; }
+        public double? Latitude { get; set; }
+        public double? Longitude { get; set; }
         public string CurrentQR { get; set; } = string.Empty;
         public short EventStatus { get; set; } = (short)Status.EVENT_NOT_STARTED;
         public string OrganizerId { get; set; } = string.Empty;

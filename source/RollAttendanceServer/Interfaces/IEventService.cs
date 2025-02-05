@@ -22,7 +22,13 @@ namespace RollAttendanceServer.Interfaces
         Task AddAttendanceAttemptAsync(string eventId);
         Task<Event> CompleteEventAsync(string eventId);
         Task<IEnumerable<UserDTO>> GetEventUsersAsync(string eventId);
+
+        // FACE CHECKIN
         Task<BiometricCheckInResultDTO> FaceCheckIn(string eventId, string faceData, int attendanceAttempt);
+
+        // GEOGRAPHY CHECKIN
+        Task<EventDTO> ActivateGeographyCheckIn(string eventId, double lat, double lon, decimal radius, bool isMandatory);
+        Task<BiometricCheckInResultDTO> GeographyCheckIn(string eventId, string userId, double lat, double lon);
 
         // REQUEST
         Task<PermissionRequest> SendRequest(string eventId, string userId, string notes, short type);

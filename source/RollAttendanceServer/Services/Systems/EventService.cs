@@ -786,5 +786,15 @@ namespace RollAttendanceServer.Services.Systems
                 PageSize = pageSize
             };
         }
+
+        public Task<EventDTO> ActivateGeographyCheckIn(string eventId, double lat, double lon, decimal radius, bool isMandatory)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<BiometricCheckInResultDTO> GeographyCheckIn(string eventId, string userId, double lat, double lon)
+        {
+            throw new NotImplementedException();
+        }
     }
 }
