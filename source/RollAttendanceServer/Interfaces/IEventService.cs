@@ -27,8 +27,8 @@ namespace RollAttendanceServer.Interfaces
         Task<BiometricCheckInResultDTO> FaceCheckIn(string eventId, string faceData, int attendanceAttempt);
 
         // GEOGRAPHY CHECKIN
-        Task<EventDTO> ActivateGeographyCheckIn(string eventId, double lat, double lon, decimal radius, bool isMandatory);
-        Task<BiometricCheckInResultDTO> GeographyCheckIn(string eventId, string userId, double lat, double lon);
+        Task<Event> ActivateGeographyCheckIn(string eventId, double lat, double lon, decimal radius);
+        Task<BiometricCheckInResultDTO> GeographyCheckIn(string eventId, string userId, double lat, double lon, int attendanceAttempt);
 
         // REQUEST
         Task<PermissionRequest> SendRequest(string eventId, string userId, string notes, short type);

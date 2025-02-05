@@ -787,14 +787,94 @@ namespace RollAttendanceServer.Services.Systems
             };
         }
 
-        public Task<EventDTO> ActivateGeographyCheckIn(string eventId, double lat, double lon, decimal radius, bool isMandatory)
+        public async Task<Event> ActivateGeographyCheckIn(string eventId, double lat, double lon, decimal radius)
         {
-            throw new NotImplementedException();
+            var eventEntity = await _context.Events.FindAsync(eventId);
+            if (eventEntity == null || eventEntity.EventStatus != (short)Status.EVENT_IN_PROGRESS)
+                throw new Exception("Event not found or not started yet.");
+
+            eventEntity.Latitude = lat;
+            eventEntity.Longitude = lon;
+            eventEntity.CurrentLocationRadius = radius;
+
+            _context.Events.Update(eventEntity);
+            await _context.SaveChangesAsync();
+            return eventEntity;
         }
 
-        public Task<BiometricCheckInResultDTO> GeographyCheckIn(string eventId, string userId, double lat, double lon)
+        public async Task<BiometricCheckInResultDTO> GeographyCheckIn(string eventId, string userId, double lat, double lon, int attendanceAttempt)
         {
-            throw new NotImplementedException();
+            var eventEntity = await _context.Events
+                                            .Include(e => e.EventUsers)
+                                            .Include(e => e.Organization)
+                                            .Include(e => e.Histories)
+                                            .ThenInclude(h => h.HistoryDetails)
+                                            .FirstOrDefaultAsync(e => e.Id == eventId);
+
+            if (eventEntity == null || eventEntity.EventStatus != (short)Status.EVENT_IN_PROGRESS)
+                throw new Exception("Event not found or not started yet.");
+
+            var history = eventEntity.Histories.OrderByDescending(h => h.CreatedAt).FirstOrDefault();
+            if (history == null) throw new Exception("History not found for the event.");
+
+            var user = await _context.Users.FindAsync(userId);
+            if (user == null)
+                throw new Exception("User not found.");
+
+            if (eventEntity.IsPrivate && !eventEntity.EventUsers.Any(eu => eu.UserId == userId))
+                throw new Exception("User not permitted for this event.");
+
+            double distance = Tools.CalculateDistance(
+                eventEntity.Latitude.Value, eventEntity.Longitude.Value,
+                lat, lon
+            );
+
+            if (distance > (double)eventEntity.CurrentLocationRadius)
+            {
+                throw new Exception("User's location is outside of check in area!");
+            }
+
+            var userDetail = history.HistoryDetails.FirstOrDefault(d => d.UserId == user.Id);
+            if (userDetail == null)
+            {
+                userDetail = new HistoryDetail
+                {
+                    UserId = user.Id,
+                    UserAvatar = user.Avatar,
+                    UserEmail = user.Email,
+                    UserName = user.DisplayName,
+                    AttendanceCount = 1,
+                    AbsentTime = DateTime.UtcNow,
+                    AttendanceStatus = attendanceAttempt <= history.AttendanceTimes ? (short)Status.USER_PRESENTED : (short)Status.USER_LATED
+                };
+                history.HistoryDetails.Add(userDetail);
+            }
+            else if (userDetail.AttendanceStatus == (short)Status.USER_PERMITTED_ABSENTED)
+            {
+                userDetail.AttendanceStatus = attendanceAttempt <= history.AttendanceTimes ? (short)Status.USER_PRESENTED : (short)Status.USER_LATED;
+            }
+            else
+            {
+                if (attendanceAttempt == history.AttendanceTimes)
+                    throw new Exception("You have already checked in!");
+                userDetail.AttendanceCount++;
+                userDetail.LeaveTime = DateTime.UtcNow;
+            }
+
+            if (attendanceAttempt == 1)
+                history.PresentCount++;
+
+            await _context.SaveChangesAsync();
+
+            return new BiometricCheckInResultDTO
+            {
+                UserId = user.Id,
+                Email = user.Email,
+                Name = user.DisplayName,
+                EventId = eventId,
+                Method = "GEOGRAPHY",
+                Prediction = 1.0
+            };
         }
     }
 }

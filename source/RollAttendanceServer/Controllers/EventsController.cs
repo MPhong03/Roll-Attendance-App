@@ -368,5 +368,53 @@ namespace RollAttendanceServer.Controllers
                 return BadRequest(new { message = ex.Message });
             }
         }
+
+        [HttpPost("{id}/activate-geography-checkin")]
+        public async Task<IActionResult> ActivateGeographyCheckIn(string id, [FromBody] GeographyCheckInRequest request)
+        {
+            try
+            {
+                var result = await _eventService.ActivateGeographyCheckIn(id, request.Latitude, request.Longitude, request.Radius);
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+        }
+
+        [HttpPost("{id}/geography-checkin")]
+        public async Task<IActionResult> GeographyCheckIn(string id, [FromBody] GeographyCheckInUserRequest request)
+        {
+            try
+            {
+                var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+                if (string.IsNullOrEmpty(userId))
+                {
+                    return Unauthorized("Invalid user.");
+                }
+
+                var result = await _eventService.GeographyCheckIn(id, userId, request.Latitude, request.Longitude, request.AttendanceAttempt);
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+        }
+    }
+
+    public class GeographyCheckInRequest
+    {
+        public double Latitude { get; set; }
+        public double Longitude { get; set; }
+        public decimal Radius { get; set; }
+    }
+
+    public class GeographyCheckInUserRequest
+    {
+        public double Latitude { get; set; }
+        public double Longitude { get; set; }
+        public int AttendanceAttempt { get; set; }
     }
 }
