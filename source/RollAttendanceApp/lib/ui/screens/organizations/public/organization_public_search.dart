@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:itproject/models/public_organization_model.dart';
 import 'package:itproject/services/api_service.dart';
+import 'package:blurry_modal_progress_hud/blurry_modal_progress_hud.dart';
 
 class OrganizationPublicSearchScreen extends StatefulWidget {
   const OrganizationPublicSearchScreen({super.key});
@@ -26,6 +27,7 @@ class _OrganizationPublicSearchScreenState
   List<String> _suggestions = [];
 
   Future<List<PublicOrganizationModel>> getPublicOrganization() async {
+    setState(() => _isLoading = true);
     try {
       final response = await _apiService.get(
           'api/organization?pageIndex=$_page&pageSize=$_limit&keyword=$_keyword');
@@ -39,10 +41,11 @@ class _OrganizationPublicSearchScreenState
       }
     } catch (e) {
       throw Exception('Failed to load organizations: $e');
+    } finally {
+      setState(() => _isLoading = false);
     }
   }
 
-  // Function to get suggestions based on keyword
   Future<void> getSuggestions(String keyword) async {
     try {
       final response = await _apiService
@@ -62,6 +65,13 @@ class _OrganizationPublicSearchScreenState
     }
   }
 
+  Future<void> _refreshOrganizations() async {
+    setState(() {
+      _page = 0;
+      _publicOrganizationFuture = getPublicOrganization();
+    });
+  }
+
   @override
   void initState() {
     super.initState();
@@ -74,17 +84,12 @@ class _OrganizationPublicSearchScreenState
 
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: isDarkMode ? const Color(0xFF121212) : const Color(0xFFE9FCE9),
+        automaticallyImplyLeading: false,
+        backgroundColor:
+            isDarkMode ? const Color(0xFF121212) : const Color(0xFFE9FCE9),
         elevation: 0,
-        leading: IconButton(
-          icon: Icon(
-            Icons.arrow_back,
-            color: isDarkMode ? Colors.white : Colors.black,
-          ),
-          onPressed: () => Navigator.of(context).pop(),
-        ),
         title: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16.0),
+          padding: const EdgeInsets.symmetric(horizontal: 8.0),
           child: TextField(
             controller: _searchController,
             style: TextStyle(
@@ -93,17 +98,19 @@ class _OrganizationPublicSearchScreenState
             cursorColor: Colors.green,
             decoration: InputDecoration(
               hintText: 'Search organizations...',
-              hintStyle: TextStyle(color: isDarkMode ? Colors.grey : Colors.black54),
+              hintStyle:
+                  TextStyle(color: isDarkMode ? Colors.grey : Colors.black54),
               filled: true,
               fillColor: isDarkMode ? const Color(0xFF1E1E1E) : Colors.white,
-              contentPadding: const EdgeInsets.symmetric(vertical: 10, horizontal: 15),
+              contentPadding:
+                  const EdgeInsets.symmetric(vertical: 10, horizontal: 15),
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(20),
                 borderSide: BorderSide.none,
               ),
-              prefixIcon: Icon(Icons.search, color: isDarkMode ? Colors.white : Colors.black),
+              prefixIcon: Icon(Icons.search,
+                  color: isDarkMode ? Colors.white : Colors.black),
             ),
-            selectionControls: materialTextSelectionControls,
             onChanged: (value) {
               setState(() {
                 getSuggestions(value);
@@ -118,123 +125,137 @@ class _OrganizationPublicSearchScreenState
           ),
         ),
       ),
-      body: Stack(
-        children: [
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16.0),
-            child: Column(
-              children: [
-                Expanded(
-                  child: FutureBuilder<List<PublicOrganizationModel>>(
-                    future: _publicOrganizationFuture,
-                    builder: (context, snapshot) {
-                      if (snapshot.connectionState == ConnectionState.waiting) {
-                        return const Center(
-                          child: CircularProgressIndicator(),
-                        );
-                      } else if (snapshot.hasError) {
-                        return Center(
-                          child: Text(
-                            'Error: ${snapshot.error}',
-                            style: const TextStyle(color: Colors.red),
-                          ),
-                        );
-                      } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                        return const Center(
-                          child: Text('No organizations found.'),
-                        );
-                      }
+      body: BlurryModalProgressHUD(
+        inAsyncCall: _isLoading,
+        child: RefreshIndicator(
+          onRefresh: _refreshOrganizations,
+          child: Stack(
+            children: [
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                child: Column(
+                  children: [
+                    Expanded(
+                      child: FutureBuilder<List<PublicOrganizationModel>>(
+                        future: _publicOrganizationFuture,
+                        builder: (context, snapshot) {
+                          if (snapshot.connectionState ==
+                              ConnectionState.waiting) {
+                            return const Center(
+                              child: CircularProgressIndicator(),
+                            );
+                          } else if (snapshot.hasError) {
+                            return Center(
+                              child: Text(
+                                'Error: ${snapshot.error}',
+                                style: const TextStyle(color: Colors.red),
+                              ),
+                            );
+                          } else if (!snapshot.hasData ||
+                              snapshot.data!.isEmpty) {
+                            return const Center(
+                              child: Text('No organizations found.'),
+                            );
+                          }
 
-                      final organizations = snapshot.data!;
-                      return ListView.builder(
-                        itemCount: organizations.length,
-                        itemBuilder: (context, index) {
-                          final org = organizations[index];
-                          return GestureDetector(
-                            onTap: () {
-                              context.push(
-                                  '/public-organization-detail/${org.id}');
+                          final organizations = snapshot.data!;
+                          return ListView.builder(
+                            itemCount: organizations.length,
+                            itemBuilder: (context, index) {
+                              final org = organizations[index];
+                              return GestureDetector(
+                                onTap: () {
+                                  context.push(
+                                      '/public-organization-detail/${org.id}');
+                                },
+                                child: Card(
+                                  margin:
+                                      const EdgeInsets.symmetric(vertical: 8),
+                                  elevation: 3,
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(10),
+                                  ),
+                                  child: ListTile(
+                                    contentPadding: const EdgeInsets.all(16),
+                                    leading: ClipRRect(
+                                      borderRadius: BorderRadius.circular(8),
+                                      child: Image.network(
+                                        org.image ??
+                                            'https://via.placeholder.com/150',
+                                        fit: BoxFit.cover,
+                                        width: 50,
+                                        height: 50,
+                                      ),
+                                    ),
+                                    title: Text(
+                                      org.name ?? 'N/A',
+                                      style: const TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 16,
+                                      ),
+                                    ),
+                                    subtitle: Row(
+                                      children: [
+                                        const Icon(Icons.person,
+                                            size: 16, color: Colors.grey),
+                                        const SizedBox(width: 5),
+                                        Text('${org.users}',
+                                            style: const TextStyle(
+                                                color: Colors.grey)),
+                                        const SizedBox(width: 10),
+                                        const Icon(Icons.event,
+                                            size: 16, color: Colors.grey),
+                                        const SizedBox(width: 5),
+                                        Text('${org.events}',
+                                            style: const TextStyle(
+                                                color: Colors.grey)),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              );
                             },
-                            child: Card(
-                              margin: const EdgeInsets.symmetric(vertical: 8),
-                              elevation: 3,
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(10),
-                              ),
-                              child: ListTile(
-                                contentPadding: const EdgeInsets.all(16),
-                                leading: ClipRRect(
-                                  borderRadius: BorderRadius.circular(8),
-                                  child: Image.network(
-                                    org.image ?? 'https://via.placeholder.com/150',
-                                    fit: BoxFit.cover,
-                                    width: 50,
-                                    height: 50,
-                                  ),
-                                ),
-                                title: Text(
-                                  org.name ?? 'N/A',
-                                  style: const TextStyle(
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 16,
-                                  ),
-                                ),
-                                subtitle: Row(
-                                  children: [
-                                    const Icon(Icons.person, size: 16, color: Colors.grey),
-                                    const SizedBox(width: 5),
-                                    Text(
-                                      '${org.users}',
-                                      style: const TextStyle(color: Colors.grey),
-                                    ),
-                                    const SizedBox(width: 10),
-                                    const Icon(Icons.event, size: 16, color: Colors.grey),
-                                    const SizedBox(width: 5),
-                                    Text(
-                                      '${org.events}',
-                                      style: const TextStyle(color: Colors.grey),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ),
                           );
                         },
-                      );
-                    },
-                  ),
-                ),
-              ],
-            ),
-          ),
-          if (_suggestions.isNotEmpty)
-            Positioned(
-              top: kToolbarHeight,
-              left: 16,
-              right: 16,
-              child: Material(
-                elevation: 4,
-                child: ListView.builder(
-                  shrinkWrap: true,
-                  itemCount: _suggestions.length,
-                  itemBuilder: (context, index) {
-                    return ListTile(
-                      leading: const Icon(Icons.search),
-                      title: Text(_suggestions[index]),
-                      onTap: () {
-                        _searchController.text = _suggestions[index];
-                        setState(() {
-                          _keyword = _suggestions[index];
-                          _publicOrganizationFuture = getPublicOrganization();
-                          _suggestions.clear();
-                        });
-                      },
-                    );
-                  },
+                      ),
+                    ),
+                  ],
                 ),
               ),
-            ),
-        ],
+              if (_suggestions.isNotEmpty)
+                Positioned(
+                  left: 16,
+                  right: 16,
+                  child: Material(
+                    elevation: 4,
+                    child: ListView.builder(
+                      shrinkWrap: true,
+                      itemCount: _suggestions.length,
+                      itemBuilder: (context, index) {
+                        return ListTile(
+                          trailing: Transform(
+                            alignment: Alignment.center,
+                            transform: Matrix4.identity()..scale(-1.0, 1.0),
+                            child: const Icon(Icons.arrow_outward),
+                          ),
+                          title: Text(_suggestions[index]),
+                          onTap: () {
+                            _searchController.text = _suggestions[index];
+                            setState(() {
+                              _keyword = _suggestions[index];
+                              _publicOrganizationFuture =
+                                  getPublicOrganization();
+                              _suggestions.clear();
+                            });
+                          },
+                        );
+                      },
+                    ),
+                  ),
+                ),
+            ],
+          ),
+        ),
       ),
     );
   }

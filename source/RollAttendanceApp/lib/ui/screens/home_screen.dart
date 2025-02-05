@@ -220,62 +220,65 @@ class _HomeScreenState extends State<HomeScreen> {
       inAsyncCall: _isLoading,
       opacity: 0.3,
       blurEffectIntensity: 5,
-      child: Scaffold(
-        backgroundColor: backgroundColor,
-        body: RefreshIndicator(
-          onRefresh: () async {
-            setState(() {
-              pageIndex = 0;
-              pageEventIndex = 1;
-              hasMoreData = true;
-              hasMoreEventData = true;
-            });
-            await fetchUserAvailableEvents();
-          },
-          child: ListView(
-            padding: const EdgeInsets.all(16.0),
-            children: [
-              const SizedBox(height: 30),
-              Align(
-                alignment: Alignment.centerRight,
-                child: DropdownButton<String>(
-                  value: filterType,
-                  onChanged: (String? newValue) {
-                    if (newValue != null) {
-                      setState(() {
-                        filterType = newValue;
-                        pageEventIndex = 1;
-                        hasMoreEventData = true;
-                      });
-                      fetchUserAvailableEvents();
-                    }
-                  },
-                  items: <String>['Today', 'Week', 'Month']
-                      .map<DropdownMenuItem<String>>((String value) {
-                    return DropdownMenuItem<String>(
-                      value: value,
-                      child: Text(value),
-                    );
-                  }).toList(),
-                ),
-              ),
-              const SizedBox(height: 10),
-              if (events.isEmpty)
-                Center(
-                  child: Text(
-                    'No available events.',
-                    style: TextStyle(
-                      fontSize: getResponsiveFontSize(16),
-                      color: textColor,
-                    ),
+      child: SafeArea(
+        // Đảm bảo nội dung không bị che bởi status bar
+        child: Scaffold(
+          backgroundColor: backgroundColor,
+          body: RefreshIndicator(
+            onRefresh: () async {
+              setState(() {
+                pageIndex = 0;
+                pageEventIndex = 1;
+                hasMoreData = true;
+                hasMoreEventData = true;
+              });
+              await fetchUserAvailableEvents();
+            },
+            child: ListView(
+              padding: const EdgeInsets.all(16.0),
+              children: [
+                // const SizedBox(height: 30),
+                Align(
+                  alignment: Alignment.centerRight,
+                  child: DropdownButton<String>(
+                    value: filterType,
+                    onChanged: (String? newValue) {
+                      if (newValue != null) {
+                        setState(() {
+                          filterType = newValue;
+                          pageEventIndex = 1;
+                          hasMoreEventData = true;
+                        });
+                        fetchUserAvailableEvents();
+                      }
+                    },
+                    items: <String>['Today', 'Week', 'Month']
+                        .map<DropdownMenuItem<String>>((String value) {
+                      return DropdownMenuItem<String>(
+                        value: value,
+                        child: Text(value),
+                      );
+                    }).toList(),
                   ),
                 ),
-              ...events.map((event) => Container(
-                    margin: const EdgeInsets.only(bottom: 16.0),
-                    width: screenWidth * 0.8,
-                    child: EventCard(event: event),
-                  )),
-            ],
+                const SizedBox(height: 10),
+                if (events.isEmpty)
+                  Center(
+                    child: Text(
+                      'No available events.',
+                      style: TextStyle(
+                        fontSize: getResponsiveFontSize(16),
+                        color: textColor,
+                      ),
+                    ),
+                  ),
+                ...events.map((event) => Container(
+                      margin: const EdgeInsets.only(bottom: 16.0),
+                      width: screenWidth * 0.8,
+                      child: EventCard(event: event),
+                    )),
+              ],
+            ),
           ),
         ),
       ),

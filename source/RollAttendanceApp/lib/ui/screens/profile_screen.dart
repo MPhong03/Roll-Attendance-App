@@ -355,7 +355,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               color: Theme.of(context).scaffoldBackgroundColor,
             ),
             Positioned(
-              top: screenHeight * 0.05,
+              // top: screenHeight * 0.05,
               left: 0,
               right: 0,
               child: Container(

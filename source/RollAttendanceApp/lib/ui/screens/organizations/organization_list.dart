@@ -207,89 +207,93 @@ class _OrganizationScreenState extends State<OrganizationScreen> {
       blurEffectIntensity: 5,
       child: Scaffold(
         backgroundColor: backgroundColor,
-        appBar: AppBar(
-          automaticallyImplyLeading: false,
-          backgroundColor: backgroundColor,
-          actions: [
-            IconButton(
-              icon: Icon(
-                Icons.search,
-                color: textColor,
-                size: getResponsiveFontSize(24),
-              ),
-              onPressed: () {
-                context.push("/search-organization");
-              },
-            ),
-          ],
-        ),
-        body: Stack(
-          children: [
-            Padding(
-              padding: const EdgeInsets.only(top: 100.0),
-              child: RefreshIndicator(
-                onRefresh: () async {
-                  setState(() {
-                    pageIndex = 0;
-                    pageEventIndex = 1;
-                    hasMoreData = true;
-                    hasMoreEventData = true;
-                  });
-                  await fetchUserOrganizations();
-                  await fetchUserAvailableEvents();
-                },
-                child: ListView(
-                  padding: const EdgeInsets.all(16.0),
-                  children: [
-                    if (organizations.isEmpty)
-                      Center(
-                        child: Text(
-                          'No organizations available.',
-                          style: TextStyle(
-                            fontSize: getResponsiveFontSize(16),
-                            color: textColor,
+        // appBar: AppBar(
+        //   automaticallyImplyLeading: false,
+        //   backgroundColor: backgroundColor,
+        //   actions: [
+        //     IconButton(
+        //       icon: Icon(
+        //         Icons.search,
+        //         color: textColor,
+        //         size: getResponsiveFontSize(24),
+        //       ),
+        //       onPressed: () {
+        //         context.push("/search-organization");
+        //       },
+        //     ),
+        //   ],
+        // ),
+        body: SafeArea(
+          // Đảm bảo nội dung không bị che bởi status bar
+          child: Stack(
+            children: [
+              Padding(
+                padding: const EdgeInsets.only(top: 100.0),
+                child: RefreshIndicator(
+                  onRefresh: () async {
+                    setState(() {
+                      pageIndex = 0;
+                      pageEventIndex = 1;
+                      hasMoreData = true;
+                      hasMoreEventData = true;
+                    });
+                    await fetchUserOrganizations();
+                    await fetchUserAvailableEvents();
+                  },
+                  child: ListView(
+                    padding: const EdgeInsets.all(16.0),
+                    children: [
+                      if (organizations.isEmpty)
+                        Center(
+                          child: Text(
+                            'No organizations available.',
+                            style: TextStyle(
+                              fontSize: getResponsiveFontSize(16),
+                              color: textColor,
+                            ),
                           ),
                         ),
+                      ...organizations.map(
+                        (org) => OrganizationCard(organization: org),
                       ),
-                    ...organizations.map(
-                      (org) => OrganizationCard(organization: org),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-            Positioned(
-              top: 0.0,
-              left: 0.0,
-              right: 0.0,
-              child: Container(
-                height: 100.0,
-                padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 16.0),
-                color: backgroundColor,
-                child: ElevatedButton(
-                  onPressed: () {
-                    context.push("/create-organization");
-                  },
-                  style: ElevatedButton.styleFrom(
-                    minimumSize: const Size(double.infinity, 50),
-                    padding: const EdgeInsets.symmetric(vertical: 14),
-                    backgroundColor: Colors.green,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                  ),
-                  child: Text(
-                    "Create New Organization",
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: getResponsiveFontSize(16),
-                      fontWeight: FontWeight.bold,
-                    ),
+                    ],
                   ),
                 ),
               ),
-            ),
-          ],
+              Positioned(
+                top: 0.0,
+                left: 0.0,
+                right: 0.0,
+                child: Container(
+                  height: 100.0,
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: 16.0, vertical: 16.0),
+                  color: backgroundColor,
+                  child: ElevatedButton(
+                    onPressed: () {
+                      context.push("/create-organization");
+                    },
+                    style: ElevatedButton.styleFrom(
+                      minimumSize: const Size(double.infinity, 50),
+                      padding: const EdgeInsets.symmetric(vertical: 14),
+                      backgroundColor: Colors.green,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                    child: Text(
+                      "Create New Organization",
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: getResponsiveFontSize(16),
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
