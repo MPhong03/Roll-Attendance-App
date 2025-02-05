@@ -69,12 +69,16 @@ class _EventAttendanceListScreenState extends State<EventAttendanceListScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+
     return BlurryModalProgressHUD(
       inAsyncCall: _isLoading,
       opacity: 0.3,
       blurEffectIntensity: 5,
       child: Scaffold(
-        appBar: AppBar(title: const Text('Histories')),
+        appBar: AppBar(
+          iconTheme: const IconThemeData(),
+        ),
         body: RefreshIndicator(
           onRefresh: () async {
             setState(() => _historiesFuture = getHistories(widget.eventId));
@@ -88,78 +92,62 @@ class _EventAttendanceListScreenState extends State<EventAttendanceListScreen> {
                 return Center(child: Text('Error: ${snapshot.error}'));
               } else if (snapshot.hasData) {
                 final histories = snapshot.data!;
-                if (histories.isEmpty)
+                if (histories.isEmpty) {
                   return const Center(child: Text('No history available'));
+                }
 
                 return ListView.builder(
+                  padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 16),
                   itemCount: histories.length,
                   itemBuilder: (context, index) {
                     final history = histories[index];
                     final isExpanded = _expandedHistories.contains(history.id);
 
                     return Card(
-                      margin: const EdgeInsets.symmetric(
-                          horizontal: 12, vertical: 8),
+                      margin: const EdgeInsets.only(bottom: 12),
                       shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12)),
-                      elevation: 4,
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      elevation: 3,
                       child: Column(
                         children: [
                           ListTile(
+                            contentPadding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
                             title: Text(
                               'History ${index + 1}',
-                              style: TextStyle(
-                                fontWeight: FontWeight.bold,
-                                fontSize: 18,
-                              ),
+                              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
                             ),
                             subtitle: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(
                                   '${FormatUtils.formatDateTime(history.startTime)} - ${FormatUtils.formatDateTime(history.endTime)}',
-                                  style: TextStyle(color: Colors.grey[700]),
+                                  style: TextStyle(color: Colors.grey[700], fontSize: 14),
                                 ),
-                                const SizedBox(height: 8),
-                                Wrap(
-                                  spacing: 8,
-                                  runSpacing: 4,
+                                const SizedBox(height: 10),
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                   children: [
-                                    InfoChip(
-                                        icon: Icons.people,
-                                        label: 'Total',
-                                        count: history.totalCount ?? 0),
-                                    InfoChip(
-                                        icon: Icons.check_circle,
-                                        label: 'Present',
-                                        count: history.presentCount ?? 0,
-                                        color: Colors.green),
-                                    InfoChip(
-                                        icon: Icons.timer,
-                                        label: 'Late',
-                                        count: history.lateCount ?? 0,
-                                        color: Colors.orange),
+                                    _buildInfoChip(Icons.people, history.totalCount ?? 0),
+                                    _buildInfoChip(Icons.check_circle, history.presentCount ?? 0, Colors.green),
+                                    _buildInfoChip(Icons.timer, history.lateCount ?? 0, Colors.orange),
                                   ],
                                 ),
                                 const SizedBox(height: 6),
                                 Row(
                                   children: [
-                                    Icon(Icons.access_time,
-                                        color: Colors.blue, size: 18),
+                                    const Icon(Icons.access_time, color: Colors.blue, size: 18),
                                     const SizedBox(width: 6),
                                     Text(
                                       'Attendance Times: ${history.attendanceTimes}',
-                                      style: TextStyle(
-                                          fontSize: 14, color: Colors.blue),
+                                      style: const TextStyle(fontSize: 14, color: Colors.blue),
                                     ),
                                   ],
                                 ),
                               ],
                             ),
                             trailing: Icon(
-                              isExpanded
-                                  ? Icons.expand_less
-                                  : Icons.expand_more,
+                              isExpanded ? Icons.expand_less : Icons.expand_more,
                               color: Colors.blueAccent,
                             ),
                             onTap: () {
@@ -168,18 +156,18 @@ class _EventAttendanceListScreenState extends State<EventAttendanceListScreen> {
                                   _expandedHistories.remove(history.id);
                                 } else {
                                   _expandedHistories.add(history.id ?? '');
-                                  _historyDetailsMap[history.id!] =
-                                      getHistoryDetail(history.id!);
+                                  _historyDetailsMap[history.id!] = getHistoryDetail(history.id!);
                                 }
                               });
                             },
                           ),
+
+                          /// Phần chi tiết mở rộng
                           if (isExpanded)
                             FutureBuilder<List<HistoryDetailModel>>(
                               future: _historyDetailsMap[history.id!],
                               builder: (context, detailSnapshot) {
-                                if (detailSnapshot.connectionState ==
-                                    ConnectionState.waiting) {
+                                if (detailSnapshot.connectionState == ConnectionState.waiting) {
                                   return const Padding(
                                     padding: EdgeInsets.all(16),
                                     child: CircularProgressIndicator(),
@@ -187,42 +175,41 @@ class _EventAttendanceListScreenState extends State<EventAttendanceListScreen> {
                                 } else if (detailSnapshot.hasError) {
                                   return Padding(
                                     padding: const EdgeInsets.all(16),
-                                    child:
-                                        Text('Error: ${detailSnapshot.error}'),
+                                    child: Text('Error: ${detailSnapshot.error}'),
                                   );
                                 } else if (detailSnapshot.hasData) {
                                   final details = detailSnapshot.data!;
-                                  return Column(
-                                    children: details.map((detail) {
-                                      final attendanceStatus = getRoleFromValue(
-                                          detail.attendanceStatus ?? -1);
-                                      return ListTile(
-                                        leading: CircleAvatar(
-                                            backgroundImage: NetworkImage(
-                                                detail.userAvatar ?? '')),
-                                        title:
-                                            Text(detail.userName ?? 'Unknown'),
-                                        subtitle: Column(
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.start,
-                                          children: [
-                                            Text('Email: ${detail.userEmail}'),
-                                            Text(
-                                                'Absent: ${FormatUtils.formatDateTime(detail.absentTime)}'),
-                                            Text(
-                                                'Leave: ${FormatUtils.formatDateTime(detail.leaveTime)}'),
-                                            Text(
-                                                'Count: ${detail.attendanceCount}'),
-                                            Text(
-                                              'Status: ${attendanceStatus['text']}',
-                                              style: TextStyle(
-                                                  color: attendanceStatus[
-                                                      'color']),
-                                            ),
-                                          ],
-                                        ),
-                                      );
-                                    }).toList(),
+                                  return Padding(
+                                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                                    child: Column(
+                                      children: details.map((detail) {
+                                        final attendanceStatus = getRoleFromValue(detail.attendanceStatus ?? -1);
+                                        return ListTile(
+                                          contentPadding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
+                                          leading: CircleAvatar(
+                                            backgroundImage: NetworkImage(detail.userAvatar ?? ''),
+                                            radius: 25,
+                                          ),
+                                          title: Text(
+                                            detail.userName ?? 'Unknown',
+                                            style: const TextStyle(fontWeight: FontWeight.bold),
+                                          ),
+                                          subtitle: Column(
+                                            crossAxisAlignment: CrossAxisAlignment.start,
+                                            children: [
+                                              Text('Email: ${detail.userEmail}', style: const TextStyle(fontSize: 14)),
+                                              Text('Absent: ${FormatUtils.formatDateTime(detail.absentTime)}', style: const TextStyle(fontSize: 14)),
+                                              Text('Leave: ${FormatUtils.formatDateTime(detail.leaveTime)}', style: const TextStyle(fontSize: 14)),
+                                              Text('Count: ${detail.attendanceCount}', style: const TextStyle(fontSize: 14)),
+                                              Text(
+                                                'Status: ${attendanceStatus['text']}',
+                                                style: TextStyle(fontSize: 14, color: attendanceStatus['color']),
+                                              ),
+                                            ],
+                                          ),
+                                        );
+                                      }).toList(),
+                                    ),
                                   );
                                 } else {
                                   return const Padding(
@@ -243,6 +230,24 @@ class _EventAttendanceListScreenState extends State<EventAttendanceListScreen> {
             },
           ),
         ),
+      ),
+    );
+  }
+
+  /// Widget hiển thị thông tin số liệu (Total, Present, Late)
+  Widget _buildInfoChip(IconData icon, int count, [Color? color]) {
+    return Chip(
+      backgroundColor: color?.withOpacity(0.15) ?? Colors.grey.shade200,
+      label: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 18, color: color ?? Colors.black87),
+          const SizedBox(width: 4),
+          Text(
+            ' $count',
+            style: TextStyle(color: color ?? Colors.black87, fontSize: 14, fontWeight: FontWeight.bold),
+          ),
+        ],
       ),
     );
   }

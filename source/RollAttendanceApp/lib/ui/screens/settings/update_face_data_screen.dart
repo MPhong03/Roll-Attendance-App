@@ -407,13 +407,10 @@ class _UpdateFaceDataScreenState extends State<UpdateFaceDataScreen> {
       opacity: 0.3,
       blurEffectIntensity: 5,
       child: Scaffold(
-        appBar: AppBar(
-          title: const Text('Update Face Data'),
-        ),
         body: Padding(
           padding: const EdgeInsets.all(16.0),
           child: Column(
-            mainAxisAlignment: MainAxisAlignment.center, // Căn giữa nội dung
+            mainAxisAlignment: MainAxisAlignment.center,
             children: [
               if (_isCameraInitialized)
                 Transform(

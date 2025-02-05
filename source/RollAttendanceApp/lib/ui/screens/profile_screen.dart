@@ -443,7 +443,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       // Divider
                       const Divider(),
 
-                      // Danh sách các cài đặt
+                      // Danh sách các settings
                       ListTile(
                         leading: const Icon(Icons.account_circle),
                         title: Text(
@@ -464,16 +464,16 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           context.push("/update-face-data");
                         },
                       ),
-                      ListTile(
-                        leading: const Icon(Icons.send),
-                        title: Text(
-                          'Requests',
-                          style: TextStyle(fontSize: getResponsiveFontSize(16)),
-                        ),
-                        onTap: () {
-                          context.push("/my-requests");
-                        },
-                      ),
+                      // ListTile(
+                      //   leading: const Icon(Icons.send),
+                      //   title: Text(
+                      //     'Requests',
+                      //     style: TextStyle(fontSize: getResponsiveFontSize(16)),
+                      //   ),
+                      //   onTap: () {
+                      //     context.push("/my-requests");
+                      //   },
+                      // ),
                       ListTile(
                         leading: const Icon(Icons.mail_rounded),
                         title: Text(

@@ -475,42 +475,42 @@ class _OrganizationDetailScreenState extends State<OrganizationDetailScreen> {
                                           ),
                                         ),
                                       ),
-                                      Container(
-                                        width:
-                                            MediaQuery.of(context).size.width *
-                                                0.5,
-                                        margin:
-                                            const EdgeInsets.only(bottom: 16),
-                                        decoration: BoxDecoration(
-                                          color: Colors.green,
-                                          borderRadius:
-                                              BorderRadius.circular(12),
-                                          border:
-                                              Border.all(color: Colors.green),
-                                          boxShadow: [
-                                            BoxShadow(
-                                              color:
-                                                  Colors.green.withOpacity(0.2),
-                                              blurRadius: 4,
-                                              offset: const Offset(0, 2),
-                                            ),
-                                          ],
-                                        ),
-                                        child: TextButton.icon(
-                                          onPressed: () {
-                                            context.push(
-                                                '/organization-invitations/${widget.organizationId}');
-                                          },
-                                          icon: const Icon(
-                                              Icons.mark_email_unread_rounded,
-                                              color: Colors.white),
-                                          label: const Text(
-                                            'Invitations',
-                                            style:
-                                                TextStyle(color: Colors.white),
-                                          ),
-                                        ),
-                                      ),
+                                      // Container(
+                                      //   width:
+                                      //       MediaQuery.of(context).size.width *
+                                      //           0.5,
+                                      //   margin:
+                                      //       const EdgeInsets.only(bottom: 16),
+                                      //   decoration: BoxDecoration(
+                                      //     color: Colors.green,
+                                      //     borderRadius:
+                                      //         BorderRadius.circular(12),
+                                      //     border:
+                                      //         Border.all(color: Colors.green),
+                                      //     boxShadow: [
+                                      //       BoxShadow(
+                                      //         color:
+                                      //             Colors.green.withOpacity(0.2),
+                                      //         blurRadius: 4,
+                                      //         offset: const Offset(0, 2),
+                                      //       ),
+                                      //     ],
+                                      //   ),
+                                      //   child: TextButton.icon(
+                                      //     onPressed: () {
+                                      //       context.push(
+                                      //           '/organization-invitations/${widget.organizationId}');
+                                      //     },
+                                      //     icon: const Icon(
+                                      //         Icons.mark_email_unread_rounded,
+                                      //         color: Colors.white),
+                                      //     label: const Text(
+                                      //       'Invitations',
+                                      //       style:
+                                      //           TextStyle(color: Colors.white),
+                                      //     ),
+                                      //   ),
+                                      // ),
                                       Container(
                                         width:
                                             MediaQuery.of(context).size.width *

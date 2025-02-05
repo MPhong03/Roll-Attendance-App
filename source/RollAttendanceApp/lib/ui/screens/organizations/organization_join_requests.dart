@@ -22,18 +22,11 @@ class _OrganizationJoinRequestsScreenState
   late Future<List<ParticipationRequestModel>> _requestListFuture;
   bool _isLoading = false;
   int _page = 1;
-  final int _limit = 10;
+  final int _limit = 100;
   int _selectedStatus = 0;
 
   String imagePlaceHolder =
       'https://yt3.ggpht.com/a/AGF-l78urB8ASkb0JO2a6AB0UAXeEHe6-pc9UJqxUw=s900-mo-c-c0xffffffff-rj-k-no';
-
-  static const Map<int, String> statuses = {
-    0: 'WAITING',
-    1: 'APPROVED',
-    2: 'REJECTED',
-    3: 'CANCELLED',
-  };
 
   Future<List<ParticipationRequestModel>> getRequests() async {
     try {
@@ -122,106 +115,146 @@ class _OrganizationJoinRequestsScreenState
     _requestListFuture = getRequests();
   }
 
-  void _nextPage() {
-    setState(() {
-      _page++;
-      _onRefresh();
-    });
-  }
+  // void _nextPage() {
+  //   setState(() {
+  //     _page++;
+  //     _onRefresh();
+  //   });
+  // }
 
-  void _prevPage() {
-    if (_page > 1) {
-      setState(() {
-        _page--;
-        _onRefresh();
-      });
-    }
-  }
+  // void _prevPage() {
+  //   if (_page > 1) {
+  //     setState(() {
+  //       _page--;
+  //       _onRefresh();
+  //     });
+  //   }
+  // }
 
   void _showRequestDetailModal(ParticipationRequestModel request) {
     showDialog(
       context: context,
       builder: (context) {
-        return AlertDialog(
-          shape: const RoundedRectangleBorder(
-            borderRadius: BorderRadius.all(Radius.circular(12)),
+        final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+
+        return Dialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
           ),
-          title: Text(
-            request.userName ?? 'Request Details',
-            style: Theme.of(context)
-                .textTheme
-                .headlineLarge
-                ?.copyWith(fontWeight: FontWeight.bold),
-          ),
-          content: SingleChildScrollView(
+          child: Container(
+            padding: const EdgeInsets.all(20),
+            decoration: BoxDecoration(
+              color: isDarkMode ? const Color(0xFF1E1E1E) : Colors.white,
+              borderRadius: BorderRadius.circular(16),
+            ),
             child: Column(
+              mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                _buildDetailTile('User Name', request.userName),
-                _buildDetailTile('Email', request.userEmail),
-                _buildDetailTile('Organization', request.organizationName),
-                _buildDetailTile('Notes', request.notes),
-                _buildDetailTile(
-                  'Status',
-                  _getStatusLabel(request.requestStatus),
-                ),
-                _buildDetailTile(
-                  'Participation Method',
-                  request.participationMethod,
+                // Danh sách thông tin chi tiết
+                _buildDetailCard('User', request.userName),
+                _buildDetailCard('Email', request.userEmail),
+                // _buildDetailCard('From', request.organizationName),
+                _buildDetailCard('Notes', request.notes),
+                // _buildDetailCard('Status', _getStatusLabel(request.requestStatus)),
+                // _buildDetailCard('Participation Method', request.participationMethod),
+
+                const SizedBox(height: 20),
+
+                // Nút hành động
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Expanded(
+                      child: TextButton(
+                        onPressed: () => Navigator.pop(context),
+                        style: TextButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(vertical: 12),
+                        ),
+                        child: Text(
+                          'Close',
+                          style: TextStyle(fontWeight: FontWeight.bold, color: isDarkMode ? Colors.white : Colors.black),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: ElevatedButton(
+                        onPressed: () {
+                          Navigator.pop(context);
+                          _confirmRequest(request.id ?? '', 1); // Approve
+                        },
+                        style: ElevatedButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(vertical: 12),
+                          backgroundColor: Colors.green,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                        ),
+                        child: const Text(
+                          'Approve',
+                          style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: ElevatedButton(
+                        onPressed: () {
+                          Navigator.pop(context);
+                          _confirmRequest(request.id ?? '', 2); // Reject
+                        },
+                        style: ElevatedButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(vertical: 12),
+                          backgroundColor: Colors.red,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                        ),
+                        child: const Text(
+                          'Reject',
+                          style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
               ],
             ),
           ),
-          actions: [
-            Row(
-              mainAxisAlignment:
-                  MainAxisAlignment.spaceBetween, // Adjust alignment as needed
-              children: [
-                // Close button
-                TextButton(
-                  onPressed: () {
-                    Navigator.pop(context);
-                  },
-                  child: const Text(
-                    'Close',
-                    style: TextStyle(fontWeight: FontWeight.bold),
-                  ),
-                ),
-                // Approve button
-                TextButton(
-                  onPressed: () {
-                    Navigator.pop(context);
-                    _confirmRequest(request.id ?? '', 1); // Approve
-                  },
-                  child: const Text(
-                    'Approve',
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      color: Colors.green,
-                    ),
-                  ),
-                ),
-                // Reject button
-                TextButton(
-                  onPressed: () {
-                    Navigator.pop(context);
-                    _confirmRequest(request.id ?? '', 2); // Reject
-                  },
-                  child: const Text(
-                    'Reject',
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      color: Colors.red,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ],
         );
       },
     );
   }
+
+  /// Widget hiển thị chi tiết dưới dạng card
+  Widget _buildDetailCard(String title, String? value) {
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+    return Container(
+      margin: const EdgeInsets.only(bottom: 8),
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: isDarkMode ? Color(0xFF1E1E1E) : Colors.white,
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Row(
+        children: [
+          Text(
+            '$title: ',
+            style: const TextStyle(fontWeight: FontWeight.bold),
+          ),
+          Expanded(
+            child: Text(
+              value ?? 'N/A',
+              style: TextStyle(color: isDarkMode ? Colors.white : Colors.black),
+              overflow: TextOverflow.ellipsis,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
 
   Widget _buildDetailTile(String title, String? value) {
     return Padding(
@@ -265,7 +298,7 @@ class _OrganizationJoinRequestsScreenState
       blurEffectIntensity: 5,
       child: Scaffold(
         appBar: AppBar(
-          title: const Text('My Requests'),
+          title: const Text('Requests'),
           leading: IconButton(
             icon: const Icon(Icons.arrow_back),
             onPressed: () => context.pop(),
@@ -273,27 +306,6 @@ class _OrganizationJoinRequestsScreenState
         ),
         body: Column(
           children: [
-            DefaultTabController(
-              length: statuses.length,
-              child: Column(
-                children: [
-                  TabBar(
-                    onTap: (index) {
-                      setState(() {
-                        _selectedStatus = index;
-                        _page = 1;
-                      });
-                      _onRefresh();
-                    },
-                    tabs: statuses.entries.map((entry) {
-                      return Tab(
-                        text: entry.value,
-                      );
-                    }).toList(),
-                  ),
-                ],
-              ),
-            ),
             Expanded(
               child: FutureBuilder<List<ParticipationRequestModel>>(
                 future: _requestListFuture,
@@ -325,7 +337,7 @@ class _OrganizationJoinRequestsScreenState
                               backgroundImage: NetworkImage(imagePlaceHolder),
                             ),
                             title: Text(request.userName ?? 'Unknown'),
-                            subtitle: Text(request.participationMethod ?? ''),
+                            subtitle: Text(request.userEmail ?? ''),
                             trailing: const Icon(Icons.arrow_forward),
                           ),
                         ),
@@ -334,20 +346,6 @@ class _OrganizationJoinRequestsScreenState
                   );
                 },
               ),
-            ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                IconButton(
-                  icon: const Icon(Icons.arrow_back),
-                  onPressed: _prevPage,
-                ),
-                Text('Page $_page'),
-                IconButton(
-                  icon: const Icon(Icons.arrow_forward),
-                  onPressed: _nextPage,
-                ),
-              ],
             ),
           ],
         ),

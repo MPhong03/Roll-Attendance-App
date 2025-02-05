@@ -19,18 +19,17 @@ class _MyInvitationsScreenState extends State<MyInvitationsScreen> {
   late Future<List<InviteRequestModel>> _requestListFuture;
   bool _isLoading = false;
   int _page = 1;
-  final int _limit = 10;
+  final int _limit = 100;
   int _selectedStatus = 0;
 
   String imagePlaceHolder =
       'https://yt3.ggpht.com/a/AGF-l78urB8ASkb0JO2a6AB0UAXeEHe6-pc9UJqxUw=s900-mo-c-c0xffffffff-rj-k-no';
 
-  static const Map<int, String> statuses = {
-    0: 'WAITING',
-    1: 'APPROVED',
-    2: 'REJECTED',
-    3: 'CANCELLED',
-  };
+  // static const Map<int, String> statuses = {
+  //   0: 'WAITING',
+  //   1: 'APPROVED',
+  //   2: 'REJECTED',
+  // };
 
   Future<List<InviteRequestModel>> getInvitations() async {
     try {
@@ -78,97 +77,235 @@ class _MyInvitationsScreenState extends State<MyInvitationsScreen> {
     _requestListFuture = getInvitations();
   }
 
-  void _nextPage() {
-    setState(() {
-      _page++;
-      _onRefresh();
-    });
-  }
+  // void _nextPage() {
+  //   setState(() {
+  //     _page++;
+  //     _onRefresh();
+  //   });
+  // }
 
-  void _prevPage() {
-    if (_page > 1) {
-      setState(() {
-        _page--;
-        _onRefresh();
-      });
-    }
-  }
+  // void _prevPage() {
+  //   if (_page > 1) {
+  //     setState(() {
+  //       _page--;
+  //       _onRefresh();
+  //     });
+  //   }
+  // }
+
+  // void _showRequestDetailModal(InviteRequestModel request) {
+  //   showDialog(
+  //     context: context,
+  //     builder: (context) {
+  //       return AlertDialog(
+  //         shape: const RoundedRectangleBorder(
+  //           borderRadius: BorderRadius.all(Radius.circular(12)),
+  //         ),
+  //         title: Text(
+  //           request.userName ?? 'Request Details',
+  //           style: Theme.of(context)
+  //               .textTheme
+  //               .headlineLarge
+  //               ?.copyWith(fontWeight: FontWeight.bold),
+  //         ),
+  //         content: SingleChildScrollView(
+  //           child: Column(
+  //             crossAxisAlignment: CrossAxisAlignment.start,
+  //             children: [
+  //               _buildDetailTile('User Name', request.userName),
+  //               _buildDetailTile('Email', request.userEmail),
+  //               _buildDetailTile('Organization', request.organizationName),
+  //               _buildDetailTile('Notes', request.notes),
+  //               _buildDetailTile(
+  //                 'Status',
+  //                 _getStatusLabel(request.requestStatus),
+  //               ),
+  //               _buildDetailTile(
+  //                 'Role',
+  //                 getRoleFromValue(request.role ?? 0),
+  //               ),
+  //             ],
+  //           ),
+  //         ),
+  //         actions: [
+  //           TextButton(
+  //             onPressed: () {
+  //               Navigator.pop(context);
+  //             },
+  //             child: const Text(
+  //               'Close',
+  //               style: TextStyle(fontWeight: FontWeight.bold),
+  //             ),
+  //           ),
+  //           if (request.requestStatus == 0)
+  //             TextButton(
+  //               onPressed: () {
+  //                 Navigator.pop(context);
+  //                 _approveRequest(request.id ?? '');
+  //               },
+  //               child: const Text(
+  //                 'Approve',
+  //                 style: TextStyle(
+  //                   fontWeight: FontWeight.bold,
+  //                   color: Colors.green,
+  //                 ),
+  //               ),
+  //             ),
+  //           if (request.requestStatus == 0)
+  //             TextButton(
+  //               onPressed: () {
+  //                 Navigator.pop(context);
+  //                 _rejectRequest(request.id ?? '');
+  //               },
+  //               child: const Text(
+  //                 'Reject',
+  //                 style: TextStyle(
+  //                   fontWeight: FontWeight.bold,
+  //                   color: Colors.red,
+  //                 ),
+  //               ),
+  //             ),
+  //         ],
+  //       );
+  //     },
+  //   );
+  // }
 
   void _showRequestDetailModal(InviteRequestModel request) {
     showDialog(
       context: context,
       builder: (context) {
-        return AlertDialog(
-          shape: const RoundedRectangleBorder(
-            borderRadius: BorderRadius.all(Radius.circular(12)),
+        final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+
+        return Dialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
           ),
-          title: Text(
-            request.userName ?? 'Request Details',
-            style: Theme.of(context)
-                .textTheme
-                .headlineLarge
-                ?.copyWith(fontWeight: FontWeight.bold),
-          ),
-          content: SingleChildScrollView(
+          child: Container(
+            padding: const EdgeInsets.all(20),
+            decoration: BoxDecoration(
+              color: isDarkMode ? const Color(0xFF1E1E1E) : Colors.white,
+              borderRadius: BorderRadius.circular(16),
+            ),
             child: Column(
+              mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                _buildDetailTile('User Name', request.userName),
-                _buildDetailTile('Email', request.userEmail),
-                _buildDetailTile('Organization', request.organizationName),
-                _buildDetailTile('Notes', request.notes),
-                _buildDetailTile(
-                  'Status',
-                  _getStatusLabel(request.requestStatus),
+                // Tiêu đề
+                Center(
+                  child: Text(
+                    request.organizationName ?? 'Request Details',
+                    style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                          fontWeight: FontWeight.bold,
+                          color: isDarkMode ? Colors.white : Colors.black,
+                        ),
+                    textAlign: TextAlign.center,
+                  ),
                 ),
-                _buildDetailTile(
-                  'Role',
-                  getRoleFromValue(request.role ?? 0),
+                const SizedBox(height: 16),
+
+                // Danh sách thông tin chi tiết
+                _buildDetailCard('From', request.userName),
+                _buildDetailCard('Email', request.userEmail),
+                // _buildDetailCard('From', request.organizationName),
+                // _buildDetailCard('Notes', request.notes),
+                // _buildDetailCard('Status', _getStatusLabel(request.requestStatus)),
+                _buildDetailCard('Role', getRoleFromValue(request.role ?? 0)),
+
+                const SizedBox(height: 20),
+
+                // Nút hành động
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Expanded(
+                      child: TextButton(
+                        onPressed: () => Navigator.pop(context),
+                        style: TextButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(vertical: 12),
+                        ),
+                        child: Text(
+                          'Close',
+                          style: TextStyle(fontWeight: FontWeight.bold, color: isDarkMode ? Colors.white : Colors.black),
+                        ),
+                      ),
+                    ),
+                    if (request.requestStatus == 0) ...[
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: ElevatedButton(
+                          onPressed: () {
+                            Navigator.pop(context);
+                            _approveRequest(request.id ?? '');
+                          },
+                          style: ElevatedButton.styleFrom(
+                            padding: const EdgeInsets.symmetric(vertical: 12),
+                            backgroundColor: Colors.green,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                          ),
+                          child: const Text(
+                            'Approve',
+                            style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: ElevatedButton(
+                          onPressed: () {
+                            Navigator.pop(context);
+                            _rejectRequest(request.id ?? '');
+                          },
+                          style: ElevatedButton.styleFrom(
+                            padding: const EdgeInsets.symmetric(vertical: 12),
+                            backgroundColor: Colors.red,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                          ),
+                          child: const Text(
+                            'Reject',
+                            style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ],
                 ),
               ],
             ),
           ),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.pop(context);
-              },
-              child: const Text(
-                'Close',
-                style: TextStyle(fontWeight: FontWeight.bold),
-              ),
-            ),
-            if (request.requestStatus == 0)
-              TextButton(
-                onPressed: () {
-                  Navigator.pop(context);
-                  _approveRequest(request.id ?? '');
-                },
-                child: const Text(
-                  'Approve',
-                  style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                    color: Colors.green,
-                  ),
-                ),
-              ),
-            if (request.requestStatus == 0)
-              TextButton(
-                onPressed: () {
-                  Navigator.pop(context);
-                  _rejectRequest(request.id ?? '');
-                },
-                child: const Text(
-                  'Reject',
-                  style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                    color: Colors.red,
-                  ),
-                ),
-              ),
-          ],
         );
       },
+    );
+  }
+
+  Widget _buildDetailCard(String title, String? value) {
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+    return Container(
+      margin: const EdgeInsets.only(bottom: 8),
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: isDarkMode ? Color(0xFF1E1E1E) : Colors.white,
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Row(
+        children: [
+          Text(
+            '$title: ',
+            style: const TextStyle(fontWeight: FontWeight.bold),
+          ),
+          Expanded(
+            child: Text(
+              value ?? 'N/A',
+              style: TextStyle(color: isDarkMode ? Colors.white : Colors.black),
+              overflow: TextOverflow.ellipsis,
+            ),
+          ),
+        ],
+      ),
     );
   }
 
@@ -201,7 +338,6 @@ class _MyInvitationsScreenState extends State<MyInvitationsScreen> {
       0: 'WAITING',
       1: 'APPROVED',
       2: 'REJECTED',
-      3: 'CANCELLED',
     };
     return statuses[status] ?? 'Unknown';
   }
@@ -282,41 +418,22 @@ class _MyInvitationsScreenState extends State<MyInvitationsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final bool isDarkMode = Theme.of(context).brightness == Brightness.dark;
     return BlurryModalProgressHUD(
       inAsyncCall: _isLoading,
       opacity: 0.3,
       blurEffectIntensity: 5,
       child: Scaffold(
         appBar: AppBar(
-          title: const Text('My Invitations'),
+          title: const Text('Invitations'),
+          backgroundColor: isDarkMode ? Color(0xFF121212) : Color(0xFFE9FCe9),
           leading: IconButton(
-            icon: const Icon(Icons.arrow_back),
+            icon: Icon(Icons.arrow_back, color: isDarkMode ? Colors.white : Colors.black),
             onPressed: () => context.pop(),
           ),
         ),
         body: Column(
           children: [
-            DefaultTabController(
-              length: statuses.length,
-              child: Column(
-                children: [
-                  TabBar(
-                    onTap: (index) {
-                      setState(() {
-                        _selectedStatus = index;
-                        _page = 1;
-                      });
-                      _onRefresh();
-                    },
-                    tabs: statuses.entries.map((entry) {
-                      return Tab(
-                        text: entry.value,
-                      );
-                    }).toList(),
-                  ),
-                ],
-              ),
-            ),
             Expanded(
               child: FutureBuilder<List<InviteRequestModel>>(
                 future: _requestListFuture,
@@ -347,8 +464,8 @@ class _MyInvitationsScreenState extends State<MyInvitationsScreen> {
                             leading: CircleAvatar(
                               backgroundImage: NetworkImage(imagePlaceHolder),
                             ),
-                            title: Text(request.userName ?? 'Unknown'),
-                            subtitle: Text(getRoleFromValue(request.role ?? 0)),
+                            title: Text(request.organizationName ?? 'Unknown'),
+                            subtitle: Text("From: ${request.userName ?? ''}"),
                             trailing: const Icon(Icons.arrow_forward),
                           ),
                         ),
@@ -358,20 +475,20 @@ class _MyInvitationsScreenState extends State<MyInvitationsScreen> {
                 },
               ),
             ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                IconButton(
-                  icon: const Icon(Icons.arrow_back),
-                  onPressed: _prevPage,
-                ),
-                Text('Page $_page'),
-                IconButton(
-                  icon: const Icon(Icons.arrow_forward),
-                  onPressed: _nextPage,
-                ),
-              ],
-            ),
+            // Row(
+            //   mainAxisAlignment: MainAxisAlignment.center,
+            //   children: [
+            //     IconButton(
+            //       icon: const Icon(Icons.arrow_back),
+            //       onPressed: _prevPage,
+            //     ),
+            //     Text('Page $_page'),
+            //     IconButton(
+            //       icon: const Icon(Icons.arrow_forward),
+            //       onPressed: _nextPage,
+            //     ),
+            //   ],
+            // ),
           ],
         ),
       ),

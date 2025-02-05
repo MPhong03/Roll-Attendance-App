@@ -91,11 +91,144 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     }
   }
 
+  // Future<void> _showEditProfileBottomSheet() {
+  //   TextEditingController nameController = TextEditingController(text: name);
+  //   TextEditingController phoneController =
+  //       TextEditingController(text: phoneNumber);
+  //   dynamic selectedImageFile;
+
+  //   return showModalBottomSheet(
+  //     context: context,
+  //     isScrollControlled: true,
+  //     shape: const RoundedRectangleBorder(
+  //       borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+  //     ),
+  //     builder: (BuildContext context) {
+  //       return Padding(
+  //         padding: MediaQuery.of(context).viewInsets,
+  //         child: StatefulBuilder(
+  //           builder: (BuildContext context, StateSetter setModalState) {
+  //             return Padding(
+  //               padding: const EdgeInsets.all(16.0),
+  //               child: Column(
+  //                 mainAxisSize: MainAxisSize.min,
+  //                 children: [
+  //                   const Text(
+  //                     'Edit Profile',
+  //                     style: TextStyle(
+  //                       fontSize: 18,
+  //                       fontWeight: FontWeight.bold,
+  //                     ),
+  //                   ),
+  //                   const SizedBox(height: 10),
+  //                   selectedImageFile != null
+  //                       ? Column(
+  //                           children: [
+  //                             kIsWeb
+  //                                 ? Image.memory(
+  //                                     selectedImageFile,
+  //                                     height: 100,
+  //                                     width: 100,
+  //                                     fit: BoxFit.cover,
+  //                                   )
+  //                                 : Image.file(
+  //                                     selectedImageFile,
+  //                                     height: 100,
+  //                                     width: 100,
+  //                                     fit: BoxFit.cover,
+  //                                   ),
+  //                             const SizedBox(height: 10),
+  //                           ],
+  //                         )
+  //                       : const SizedBox(),
+  //                   ElevatedButton.icon(
+  //                     onPressed: () async {
+  //                       final ImagePicker picker = ImagePicker();
+  //                       try {
+  //                         final XFile? image = await picker.pickImage(
+  //                             source: ImageSource.gallery);
+
+  //                         if (image != null) {
+  //                           if (kIsWeb) {
+  //                             final Uint8List imageBytes =
+  //                                 await image.readAsBytes();
+  //                             setModalState(() {
+  //                               selectedImageFile = imageBytes;
+  //                             });
+  //                           } else {
+  //                             setModalState(() {
+  //                               selectedImageFile = File(image.path);
+  //                             });
+  //                           }
+  //                         } else {
+  //                           Fluttertoast.showToast(
+  //                             msg: "No file selected!",
+  //                             toastLength: Toast.LENGTH_SHORT,
+  //                             gravity: ToastGravity.BOTTOM,
+  //                             backgroundColor: Colors.orange,
+  //                             textColor: Colors.white,
+  //                           );
+  //                         }
+  //                       } catch (e) {
+  //                         Fluttertoast.showToast(
+  //                           msg: "Error selecting image: $e",
+  //                           toastLength: Toast.LENGTH_SHORT,
+  //                           gravity: ToastGravity.BOTTOM,
+  //                           backgroundColor: Colors.red,
+  //                           textColor: Colors.white,
+  //                         );
+  //                       }
+  //                     },
+  //                     icon: const Icon(Icons.image),
+  //                     label: const Text('Choose Image'),
+  //                   ),
+  //                   const SizedBox(height: 10),
+  //                   TextField(
+  //                     controller: nameController,
+  //                     decoration: const InputDecoration(labelText: 'Name'),
+  //                   ),
+  //                   // const SizedBox(height: 10),
+  //                   // TextField(
+  //                   //   controller: phoneController,
+  //                   //   decoration: const InputDecoration(labelText: 'Phone'),
+  //                   // ),
+  //                   const SizedBox(height: 20),
+  //                   Row(
+  //                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+  //                     children: [
+  //                       ElevatedButton(
+  //                         onPressed: () async {
+  //                           _updateProfile(nameController.text,
+  //                               phoneController.text, selectedImageFile);
+  //                         },
+  //                         child: const Text('Update'),
+  //                       ),
+  //                       ElevatedButton(
+  //                         onPressed: () {
+  //                           Navigator.pop(context);
+  //                         },
+  //                         style: ElevatedButton.styleFrom(
+  //                           backgroundColor: Colors.grey,
+  //                         ),
+  //                         child: const Text('Cancel'),
+  //                       ),
+  //                     ],
+  //                   ),
+  //                 ],
+  //               ),
+  //             );
+  //           },
+  //         ),
+  //       );
+  //     },
+  //   );
+  // }
+
   Future<void> _showEditProfileBottomSheet() {
     TextEditingController nameController = TextEditingController(text: name);
-    TextEditingController phoneController =
-        TextEditingController(text: phoneNumber);
+    TextEditingController phoneController = TextEditingController(text: phoneNumber);
     dynamic selectedImageFile;
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
 
     return showModalBottomSheet(
       context: context,
@@ -108,41 +241,27 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
           padding: MediaQuery.of(context).viewInsets,
           child: StatefulBuilder(
             builder: (BuildContext context, StateSetter setModalState) {
-              return Padding(
-                padding: const EdgeInsets.all(16.0),
+              return Container(
+                decoration: BoxDecoration(
+                  color: isDarkMode ? Color(0xFF121212) : Color(0xFFE9FCe9),
+                  borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
+                ),
+                padding: const EdgeInsets.all(20.0),
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    const Text(
+                    // Tiêu đề
+                    Text(
                       'Edit Profile',
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                      ),
+                      style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                            fontWeight: FontWeight.bold,
+                          ),
                     ),
-                    const SizedBox(height: 10),
-                    selectedImageFile != null
-                        ? Column(
-                            children: [
-                              kIsWeb
-                                  ? Image.memory(
-                                      selectedImageFile,
-                                      height: 100,
-                                      width: 100,
-                                      fit: BoxFit.cover,
-                                    )
-                                  : Image.file(
-                                      selectedImageFile,
-                                      height: 100,
-                                      width: 100,
-                                      fit: BoxFit.cover,
-                                    ),
-                              const SizedBox(height: 10),
-                            ],
-                          )
-                        : const SizedBox(),
-                    ElevatedButton.icon(
-                      onPressed: () async {
+                    const SizedBox(height: 16),
+
+                    // Ảnh đại diện + nút chọn ảnh
+                    GestureDetector(
+                      onTap: () async {
                         final ImagePicker picker = ImagePicker();
                         try {
                           final XFile? image = await picker.pickImage(
@@ -179,38 +298,80 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                           );
                         }
                       },
-                      icon: const Icon(Icons.image),
-                      label: const Text('Choose Image'),
-                    ),
-                    const SizedBox(height: 10),
-                    TextField(
-                      controller: nameController,
-                      decoration: const InputDecoration(labelText: 'Name'),
-                    ),
-                    // const SizedBox(height: 10),
-                    // TextField(
-                    //   controller: phoneController,
-                    //   decoration: const InputDecoration(labelText: 'Phone'),
-                    // ),
-                    const SizedBox(height: 20),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                      children: [
-                        ElevatedButton(
-                          onPressed: () async {
-                            _updateProfile(nameController.text,
-                                phoneController.text, selectedImageFile);
-                          },
-                          child: const Text('Update'),
-                        ),
-                        ElevatedButton(
-                          onPressed: () {
-                            Navigator.pop(context);
-                          },
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.grey,
+                      child: Stack(
+                        alignment: Alignment.bottomRight,
+                        children: [
+                          CircleAvatar(
+                            radius: 50,
+                            backgroundImage: selectedImageFile != null
+                                ? (kIsWeb
+                                    ? MemoryImage(selectedImageFile)
+                                    : FileImage(selectedImageFile) as ImageProvider)
+                                : const AssetImage('assets/images/avatar_placeholder.jpg'),
                           ),
-                          child: const Text('Cancel'),
+                          Container(
+                            padding: const EdgeInsets.all(5),
+                            decoration: const BoxDecoration(
+                              color: Colors.green,
+                              shape: BoxShape.circle,
+                            ),
+                            child: const Icon(
+                              Icons.camera_alt,
+                              color: Colors.white,
+                              size: 20,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+
+                    const SizedBox(height: 20),
+
+                    // Form nhập liệu
+                    _buildTextField("Name", nameController),
+
+                    const SizedBox(height: 20),
+
+                    // Nút hành động
+                    Row(
+                      children: [
+                        Expanded(
+                          child: ElevatedButton(
+                            onPressed: () async {
+                              _updateProfile(
+                                  nameController.text, phoneController.text, selectedImageFile);
+                            },
+                            style: ElevatedButton.styleFrom(
+                              padding: const EdgeInsets.symmetric(vertical: 14),
+                              backgroundColor: Colors.green,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                            ),
+                            child: const Text(
+                              'Update',
+                              style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 10),
+                        Expanded(
+                          child: ElevatedButton(
+                            onPressed: () {
+                              Navigator.pop(context);
+                            },
+                            style: ElevatedButton.styleFrom(
+                              padding: const EdgeInsets.symmetric(vertical: 14),
+                              backgroundColor: Colors.grey.shade400,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                            ),
+                            child: const Text(
+                              'Cancel',
+                              style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
+                            ),
+                          ),
                         ),
                       ],
                     ),
@@ -223,6 +384,28 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       },
     );
   }
+
+  Widget _buildTextField(String label, TextEditingController controller) {
+    final bool isDarkMode = Theme.of(context).brightness == Brightness.dark;
+    return TextField(
+      controller: controller,
+      decoration: InputDecoration(
+        labelText: label,
+        filled: true,
+        fillColor: isDarkMode ? Color(0xFF1E1E1E) : Colors.white,
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(10),
+          borderSide: BorderSide.none,
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(10),
+          borderSide: const BorderSide(color: Colors.green, width: 2),
+        ),
+        contentPadding: const EdgeInsets.symmetric(horizontal: 15, vertical: 12),
+      ),
+    );
+  }
+
 
   Future<void> _updateProfile(String updatedName, String updatedPhone,
       dynamic selectedImageFile) async {
@@ -470,7 +653,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                         "Save",
                         style: TextStyle(
                             fontSize: getResponsiveFontSize(16),
-                            color: isDarkMode ? Colors.white : Colors.black),
+                            color: Colors.white),
                       ),
                     ),
                   ),

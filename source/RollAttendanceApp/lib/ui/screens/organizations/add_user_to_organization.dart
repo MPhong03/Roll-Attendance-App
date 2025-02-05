@@ -268,7 +268,6 @@ class _AddUserToOrganizationScreenState
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Add Users"),
         actions: [
           IconButton(
             icon: const Icon(Icons.upload_file),

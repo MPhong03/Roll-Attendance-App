@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:blurry_modal_progress_hud/blurry_modal_progress_hud.dart';
+import 'package:flutter_launcher_icons/constants.dart';
 import 'package:go_router/go_router.dart';
 import 'package:itproject/models/organization_model.dart';
 import 'package:itproject/services/api_service.dart';
@@ -98,39 +99,114 @@ class _PublicOrganizationDetailScreenState
     showDialog(
       context: context,
       builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Text('Enter Notes'),
-          content: TextField(
-            controller: notesController,
-            decoration: const InputDecoration(hintText: "Enter your notes..."),
-            maxLines: 3,
+        final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+
+        return Dialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
           ),
-          actions: <Widget>[
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-              child: const Text('Cancel'),
+          child: Container(
+            padding: const EdgeInsets.all(20),
+            decoration: BoxDecoration(
+              color: isDarkMode ? const Color(0xFF1E1E1E) : Colors.white,
+              borderRadius: BorderRadius.circular(16),
             ),
-            TextButton(
-              onPressed: () {
-                String notes = notesController.text;
-                if (notes.isNotEmpty) {
-                  createRequest(notes);
-                  Navigator.of(context).pop();
-                } else {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text("Notes cannot be empty")),
-                  );
-                }
-              },
-              child: const Text('Submit'),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Tiêu đề
+                Center(
+                  child: Text(
+                    'Enter Notes',
+                    style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                          fontWeight: FontWeight.bold,
+                          color: isDarkMode ? Colors.white : Colors.black,
+                        ),
+                  ),
+                ),
+                const SizedBox(height: 16),
+
+                // Ô nhập ghi chú
+                TextField(
+                  controller: notesController,
+                  maxLines: 3,
+                  decoration: InputDecoration(
+                    hintText: "Enter your notes...",
+                    filled: true,
+                    fillColor: isDarkMode ? Colors.black12 : Colors.grey.shade200,
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(10),
+                      borderSide: BorderSide.none,
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(10),
+                      borderSide: const BorderSide(color: Colors.green, width: 2),
+                    ),
+                    contentPadding: const EdgeInsets.symmetric(horizontal: 15, vertical: 12),
+                  ),
+                ),
+                const SizedBox(height: 20),
+
+                // Nút hành động
+                Row(
+                  children: [
+                    Expanded(
+                      child: ElevatedButton(
+                        onPressed: () {
+                          String notes = notesController.text.trim();
+                          if (notes.isNotEmpty) {
+                            createRequest(notes);
+                            Navigator.of(context).pop();
+                          } else {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: const Text("Notes cannot be empty"),
+                                backgroundColor: Colors.red,
+                              ),
+                            );
+                          }
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.green,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          padding: const EdgeInsets.symmetric(vertical: 14),
+                        ),
+                        child: const Text(
+                          'Submit',
+                          style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: ElevatedButton(
+                        onPressed: () => Navigator.of(context).pop(),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.grey.shade400,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          padding: const EdgeInsets.symmetric(vertical: 14),
+                        ),
+                        child: const Text(
+                          'Cancel',
+                          style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
             ),
-          ],
+          ),
         );
       },
     );
   }
+
 
   Future<void> _onRefresh() async {
     setState(() {
@@ -146,6 +222,7 @@ class _PublicOrganizationDetailScreenState
 
   @override
   Widget build(BuildContext context) {
+    final bool isDarkMode = Theme.of(context).brightness == Brightness.dark;
     return BlurryModalProgressHUD(
       inAsyncCall: _isLoading,
       opacity: 0.3,
@@ -173,7 +250,6 @@ class _PublicOrganizationDetailScreenState
             final organization = snapshot.data!;
             return Scaffold(
               appBar: AppBar(
-                title: const Text('Organization Details'),
                 leading: IconButton(
                   icon: const Icon(Icons.arrow_back),
                   onPressed: () => context.pop(),
@@ -276,7 +352,7 @@ class _PublicOrganizationDetailScreenState
                               children: [
                                 ElevatedButton.icon(
                                   onPressed: _openJoinModal,
-                                  icon: const Icon(Icons.pan_tool_rounded),
+                                  icon: const Icon(Icons.pan_tool_rounded, color: Colors.white,),
                                   label: const Text('Join'),
                                 ),
                               ],
