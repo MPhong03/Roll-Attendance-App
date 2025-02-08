@@ -19,6 +19,7 @@ namespace RollAttendanceServer.Data
         public virtual DbSet<EventUser> EventUsers { get; set; }
         public virtual DbSet<InviteRequest> InviteRequests { get; set; }
         public virtual DbSet<PermissionRequest> PermissionRequests { get; set; }
+        public virtual DbSet<Notification> Notifications { get; set; }
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options)
         {
         }
