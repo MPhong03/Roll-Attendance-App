@@ -93,7 +93,7 @@ namespace RollAttendanceServer.Services.Systems
         public async Task<IEnumerable<Organization?>> GetOrganizationsByUserAsync(string uid, UserRole role, string? keyword, int pageIndex = 0, int pageSize = 10)
         {
             var query = _context.UserOrganizationRoles
-                        .Where(uor => uor.User.Uid == uid && (role > 0 ? uor.Role == role : true))
+                        .Where(uor => uor.User.Uid == uid && (role > 0 ? uor.Role == role : uor.Role != UserRole.REPRESENTATIVE))
                         .Select(uor => uor.Organization)
                         .AsQueryable();
 
