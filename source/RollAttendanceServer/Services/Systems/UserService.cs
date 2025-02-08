@@ -52,5 +52,30 @@ namespace RollAttendanceServer.Services.Systems
             _context.Users.Update(user);
             await _context.SaveChangesAsync();
         }
+
+        public async Task UpdateUserFCMTokenAsync(string userId, string token)
+        {
+            var user = await _context.Users.FirstOrDefaultAsync(u => u.Id == userId);
+
+            if (user == null)
+            {
+                throw new Exception("User not found.");
+            }
+
+            user.FCMToken = token;
+            await _context.SaveChangesAsync();
+        }
+
+        public async Task<string> GetUserFCMTokenAsync(string userId)
+        {
+            var user = await _context.Users.FirstOrDefaultAsync(u => u.Id == userId);
+
+            if (user == null)
+            {
+                throw new Exception("User not found.");
+            }
+
+            return user.FCMToken;
+        }
     }
 }
