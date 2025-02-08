@@ -20,15 +20,16 @@ class OrganizationScreen extends StatefulWidget {
 class _OrganizationScreenState extends State<OrganizationScreen> {
   bool _isLoading = false;
   List<OrganizationModel> organizations = [];
-  List<AvailableEventModel> events = [];
+  List<OrganizationModel> joinedOrganizations = [];
   final ApiService _apiService = ApiService();
+
   int pageIndex = 0;
   int pageSize = 10;
   bool hasMoreData = true;
 
-  int pageEventIndex = 1;
-  int pageEventSize = 10;
-  bool hasMoreEventData = true;
+  int pageJoinedIndex = 0;
+  int pageJoinedSize = 10;
+  bool hasMoreJoinedData = true;
 
   String imagePlaceHolder =
       'https://yt3.ggpht.com/a/AGF-l78urB8ASkb0JO2a6AB0UAXeEHe6-pc9UJqxUw=s900-mo-c-c0xffffffff-rj-k-no';
@@ -109,21 +110,16 @@ class _OrganizationScreenState extends State<OrganizationScreen> {
     }
   }
 
-  Future<void> fetchUserAvailableEvents(
-      {int pageEventIndex = 1,
-      int pageEventSize = 10,
-      int status = 1,
-      DateTime? date}) async {
+  Future<void> fetchUserJoinedOrganizations(
+      {int pageIndex = 0, int pageSize = 10}) async {
     if (_isLoading) return;
     try {
       setState(() {
         _isLoading = true;
       });
 
-      date ??= DateTime.now();
-
       final response = await _apiService.get(
-        'api/events/available-events?pageIndex=$pageEventIndex&pageSize=$pageEventSize&date=$date&status=$status',
+        'api/organization/getjoined/${FirebaseAuth.instance.currentUser?.uid}?pageIndex=$pageIndex&pageSize=$pageSize',
       );
 
       if (response.statusCode == 200) {
@@ -131,23 +127,23 @@ class _OrganizationScreenState extends State<OrganizationScreen> {
           setState(() {
             List<dynamic> responseBody = jsonDecode(response.body);
             if (pageIndex == 0) {
-              events = responseBody
-                  .map((orgData) => AvailableEventModel.fromMap(orgData))
+              joinedOrganizations = responseBody
+                  .map((orgData) => OrganizationModel.fromMap(orgData))
                   .toList();
             } else {
-              events.addAll(responseBody
-                  .map((orgData) => AvailableEventModel.fromMap(orgData))
+              joinedOrganizations.addAll(responseBody
+                  .map((orgData) => OrganizationModel.fromMap(orgData))
                   .toList());
             }
 
-            if (responseBody.length < pageEventSize) {
-              hasMoreEventData = false;
+            if (responseBody.length < pageSize) {
+              hasMoreJoinedData = false;
             }
           });
         }
       } else {
         Fluttertoast.showToast(
-          msg: "No events found",
+          msg: "No organizations found",
           toastLength: Toast.LENGTH_SHORT,
           gravity: ToastGravity.BOTTOM,
           timeInSecForIosWeb: 1,
@@ -158,7 +154,7 @@ class _OrganizationScreenState extends State<OrganizationScreen> {
       }
     } catch (e) {
       Fluttertoast.showToast(
-        msg: "Failed to fetch events, $e",
+        msg: "Failed to fetch organizations, $e",
         toastLength: Toast.LENGTH_SHORT,
         gravity: ToastGravity.BOTTOM,
         timeInSecForIosWeb: 1,
@@ -175,7 +171,7 @@ class _OrganizationScreenState extends State<OrganizationScreen> {
 
   Future<void> initializeData() async {
     await fetchUserOrganizations();
-    await fetchUserAvailableEvents();
+    await fetchUserJoinedOrganizations();
     await shareProfile();
   }
 
@@ -188,17 +184,12 @@ class _OrganizationScreenState extends State<OrganizationScreen> {
   @override
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
-    final screenHeight = MediaQuery.of(context).size.height;
     final bool isDarkMode = Theme.of(context).brightness == Brightness.dark;
     final Color textColor = isDarkMode ? Colors.white : Colors.black;
     final Color backgroundColor = Theme.of(context).scaffoldBackgroundColor;
 
     double getResponsiveFontSize(double baseFontSize) {
-      if (screenWidth > 480) {
-        return baseFontSize * 1.2;
-      } else {
-        return baseFontSize;
-      }
+      return screenWidth > 480 ? baseFontSize * 1.2 : baseFontSize;
     }
 
     return BlurryModalProgressHUD(
@@ -207,24 +198,7 @@ class _OrganizationScreenState extends State<OrganizationScreen> {
       blurEffectIntensity: 5,
       child: Scaffold(
         backgroundColor: backgroundColor,
-        // appBar: AppBar(
-        //   automaticallyImplyLeading: false,
-        //   backgroundColor: backgroundColor,
-        //   actions: [
-        //     IconButton(
-        //       icon: Icon(
-        //         Icons.search,
-        //         color: textColor,
-        //         size: getResponsiveFontSize(24),
-        //       ),
-        //       onPressed: () {
-        //         context.push("/search-organization");
-        //       },
-        //     ),
-        //   ],
-        // ),
         body: SafeArea(
-          // Đảm bảo nội dung không bị che bởi status bar
           child: Stack(
             children: [
               Padding(
@@ -233,16 +207,24 @@ class _OrganizationScreenState extends State<OrganizationScreen> {
                   onRefresh: () async {
                     setState(() {
                       pageIndex = 0;
-                      pageEventIndex = 1;
+                      pageJoinedIndex = 0;
                       hasMoreData = true;
-                      hasMoreEventData = true;
+                      hasMoreJoinedData = true;
                     });
-                    await fetchUserOrganizations();
-                    await fetchUserAvailableEvents();
+                    await initializeData();
                   },
                   child: ListView(
                     padding: const EdgeInsets.all(16.0),
                     children: [
+                      Text(
+                        'My Organizations',
+                        style: TextStyle(
+                          fontSize: getResponsiveFontSize(18),
+                          fontWeight: FontWeight.bold,
+                          color: textColor,
+                        ),
+                      ),
+                      const SizedBox(height: 10),
                       if (organizations.isEmpty)
                         Center(
                           child: Text(
@@ -256,10 +238,37 @@ class _OrganizationScreenState extends State<OrganizationScreen> {
                       ...organizations.map(
                         (org) => OrganizationCard(organization: org),
                       ),
+
+                      const SizedBox(height: 20),
+
+                      Text(
+                        'Joined Organizations',
+                        style: TextStyle(
+                          fontSize: getResponsiveFontSize(18),
+                          fontWeight: FontWeight.bold,
+                          color: textColor,
+                        ),
+                      ),
+                      const SizedBox(height: 10),
+                      if (joinedOrganizations.isEmpty)
+                        Center(
+                          child: Text(
+                            'You have not joined any organizations.',
+                            style: TextStyle(
+                              fontSize: getResponsiveFontSize(16),
+                              color: textColor,
+                            ),
+                          ),
+                        ),
+                      ...joinedOrganizations.map(
+                        (org) => OrganizationCard(organization: org),
+                      ),
                     ],
                   ),
                 ),
               ),
+
+              // Nút tạo tổ chức
               Positioned(
                 top: 0.0,
                 left: 0.0,

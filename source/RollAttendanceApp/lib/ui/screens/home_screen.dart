@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:intl/intl.dart';
 
 import 'package:firebase_auth/firebase_auth.dart';
@@ -40,6 +41,14 @@ class _HomeScreenState extends State<HomeScreen> {
     if (_isLoading) return;
     try {
       await _apiService.put('api/auth/shareProfile', {});
+
+      FirebaseMessaging messaging = FirebaseMessaging.instance;
+
+      String? token = await messaging.getToken();
+
+      if (token != null) {
+        await _apiService.post('api/users/fcm-token', { 'Token': token });
+      }
     } catch (e) {
       Fluttertoast.showToast(
         msg: "Failed to share profile, $e",
@@ -84,17 +93,18 @@ class _HomeScreenState extends State<HomeScreen> {
             }
           });
         }
-      } else {
-        Fluttertoast.showToast(
-          msg: "No organizations found",
-          toastLength: Toast.LENGTH_SHORT,
-          gravity: ToastGravity.BOTTOM,
-          timeInSecForIosWeb: 1,
-          backgroundColor: Colors.black,
-          textColor: Colors.white,
-          fontSize: 16.0,
-        );
       }
+      // else {
+      //   Fluttertoast.showToast(
+      //     msg: "No organizations found",
+      //     toastLength: Toast.LENGTH_SHORT,
+      //     gravity: ToastGravity.BOTTOM,
+      //     timeInSecForIosWeb: 1,
+      //     backgroundColor: Colors.black,
+      //     textColor: Colors.white,
+      //     fontSize: 16.0,
+      //   );
+      // }
     } catch (e) {
       Fluttertoast.showToast(
         msg: "Failed to fetch organizations, $e",
@@ -238,38 +248,59 @@ class _HomeScreenState extends State<HomeScreen> {
               padding: const EdgeInsets.all(16.0),
               children: [
                 // const SizedBox(height: 30),
-                Align(
-                  alignment: Alignment.centerRight,
-                  child: DropdownButton<String>(
-                    value: filterType,
-                    onChanged: (String? newValue) {
-                      if (newValue != null) {
-                        setState(() {
-                          filterType = newValue;
-                          pageEventIndex = 1;
-                          hasMoreEventData = true;
-                        });
-                        fetchUserAvailableEvents();
-                      }
-                    },
-                    items: <String>['Today', 'Week', 'Month']
-                        .map<DropdownMenuItem<String>>((String value) {
-                      return DropdownMenuItem<String>(
-                        value: value,
-                        child: Text(value),
-                      );
-                    }).toList(),
-                  ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    // Logo app
+                    Image.asset(
+                      'assets/images/apelo_logo.png',
+                      width: 100, // Kích thước logo
+                      height: 30,
+                    ),
+                    // Bộ lọc
+                    DropdownButton<String>(
+                      value: filterType,
+                      onChanged: (String? newValue) {
+                        if (newValue != null) {
+                          setState(() {
+                            filterType = newValue;
+                            pageEventIndex = 1;
+                            hasMoreEventData = true;
+                          });
+                          fetchUserAvailableEvents();
+                        }
+                      },
+                      items: <String>['Today', 'Week', 'Month']
+                          .map<DropdownMenuItem<String>>((String value) {
+                        return DropdownMenuItem<String>(
+                          value: value,
+                          child: Text(value),
+                        );
+                      }).toList(),
+                    ),
+                  ],
                 ),
                 const SizedBox(height: 10),
                 if (events.isEmpty)
                   Center(
-                    child: Text(
-                      'No available events.',
-                      style: TextStyle(
-                        fontSize: getResponsiveFontSize(16),
-                        color: textColor,
-                      ),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Image.asset(
+                          'assets/images/you-are-free.png',
+                          width: 240,
+                          height: 240,
+                          fit: BoxFit.cover,
+                        ),
+                        const SizedBox(height: 12),
+                        Text(
+                          'No available events!',
+                          style: TextStyle(
+                            fontSize: getResponsiveFontSize(16),
+                            color: textColor,
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                 ...events.map((event) => Container(

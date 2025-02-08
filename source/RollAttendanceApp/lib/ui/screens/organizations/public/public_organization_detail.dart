@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:blurry_modal_progress_hud/blurry_modal_progress_hud.dart';
 import 'package:flutter_launcher_icons/constants.dart';
 import 'package:go_router/go_router.dart';
+import 'package:itproject/enums/user_join_status.dart';
 import 'package:itproject/models/organization_model.dart';
 import 'package:itproject/services/api_service.dart';
 
@@ -22,6 +23,7 @@ class _PublicOrganizationDetailScreenState
     extends State<PublicOrganizationDetailScreen> {
   final ApiService _apiService = ApiService();
   bool _isLoading = false;
+  int? _userStatus;
 
   late Future<OrganizationModel> _organizationFuture;
 
@@ -68,9 +70,54 @@ class _PublicOrganizationDetailScreenState
 
       if (response.statusCode == 200) {
         if (mounted) {
+          checkUserJoined();
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(content: Text("Request has been sent!")),
           );
+        }
+      } else {
+        if (mounted) {
+          final message = jsonDecode(response.body)['message'];
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text("$message")),
+          );
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text("Error: $e")),
+        );
+      }
+    } finally {
+      setState(() {
+        _isLoading = false;
+      });
+    }
+  }
+
+  Future<void> checkUserJoined() async {
+    try {
+      setState(() {
+        _isLoading = true;
+      });
+
+      final response = await _apiService.get(
+        'api/Organization/check-participation/${widget.organizationId}',
+      );
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        final int status = data['status']; // Lấy trạng thái từ API
+
+        setState(() {
+          _userStatus = status;
+        });
+
+        if (_userStatus == UserJoinStatus.USER_JOINED) {
+          if (mounted) {
+            context.push('/organization-detail/${widget.organizationId}');
+          }
         }
       } else {
         if (mounted) {
@@ -134,16 +181,19 @@ class _PublicOrganizationDetailScreenState
                   decoration: InputDecoration(
                     hintText: "Enter your notes...",
                     filled: true,
-                    fillColor: isDarkMode ? Colors.black12 : Colors.grey.shade200,
+                    fillColor:
+                        isDarkMode ? Colors.black12 : Colors.grey.shade200,
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(10),
                       borderSide: BorderSide.none,
                     ),
                     focusedBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(10),
-                      borderSide: const BorderSide(color: Colors.green, width: 2),
+                      borderSide:
+                          const BorderSide(color: Colors.green, width: 2),
                     ),
-                    contentPadding: const EdgeInsets.symmetric(horizontal: 15, vertical: 12),
+                    contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 15, vertical: 12),
                   ),
                 ),
                 const SizedBox(height: 20),
@@ -160,8 +210,8 @@ class _PublicOrganizationDetailScreenState
                             Navigator.of(context).pop();
                           } else {
                             ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(
-                                content: const Text("Notes cannot be empty"),
+                              const SnackBar(
+                                content: Text("Notes cannot be empty"),
                                 backgroundColor: Colors.red,
                               ),
                             );
@@ -176,7 +226,8 @@ class _PublicOrganizationDetailScreenState
                         ),
                         child: const Text(
                           'Submit',
-                          style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
+                          style: TextStyle(
+                              fontWeight: FontWeight.bold, color: Colors.white),
                         ),
                       ),
                     ),
@@ -193,7 +244,8 @@ class _PublicOrganizationDetailScreenState
                         ),
                         child: const Text(
                           'Cancel',
-                          style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
+                          style: TextStyle(
+                              fontWeight: FontWeight.bold, color: Colors.white),
                         ),
                       ),
                     ),
@@ -207,17 +259,18 @@ class _PublicOrganizationDetailScreenState
     );
   }
 
-
   Future<void> _onRefresh() async {
     setState(() {
       _organizationFuture = getDetail(widget.organizationId);
     });
+    checkUserJoined();
   }
 
   @override
   void initState() {
     super.initState();
     _organizationFuture = getDetail(widget.organizationId);
+    checkUserJoined();
   }
 
   @override
@@ -351,9 +404,18 @@ class _PublicOrganizationDetailScreenState
                               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                               children: [
                                 ElevatedButton.icon(
-                                  onPressed: _openJoinModal,
-                                  icon: const Icon(Icons.pan_tool_rounded, color: Colors.white,),
-                                  label: const Text('Join'),
+                                  onPressed: _userStatus == UserJoinStatus.USER_PENDING
+                                      ? null // Disable nếu USER_PENDING
+                                      : (_userStatus == UserJoinStatus.USER_NOT_JOINED
+                                          ? _openJoinModal
+                                          : null),
+                                  icon: const Icon(Icons.pan_tool_rounded,
+                                      color: Colors.white),
+                                  label: Text(
+                                    _userStatus == UserJoinStatus.USER_PENDING
+                                        ? 'Waiting'
+                                        : 'Join',
+                                  ),
                                 ),
                               ],
                             ),

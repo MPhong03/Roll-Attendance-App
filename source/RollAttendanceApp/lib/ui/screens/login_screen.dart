@@ -182,6 +182,7 @@ class _LoginScreenState extends State<LoginScreen> {
         }
       }
     } catch (e) {
+      print('Error during Google sign-in: $e');
       if (mounted) {
         AwesomeDialog(
           context: context,

@@ -226,7 +226,8 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
 
   Future<void> _showEditProfileBottomSheet() {
     TextEditingController nameController = TextEditingController(text: name);
-    TextEditingController phoneController = TextEditingController(text: phoneNumber);
+    TextEditingController phoneController =
+        TextEditingController(text: phoneNumber);
     dynamic selectedImageFile;
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
 
@@ -244,7 +245,8 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
               return Container(
                 decoration: BoxDecoration(
                   color: isDarkMode ? Color(0xFF121212) : Color(0xFFE9FCe9),
-                  borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
+                  borderRadius:
+                      const BorderRadius.vertical(top: Radius.circular(16)),
                 ),
                 padding: const EdgeInsets.all(20.0),
                 child: Column(
@@ -253,9 +255,10 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                     // Tiêu đề
                     Text(
                       'Edit Profile',
-                      style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                            fontWeight: FontWeight.bold,
-                          ),
+                      style:
+                          Theme.of(context).textTheme.headlineSmall?.copyWith(
+                                fontWeight: FontWeight.bold,
+                              ),
                     ),
                     const SizedBox(height: 16),
 
@@ -306,8 +309,10 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                             backgroundImage: selectedImageFile != null
                                 ? (kIsWeb
                                     ? MemoryImage(selectedImageFile)
-                                    : FileImage(selectedImageFile) as ImageProvider)
-                                : const AssetImage('assets/images/avatar_placeholder.jpg'),
+                                    : FileImage(selectedImageFile)
+                                        as ImageProvider)
+                                : const AssetImage(
+                                    'assets/images/default-avatar.jpg'),
                           ),
                           Container(
                             padding: const EdgeInsets.all(5),
@@ -338,8 +343,8 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                         Expanded(
                           child: ElevatedButton(
                             onPressed: () async {
-                              _updateProfile(
-                                  nameController.text, phoneController.text, selectedImageFile);
+                              _updateProfile(nameController.text,
+                                  phoneController.text, selectedImageFile);
                             },
                             style: ElevatedButton.styleFrom(
                               padding: const EdgeInsets.symmetric(vertical: 14),
@@ -350,7 +355,9 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                             ),
                             child: const Text(
                               'Update',
-                              style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
+                              style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.white),
                             ),
                           ),
                         ),
@@ -369,7 +376,9 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                             ),
                             child: const Text(
                               'Cancel',
-                              style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
+                              style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.white),
                             ),
                           ),
                         ),
@@ -401,11 +410,11 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
           borderRadius: BorderRadius.circular(10),
           borderSide: const BorderSide(color: Colors.green, width: 2),
         ),
-        contentPadding: const EdgeInsets.symmetric(horizontal: 15, vertical: 12),
+        contentPadding:
+            const EdgeInsets.symmetric(horizontal: 15, vertical: 12),
       ),
     );
   }
-
 
   Future<void> _updateProfile(String updatedName, String updatedPhone,
       dynamic selectedImageFile) async {
@@ -557,7 +566,6 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                       ),
                     ),
                   ),
-                  // Avatar
                   Positioned(
                     top: screenHeight * 0.10,
                     left: screenWidth / 2 - 60,
@@ -568,36 +576,45 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                           radius: 60,
                           backgroundImage: profileImageUrl.isNotEmpty
                               ? NetworkImage(profileImageUrl)
-                              : const AssetImage('images/default-avatar.jpg')
+                              : const AssetImage(
+                                      'assets/images/default-avatar.jpg')
                                   as ImageProvider,
                           backgroundColor: Colors.grey.shade200,
                         ),
-                        Container(
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            color: Colors.white,
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.black.withOpacity(0.3),
-                                blurRadius: 2,
-                                offset: const Offset(0, 2),
-                              ),
-                            ],
-                          ),
-                          child: IconButton(
-                            icon: const Icon(
-                              Icons.edit,
-                              color: Colors.grey,
-                            ),
-                            onPressed: () {
-                              // Thay đổi ảnh avatar
-                              _showEditProfileBottomSheet();
-                            },
-                          ),
-                        ),
+                        // Positioned(
+                        //   bottom: 4,
+                        //   right: 4,
+                        //   child: Container(
+                        //     width: 30,
+                        //     height: 30,
+                        //     decoration: BoxDecoration(
+                        //       shape: BoxShape.circle,
+                        //       color: Colors.white,
+                        //       boxShadow: [
+                        //         BoxShadow(
+                        //           color: Colors.black.withOpacity(0.3),
+                        //           blurRadius: 2,
+                        //           offset: const Offset(0, 2),
+                        //         ),
+                        //       ],
+                        //     ),
+                        //     child: IconButton(
+                        //       iconSize: 16,
+                        //       padding: EdgeInsets.zero,
+                        //       icon: const Icon(
+                        //         Icons.edit,
+                        //         color: Colors.grey,
+                        //       ),
+                        //       onPressed: () {
+                        //         _showEditProfileBottomSheet();
+                        //       },
+                        //     ),
+                        //   ),
+                        // ),
                       ],
                     ),
                   ),
+
                   // Thông tin người dùng
                   Positioned(
                     top: screenHeight * 0.3,
@@ -611,52 +628,64 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                       ],
                     ),
                   ),
-                  Positioned(
-                    top: screenHeight * 0.5,
-                    left: screenWidth * 0.1,
-                    right: screenWidth * 0.1,
-                    child: ElevatedButton(
-                      onPressed: () {
-                        context.push('/forgot-password');
-                      },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.blue,
-                        minimumSize: const Size(0, 50),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                      ),
-                      child: Text(
-                        "Change Password",
-                        style: TextStyle(
-                            fontSize: getResponsiveFontSize(16),
-                            color: Colors.white),
+                  Align(
+                    alignment: Alignment.bottomCenter,
+                    child: Padding(
+                      padding: const EdgeInsets.only(
+                          bottom: 24, left: 16, right: 16),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          SizedBox(
+                            width: double.infinity, // Đảm bảo nút rộng 100%
+                            child: ElevatedButton(
+                              onPressed: () {
+                                context.push('/forgot-password');
+                              },
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Colors.blue,
+                                minimumSize: const Size(0, 50),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                              ),
+                              child: Text(
+                                "Change Password",
+                                style: TextStyle(
+                                  fontSize: getResponsiveFontSize(16),
+                                  color: Colors.white,
+                                ),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 12),
+                          SizedBox(
+                            width: double.infinity, // Đảm bảo nút rộng 100%
+                            child: ElevatedButton(
+                              onPressed: () {
+                                _showEditProfileBottomSheet();
+                              },
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Colors.green,
+                                minimumSize: const Size(0, 50),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                              ),
+                              child: Text(
+                                "Update",
+                                style: TextStyle(
+                                  fontSize: getResponsiveFontSize(16),
+                                  color: Colors.white,
+                                ),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 24),
+                        ],
                       ),
                     ),
-                  ),
-
-                  // Nút Save
-                  Positioned(
-                    top: screenHeight * 0.7,
-                    left: screenWidth * 0.1,
-                    right: screenWidth * 0.1,
-                    child: ElevatedButton(
-                      onPressed: () {},
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.green,
-                        minimumSize: const Size(0, 50),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                      ),
-                      child: Text(
-                        "Save",
-                        style: TextStyle(
-                            fontSize: getResponsiveFontSize(16),
-                            color: Colors.white),
-                      ),
-                    ),
-                  ),
+                  )
                 ],
               ),
             ),
@@ -667,36 +696,43 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   }
 
   Widget _buildInfoRow(String label, String value, double screenWidth) {
-    final screenHeight = MediaQuery.of(context).size.height;
-    final screenWidth = MediaQuery.of(context).size.width;
     final bool isDarkMode = Theme.of(context).brightness == Brightness.dark;
 
     double getResponsiveFontSize(double baseFontSize) {
-      if (screenWidth > 480) {
-        return baseFontSize * 1.2;
-      } else {
-        return baseFontSize;
-      }
+      return screenWidth > 480 ? baseFontSize * 1.2 : baseFontSize;
     }
 
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 10.0),
+      padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 12),
       child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          Text(
-            label,
-            style: TextStyle(
-              fontSize: getResponsiveFontSize(16),
-              fontWeight: FontWeight.bold,
+          // Nhãn (Username, Email, Phone, ...)
+          Expanded(
+            flex: 3, // Chia phần text thành 3 phần
+            child: Text(
+              label,
+              style: TextStyle(
+                fontSize: getResponsiveFontSize(16),
+                fontWeight: FontWeight.w600,
+                color: isDarkMode ? Colors.white70 : Colors.black87,
+              ),
             ),
           ),
-          SizedBox(
-            width: screenWidth * 0.5,
+
+          // Giá trị (Tên, Email, SĐT, ...)
+          Expanded(
+            flex: 5, // Chia phần text thành 5 phần
             child: Text(
               value,
               textAlign: TextAlign.right,
-              style: TextStyle(fontSize: getResponsiveFontSize(16)),
+              overflow: TextOverflow.ellipsis,
+              maxLines: 1, // Giữ trên 1 dòng, nếu dài thì "..."
+              style: TextStyle(
+                fontSize: getResponsiveFontSize(16),
+                fontWeight: FontWeight.w500,
+                color: isDarkMode ? Colors.white : Colors.black54,
+              ),
             ),
           ),
         ],

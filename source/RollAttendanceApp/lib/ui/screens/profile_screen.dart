@@ -339,193 +339,123 @@ class _ProfileScreenState extends State<ProfileScreen> {
     final bool isDarkMode = Theme.of(context).brightness == Brightness.dark;
 
     double getResponsiveFontSize(double baseFontSize) {
-      if (screenWidth > 480) {
-        return baseFontSize * 1.2;
-      } else {
-        return baseFontSize;
-      }
+      return screenWidth > 480 ? baseFontSize * 1.2 : baseFontSize;
     }
 
     return Scaffold(
-      body: RefreshIndicator(
-        onRefresh: _getProfile,
-        child: Stack(
-          children: [
-            Container(
-              color: Theme.of(context).scaffoldBackgroundColor,
+      body: Stack(
+        children: [
+          // Background Gradient
+          Container(
+            decoration: const BoxDecoration(
+              gradient: LinearGradient(
+                colors: [Color(0xFFE9FCe9), Colors.green],
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+              ),
             ),
-            Positioned(
-              // top: screenHeight * 0.05,
-              left: 0,
-              right: 0,
-              child: Container(
-                width: screenWidth,
-                height: screenHeight * 0.9,
-                decoration: BoxDecoration(
-                  color: isDarkMode ? Color(0xFF1E1E1E) : Colors.white,
-                  borderRadius: const BorderRadius.only(
-                    topLeft: Radius.circular(12),
-                    topRight: Radius.circular(12),
-                  ),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.2),
-                      blurRadius: 4,
-                      spreadRadius: 2,
-                      offset: const Offset(0, 2),
-                    ),
-                  ],
+          ),
+          Positioned(
+            top: screenHeight * 0.2,
+            left: 0,
+            right: 0,
+            child: Container(
+              height: screenHeight * 0.78,
+              decoration: BoxDecoration(
+                color: isDarkMode ? Colors.black : Colors.white,
+                borderRadius: const BorderRadius.only(
+                  topLeft: Radius.circular(75),
+                  topRight: Radius.circular(75),
                 ),
-                child: Padding(
-                  padding: EdgeInsets.only(
-                    top: screenHeight * 0.1,
-                    left: 16.0,
-                    right: 16.0,
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black26,
+                    blurRadius: 8,
+                    spreadRadius: 2,
                   ),
+                ],
+              ),
+              child: Padding(
+                padding:
+                    const EdgeInsets.symmetric(vertical: 20, horizontal: 16),
+                child: SingleChildScrollView(
                   child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
                     children: [
-                      Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          // Avatar
-                          Padding(
-                            padding: EdgeInsets.only(left: screenWidth * 0.05),
-                            child: Stack(
-                              alignment: Alignment.bottomRight,
-                              children: [
-                                CircleAvatar(
-                                  radius: 60,
-                                  backgroundImage: profileImageUrl.isNotEmpty
-                                      ? NetworkImage(profileImageUrl)
-                                      : const AssetImage(
-                                              'assets/images/default-avatar.jpg')
-                                          as ImageProvider,
-                                  backgroundColor: Colors.grey.shade200,
-                                ),
-                              ],
-                            ),
-                          ),
-                          const SizedBox(width: 16),
-                          // User Info
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Padding(
-                                  padding: const EdgeInsets.only(bottom: 2),
-                                  child: Text(
-                                    name.isNotEmpty ? name : noName,
-                                    style: TextStyle(
-                                      fontSize: getResponsiveFontSize(24),
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                ),
-                                const SizedBox(height: 8),
-                                Text(
-                                  email.isNotEmpty
-                                      ? email
-                                      : 'Unable to load email!',
-                                  style: TextStyle(
-                                    fontSize: getResponsiveFontSize(16),
-                                    color: Colors.grey,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 20),
-
-                      // Divider
-                      const Divider(),
-
-                      // Danh sách các settings
+                      const SizedBox(height: 125),
+                      _buildListTile(context, Icons.account_circle, 'Account',
+                          '/editprofile'),
+                      _buildListTile(context, Icons.sensor_occupied_rounded,
+                          'Biometrics', '/update-face-data'),
+                      _buildListTile(context, Icons.mail_rounded, 'Invitations',
+                          '/my-invitations'),
+                      _buildListTile(
+                          context, Icons.notifications, 'Notifications', '/my-notifications'),
+                      _buildListTile(context, Icons.language, 'Language', ''),
+                      _buildListTile(context, Icons.help, 'Help & Support', ''),
+                      Divider(),
                       ListTile(
-                        leading: const Icon(Icons.account_circle),
-                        title: Text(
-                          'Account',
-                          style: TextStyle(fontSize: getResponsiveFontSize(16)),
-                        ),
-                        onTap: () {
-                          context.push("/editprofile");
-                        },
-                      ),
-                      ListTile(
-                        leading: const Icon(Icons.sensor_occupied_rounded),
-                        title: Text(
-                          'Biometrics',
-                          style: TextStyle(fontSize: getResponsiveFontSize(16)),
-                        ),
-                        onTap: () {
-                          context.push("/update-face-data");
-                        },
-                      ),
-                      // ListTile(
-                      //   leading: const Icon(Icons.send),
-                      //   title: Text(
-                      //     'Requests',
-                      //     style: TextStyle(fontSize: getResponsiveFontSize(16)),
-                      //   ),
-                      //   onTap: () {
-                      //     context.push("/my-requests");
-                      //   },
-                      // ),
-                      ListTile(
-                        leading: const Icon(Icons.mail_rounded),
-                        title: Text(
-                          'Invitations',
-                          style: TextStyle(fontSize: getResponsiveFontSize(16)),
-                        ),
-                        onTap: () {
-                          context.push("/my-invitations");
-                        },
-                      ),
-                      ListTile(
-                        leading: const Icon(Icons.notifications),
-                        title: Text(
-                          'Notifications',
-                          style: TextStyle(fontSize: getResponsiveFontSize(16)),
-                        ),
-                        onTap: () {},
-                      ),
-                      ListTile(
-                        leading: const Icon(Icons.language),
-                        title: Text(
-                          'Language',
-                          style: TextStyle(fontSize: getResponsiveFontSize(16)),
-                        ),
-                        onTap: () {},
-                      ),
-                      ListTile(
-                        leading: const Icon(Icons.help),
-                        title: Text(
-                          'Help & Support',
-                          style: TextStyle(fontSize: getResponsiveFontSize(16)),
-                        ),
-                        onTap: () {},
-                      ),
-                      ListTile(
-                        leading: const Icon(Icons.logout),
+                        leading: Icon(Icons.logout, color: Colors.red),
                         title: Text(
                           'Logout',
-                          style: TextStyle(fontSize: getResponsiveFontSize(16)),
+                          style: TextStyle(
+                              fontSize: getResponsiveFontSize(16),
+                              color: Colors.red),
                         ),
-                        onTap: () {
-                          _logout();
-                        },
+                        onTap: _logout,
                       ),
                     ],
                   ),
                 ),
               ),
             ),
-          ],
-        ),
+          ),
+          Positioned(
+            left: 0,
+            right: 0,
+            top: screenHeight * 0.1,
+            child: Column(
+              children: [
+                CircleAvatar(
+                  radius: 60,
+                  backgroundImage: NetworkImage(profileImageUrl),
+                  backgroundColor: Colors.grey.shade200,
+                ),
+                const SizedBox(height: 16),
+                Text(
+                  name,
+                  style: TextStyle(
+                    fontSize: getResponsiveFontSize(24),
+                    fontWeight: FontWeight.bold,
+                    color: isDarkMode ? Colors.white : Colors.black,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  email,
+                  style: TextStyle(
+                    fontSize: getResponsiveFontSize(14),
+                    color: isDarkMode ? Colors.white70 : Colors.black54,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
       ),
+    );
+  }
+
+  Widget _buildListTile(
+      BuildContext context, IconData icon, String title, String route) {
+    return ListTile(
+      leading: Icon(icon, color: Colors.green), // Đổi màu icon thành xanh lá
+      title: Text(
+        title,
+        style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
+      ),
+      trailing: Icon(Icons.arrow_forward_ios, size: 16, color: Colors.grey),
+      onTap: route.isNotEmpty ? () => context.push(route) : null,
     );
   }
 }
