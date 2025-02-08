@@ -5,7 +5,9 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Newtonsoft.Json;
 using RollAttendanceServer.Data;
+using RollAttendanceServer.Data.Responses;
 using RollAttendanceServer.Interfaces;
+using RollAttendanceServer.Models;
 
 namespace RollAttendanceServer.Services.Systems
 {
@@ -151,5 +153,22 @@ namespace RollAttendanceServer.Services.Systems
             return successCount;
         }
 
+        public async Task<PagedResult<Notification>> GetNotificationsByUserIdAsync(string userId, int pageNumber, int pageSize)
+        {
+            var query = _context.Notifications
+                .Where(n => n.UserId == userId)
+                .OrderByDescending(n => n.CreatedAt);
+
+            var totalRecords = await query.CountAsync();
+            var items = await query.Skip((pageNumber - 1) * pageSize).Take(pageSize).ToListAsync();
+
+            return new PagedResult<Notification>
+            {
+                Items = items,
+                TotalRecords = totalRecords,
+                PageIndex = pageNumber,
+                PageSize = pageSize
+            };
+        }
     }
 }
