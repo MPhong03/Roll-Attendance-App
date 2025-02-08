@@ -78,6 +78,7 @@ jobs:
             "ApiSecret": "${{ secrets.CLOUDINARY_API_SECRET }}"
           },
           "Firebase": {
+            "ProjectId": "${{ secrets.FIREBASE_PROJECT_ID }}",
             "CredentialsPath": "AppData/firebase-service-account.json"
           },
           "AllowedHosts": "*"
