@@ -306,6 +306,46 @@ namespace RollAttendanceServer.Controllers
                 return StatusCode(500, ex.Message);
             }
         }
+
+        [HttpGet("check-participation/{organizationId}")]
+        public async Task<IActionResult> CheckUserParticipation(string organizationId)
+        {
+            try
+            {
+                var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+                if (string.IsNullOrEmpty(userId))
+                {
+                    return Unauthorized("Không thể xác thực người dùng.");
+                }
+
+                var status = await _organizationService.CheckIsUserParticipateInOrg(organizationId, userId);
+                return Ok(new { organizationId, userId, status });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "Lỗi kiểm tra tham gia tổ chức", error = ex.Message });
+            }
+        }
+
+        [HttpGet("get-role/{organizationId}")]
+        public async Task<IActionResult> GetUserRole(string organizationId)
+        {
+            try
+            {
+                var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+                if (string.IsNullOrEmpty(userId))
+                {
+                    return Unauthorized("Không thể xác thực người dùng.");
+                }
+
+                var role = await _organizationService.GetUserRoleInOrganization(organizationId, userId);
+                return Ok(new { organizationId, userId, role });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "Lỗi lấy vai trò người dùng", error = ex.Message });
+            }
+        }
     }
 
     public class InvitionQuery

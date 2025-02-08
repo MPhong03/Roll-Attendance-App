@@ -315,5 +315,40 @@ namespace RollAttendanceServer.Services.Systems
                 Role = (int)uor.Role
             }).ToListAsync();
         }
+
+        public async Task<short> CheckIsUserParticipateInOrg(string id, string userId)
+        {
+            var participationRequest = await _context.ParticipationRequests
+                .Where(pr => pr.OrganizationId == id && pr.UserId == userId)
+                .OrderByDescending(pr => pr.CreatedAt)
+                .FirstOrDefaultAsync();
+
+            if (participationRequest == null ||
+                participationRequest.RequestStatus == (short)Status.REQUEST_REJECTED ||
+                participationRequest.RequestStatus == (short)Status.REQUEST_CANCELLED)
+            {
+                return (short)Status.USER_NOT_JOINED;
+            }
+
+            if (participationRequest.RequestStatus == (short)Status.REQUEST_WAITING)
+            {
+                return (short)Status.USER_PENDING;
+            }
+
+            bool isUserInOrganization = await _context.UserOrganizationRoles
+                .AnyAsync(uor => uor.OrganizationId == id && uor.UserId == userId);
+
+            return isUserInOrganization ? (short)Status.USER_JOINED : (short)Status.USER_NOT_JOINED;
+        }
+
+        public async Task<short> GetUserRoleInOrganization(string id, string userId)
+        {
+            var userRole = await _context.UserOrganizationRoles
+                .Where(uor => uor.OrganizationId == id && uor.UserId == userId)
+                .Select(uor => (short)uor.Role)
+                .FirstOrDefaultAsync();
+
+            return userRole;
+        }
     }
 }

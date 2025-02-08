@@ -20,5 +20,7 @@ namespace RollAttendanceServer.Interfaces
         Task RemoveUsersAsync(string organizationId, RemoveUsersRequest request);
         Task DeleteOrganizationAsync(string id);
         Task<IEnumerable<UserOrganizationDTO?>> GetOrganizationUsersAsync(string id, string keyword, int pageIndex, int pageSize);
+        Task<short> CheckIsUserParticipateInOrg(string id, string userId);
+        Task<short> GetUserRoleInOrganization(string id, string userId);
     }
 }

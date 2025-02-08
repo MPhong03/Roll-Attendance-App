@@ -31,5 +31,10 @@
         // REQUEST TYPE
         ABSENT_REQUEST = 0,
         LATE_REQUEST = 1,
+
+        // PARTICIPATE ORGANIZATION
+        USER_PENDING = 0,
+        USER_JOINED = 1,
+        USER_NOT_JOINED = 2,
     }
 }
