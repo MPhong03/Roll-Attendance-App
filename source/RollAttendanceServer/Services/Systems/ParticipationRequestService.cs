@@ -10,10 +10,12 @@ namespace RollAttendanceServer.Services.Systems
     public class ParticipationRequestService : IParticipationRequestService
     {
         private readonly ApplicationDbContext _context;
+        private readonly INotificationService _notificationService;
 
-        public ParticipationRequestService(ApplicationDbContext context)
+        public ParticipationRequestService(ApplicationDbContext context, INotificationService notificationService)
         {
             _context = context;
+            _notificationService = notificationService;
         }
 
         public async Task<PagedResult<ParticipationRequest>> GetParticipationRequestsAsync(
@@ -159,6 +161,22 @@ namespace RollAttendanceServer.Services.Systems
             }
 
             await _context.SaveChangesAsync();
+
+            string title, body, route;
+            if (newStatus == (short)Status.REQUEST_APPROVED)
+            {
+                title = "Yêu cầu của bạn được duyệt";
+                body = $"Yêu cầu tham gia {organization.Name} của bạn được duyệt.";
+                route = $"/organization-detail/{organization.Id}";
+            }
+            else // REQUEST_REJECTED
+            {
+                title = "Yêu cầu của bạn bị từ chối";
+                body = $"Yêu cầu tham gia {organization.Name} của bạn đã bị từ chối.";
+                route = $"/public-organization-detail/{organization.Id}";
+            }
+
+            await _notificationService.SendAndSaveNotificationAsync(request.UserId, title, body, null, route);
         }
 
         public async Task CancelRequestAsync(string requestId, string userId)

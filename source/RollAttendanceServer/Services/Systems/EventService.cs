@@ -1,4 +1,5 @@
 ﻿using Google.Api.Gax.ResourceNames;
+using Microsoft.AspNetCore.Routing;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using RollAttendanceServer.Data;
@@ -17,10 +18,12 @@ namespace RollAttendanceServer.Services.Systems
     {
         public bool IsAdmin { get; set; } = false;
         private readonly ApplicationDbContext _context;
+        private readonly INotificationService _notificationService;
 
-        public EventService(ApplicationDbContext context)
+        public EventService(ApplicationDbContext context, INotificationService notificationService)
         {
             _context = context;
+            _notificationService = notificationService;
         }
 
         public async Task<Event?> GetEventByIdAsync(string eventId)
@@ -292,6 +295,12 @@ namespace RollAttendanceServer.Services.Systems
                     EventId = eventId,
                     UserId = user.Id
                 });
+
+                var title = $"{@event.Name}";
+                var body = $"Bạn đã được thêm vào sự kiện ẩn danh - {@event.Name}";
+                var route = $"/organization-detail/{@event.OrganizationId}";
+
+                await _notificationService.SendAndSaveNotificationAsync(user.Id, title, body, null, route);
             }
 
             await _context.SaveChangesAsync();
@@ -332,7 +341,10 @@ namespace RollAttendanceServer.Services.Systems
         // CHECK IN MODULE
         public async Task<Event> ActivateEventAsync(string eventId)
         {
-            var eventEntity = await _context.Events.FindAsync(eventId);
+            var eventEntity = await _context.Events
+                                            .Include(e => e.EventUsers)
+                                            .Include(e => e.Organization)
+                                            .FirstOrDefaultAsync(e => e.Id == eventId);
             if (eventEntity == null || eventEntity.EventStatus == (short)Status.EVENT_IN_PROGRESS)
                 throw new Exception("Event not found or pending.");
 
@@ -370,6 +382,30 @@ namespace RollAttendanceServer.Services.Systems
             _context.Histories.Add(history);
 
             await _context.SaveChangesAsync();
+
+            var title = $"{eventEntity.Name}";
+            var body = $"Sự kiện {eventEntity.Name} đã được kích hoạt. Hãy kiểm tra chi tiết sự kiện!";
+            var route = $"/event-check-in/{eventEntity.Id}";
+
+            List<string> userIdsToNotify = new List<string>();
+
+            if (eventEntity.IsPrivate)
+            {
+                userIdsToNotify = eventEntity.EventUsers.Select(eu => eu.UserId).ToList();
+            }
+            else if (eventEntity.OrganizationId != null)
+            {
+                userIdsToNotify = await _context.UserOrganizationRoles
+                    .Where(uor => uor.OrganizationId == eventEntity.OrganizationId)
+                    .Select(uor => uor.UserId)
+                    .ToListAsync();
+            }
+
+            foreach (var userId in userIdsToNotify)
+            {
+                await _notificationService.SendAndSaveNotificationAsync(userId, title, body, null, route);
+            }
+
             return eventEntity;
         }
 
@@ -445,10 +481,39 @@ namespace RollAttendanceServer.Services.Systems
             if (history == null) throw new Exception("History not found.");
 
             history.AttendanceTimes++;
-            var eventEntity = await _context.Events.FindAsync(eventId);
-            eventEntity.CurrentQR = Tools.GenerateUniqueCode();
+            var eventEntity = await _context.Events
+                                            .Include(e => e.EventUsers)
+                                            .Include(e => e.Organization)
+                                            .FirstOrDefaultAsync(e => e.Id == eventId);
 
+            if (eventEntity == null)
+                throw new Exception("Event not found.");
+
+            eventEntity.CurrentQR = Tools.GenerateUniqueCode();
             await _context.SaveChangesAsync();
+
+            var title = $"Sự kiện {eventEntity.Name} - Điểm danh lần {history.AttendanceTimes}!";
+            var body = $"Một lượt điểm danh mới đã được ghi nhận cho sự kiện {eventEntity.Name}.";
+            var route = $"/event-check-in/{eventEntity.Id}";
+
+            List<string> userIdsToNotify = new List<string>();
+
+            if (eventEntity.IsPrivate)
+            {
+                userIdsToNotify = eventEntity.EventUsers.Select(eu => eu.UserId).ToList();
+            }
+            else if (eventEntity.OrganizationId != null)
+            {
+                userIdsToNotify = await _context.UserOrganizationRoles
+                    .Where(uor => uor.OrganizationId == eventEntity.OrganizationId)
+                    .Select(uor => uor.UserId)
+                    .ToListAsync();
+            }
+
+            foreach (var userId in userIdsToNotify)
+            {
+                await _notificationService.SendAndSaveNotificationAsync(userId, title, body, null, route);
+            }
         }
 
         public async Task<Event> CompleteEventAsync(string eventId)
@@ -485,6 +550,30 @@ namespace RollAttendanceServer.Services.Systems
             }
 
             await _context.SaveChangesAsync();
+
+            var title = $"Sự kiện {eventEntity.Name} đã kết thúc!";
+            var body = $"Sự kiện {eventEntity.Name} đã chính thức kết thúc. Cảm ơn bạn đã tham gia!";
+            var route = $"/event-history/{eventEntity.Id}";
+
+            List<string> userIdsToNotify = new List<string>();
+
+            if (eventEntity.IsPrivate)
+            {
+                userIdsToNotify = eventEntity.EventUsers.Select(eu => eu.UserId).ToList();
+            }
+            else if (eventEntity.OrganizationId != null)
+            {
+                userIdsToNotify = await _context.UserOrganizationRoles
+                    .Where(uor => uor.OrganizationId == eventEntity.OrganizationId)
+                    .Select(uor => uor.UserId)
+                    .ToListAsync();
+            }
+
+            foreach (var userId in userIdsToNotify)
+            {
+                await _notificationService.SendAndSaveNotificationAsync(userId, title, body, null, route);
+            }
+
             return eventEntity;
         }
 

@@ -15,11 +15,13 @@ namespace RollAttendanceServer.Services.Systems
 
         private readonly ApplicationDbContext _context;
         private readonly ICloudinaryService _cloudinaryService;
+        private readonly INotificationService _notificationService;
 
-        public OrganizationService(ApplicationDbContext context, ICloudinaryService cloudinaryService)
+        public OrganizationService(ApplicationDbContext context, ICloudinaryService cloudinaryService, INotificationService notificationService)
         {
             _context = context;
             _cloudinaryService = cloudinaryService;
+            _notificationService = notificationService;
         }
 
         public async Task<IEnumerable<Organization>> GetAll(string? keyword, int pageIndex = 0, int pageSize = 10)

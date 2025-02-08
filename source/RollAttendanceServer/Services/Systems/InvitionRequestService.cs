@@ -12,10 +12,12 @@ namespace RollAttendanceServer.Services.Systems
     public class InvitionRequestService : IInvitionRequestService
     {
         private readonly ApplicationDbContext _context;
+        private readonly INotificationService _notificationService;
 
-        public InvitionRequestService(ApplicationDbContext context)
+        public InvitionRequestService(ApplicationDbContext context, INotificationService notificationService)
         {
             _context = context;
+            _notificationService = notificationService;
         }
         public async Task<PagedResult<InviteRequest>> GetInviteRequestsAsync(
             string userId,
@@ -102,6 +104,15 @@ namespace RollAttendanceServer.Services.Systems
 
             _context.InviteRequests.AddRange(newInvites);
             await _context.SaveChangesAsync();
+
+            foreach (var invitation in newInvites)
+            {
+                var title = $"Lời mời tham gia {organization.Name}";
+                var body = $"Bạn đã được mời tham gia tổ chức {organization.Name}";
+                var route = $"/organization-detail/{organization.Id}";
+
+                await _notificationService.SendAndSaveNotificationAsync(invitation.UserId, title, body, null, route);
+            }
         }
 
 
@@ -112,15 +123,17 @@ namespace RollAttendanceServer.Services.Systems
 
             if (invitation == null) throw new Exception("Invitation not found");
 
+            var organization = await _context.Organizations
+                .FirstOrDefaultAsync(o => o.Id == invitation.OrganizationId && !o.IsDeleted);
+
+            if (organization == null) throw new Exception("Organization not found");
+
             if (status == (short)Status.INVITION_APPROVED)
             {
-                var organization = await _context.Organizations
-                    .FirstOrDefaultAsync(o => o.Id == invitation.OrganizationId && !o.IsDeleted);
                 var user = await _context.Users
                     .FirstOrDefaultAsync(u => u.Id == invitation.UserId);
 
                 if (user == null) throw new Exception("User not found");
-                if (organization == null) throw new Exception("Organization not found");
 
                 var existingRole = await _context.UserOrganizationRoles
                     .FirstOrDefaultAsync(uor => uor.UserId == user.Id && uor.OrganizationId == organization.Id);
