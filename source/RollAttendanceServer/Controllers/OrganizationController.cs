@@ -87,6 +87,24 @@ namespace RollAttendanceServer.Controllers
             }
         }
 
+        [HttpGet("getjoined/{uid}")]
+        public async Task<IActionResult> GetJoinedOrganizations(string uid, [FromQuery] string? keyword, [FromQuery] int pageIndex = 0, [FromQuery] int pageSize = 10)
+        {
+            try
+            {
+                var organizations = await _organizationService.GetOrganizationsByUserAsync(uid, 0, keyword, pageIndex, pageSize);
+
+                if (organizations == null || !organizations.Any())
+                    return NotFound("No organizations found for the specified user.");
+
+                return Ok(organizations);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, ex.Message);
+            }
+        }
+
         [HttpGet("getusers/{organizationId}")]
         public async Task<IActionResult> GetUsersByOrganization(
             string organizationId,

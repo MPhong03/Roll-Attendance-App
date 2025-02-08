@@ -93,11 +93,10 @@ namespace RollAttendanceServer.Services.Systems
         public async Task<IEnumerable<Organization?>> GetOrganizationsByUserAsync(string uid, UserRole role, string? keyword, int pageIndex = 0, int pageSize = 10)
         {
             var query = _context.UserOrganizationRoles
-                                .Where(uor => uor.User.Uid == uid && uor.Role == role)
-                                .Select(uor => uor.Organization)
-                                .AsQueryable();
+                        .Where(uor => uor.User.Uid == uid && (role > 0 ? uor.Role == role : true))
+                        .Select(uor => uor.Organization)
+                        .AsQueryable();
 
-            // Tìm kiếm theo tên hoặc mô tả
             if (!string.IsNullOrEmpty(keyword))
             {
                 query = query.Where(org => org.Name.Contains(keyword) || org.Description.Contains(keyword));
@@ -108,12 +107,9 @@ namespace RollAttendanceServer.Services.Systems
                 query = query.Where(org => !org.IsDeleted);
             }
 
-            // Phân trang
-            var organizations = await query.Skip(pageIndex * pageSize)
-                                           .Take(pageSize)
-                                           .ToListAsync();
-
-            return organizations;
+            return await query.Skip(pageIndex * pageSize)
+                              .Take(pageSize)
+                              .ToListAsync();
         }
 
         public async Task<Organization?> GetOrganizationByIdAsync(string id)
