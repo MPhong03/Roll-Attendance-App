@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Routing;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using MudBlazor.Services;
 using RollAttendanceServer.Data;
 using RollAttendanceServer.Data.Enum;
 using RollAttendanceServer.Data.Responses;
@@ -729,6 +730,10 @@ namespace RollAttendanceServer.Services.Systems
             if (user == null)
                 throw new Exception("User not found");
 
+            var title = $"Xin phép {(type == 0 ? "vắng" : "trễ")} {eventEntity.Name}";
+            var body = $"Người dùng {user.DisplayName} xin phép {(type == 0 ? "vắng" : "trễ")} sự kiện {eventEntity.Name}";
+            var route = $"/event-permission-request/{eventEntity.Id}";
+
             var existedRequest = await _context.PermissionRequests.FirstOrDefaultAsync(r => r.UserId == userId && r.EventId == eventId);
             if (existedRequest == null)
             {
@@ -750,6 +755,8 @@ namespace RollAttendanceServer.Services.Systems
                 _context.PermissionRequests.Add(request);
                 await _context.SaveChangesAsync();
 
+                await _notificationService.SendAndSaveNotificationAsync(eventEntity.OrganizerId, title, body, null, route);
+
                 return request;
             }
             else
@@ -762,6 +769,8 @@ namespace RollAttendanceServer.Services.Systems
                 existedRequest.UpdatedAt = DateTime.UtcNow;
 
                 await _context.SaveChangesAsync();
+
+                await _notificationService.SendAndSaveNotificationAsync(eventEntity.OrganizerId, title, body, null, route);
 
                 return existedRequest;
             }
@@ -821,6 +830,13 @@ namespace RollAttendanceServer.Services.Systems
             }
 
             await _context.SaveChangesAsync();
+
+            var statusText = status == (short)Status.REQUEST_APPROVED ? "đã được duyệt" : "bị từ chối";
+            var title = $"Yêu cầu xin {(request.RequestType == 0 ? "vắng" : "trễ")} {statusText}";
+            var body = $"Yêu cầu xin phép ${(request.RequestType == 0 ? "vắng" : "trễ")} trong sự kiện {eventEntity.Name} của bạn với lý do '{request.Notes}' {statusText}";
+            var route = $"/event-check-in/{eventEntity.Id}";
+
+            await _notificationService.SendAndSaveNotificationAsync(eventEntity.OrganizerId, title, body, null, route);
 
             return request;
         }
