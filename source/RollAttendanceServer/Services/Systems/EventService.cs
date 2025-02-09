@@ -929,6 +929,13 @@ namespace RollAttendanceServer.Services.Systems
             if (eventEntity.IsPrivate && !eventEntity.EventUsers.Any(eu => eu.UserId == userId))
                 throw new Exception("User not permitted for this event.");
 
+            if (!eventEntity.Latitude.HasValue ||
+                !eventEntity.Longitude.HasValue ||
+                eventEntity.CurrentLocationRadius <= 0)
+            {
+                throw new Exception("Check-in by location is not enabled for this event.");
+            }
+
             double distance = Tools.CalculateDistance(
                 eventEntity.Latitude.Value, eventEntity.Longitude.Value,
                 lat, lon
