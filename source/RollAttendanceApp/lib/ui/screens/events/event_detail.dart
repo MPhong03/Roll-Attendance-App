@@ -12,6 +12,7 @@ import 'package:itproject/services/api_service.dart';
 import 'package:itproject/ui/components/events/preview_event_modal.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 import 'package:awesome_dialog/awesome_dialog.dart';
+import 'package:geolocator/geolocator.dart';
 
 class EventDetailScreen extends StatefulWidget {
   final String eventId;
@@ -305,6 +306,145 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
     );
   }
 
+  Future<void> _handleLocationAction(BuildContext context) async {
+    bool serviceEnabled;
+    LocationPermission permission;
+
+    serviceEnabled = await Geolocator.isLocationServiceEnabled();
+    if (!serviceEnabled) {
+      await Geolocator.openLocationSettings();
+      return;
+    }
+
+    permission = await Geolocator.checkPermission();
+    if (permission == LocationPermission.denied) {
+      permission = await Geolocator.requestPermission();
+      if (permission == LocationPermission.denied) {
+        return;
+      }
+    }
+
+    if (permission == LocationPermission.deniedForever) {
+      return;
+    }
+
+    Position position = await Geolocator.getCurrentPosition(
+      desiredAccuracy: LocationAccuracy.high,
+    );
+
+    _showLocationModal(context, position);
+  }
+
+  void _showLocationModal(BuildContext context, Position position) {
+    TextEditingController radiusController = TextEditingController();
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      builder: (context) {
+        return Padding(
+          padding: EdgeInsets.only(
+            bottom: MediaQuery.of(context).viewInsets.bottom,
+            left: 16,
+            right: 16,
+            top: 16,
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextField(
+                controller: radiusController,
+                keyboardType: TextInputType.number,
+                decoration: InputDecoration(
+                  labelText: "Enter radius (meters)",
+                  border: OutlineInputBorder(),
+                ),
+              ),
+              const SizedBox(height: 16),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  ElevatedButton(
+                    onPressed: () => Navigator.pop(context),
+                    child: const Text("Cancel"),
+                  ),
+                  ElevatedButton(
+                    onPressed: () async {
+                      String radius = radiusController.text;
+                      print("Latitude: ${position.latitude}");
+                      print("Longitude: ${position.longitude}");
+                      print("Radius: $radius meters");
+
+                      bool result = await updateEventCheckInLocation(
+                        widget.eventId,
+                        position.latitude,
+                        position.longitude,
+                        double.parse(radius),
+                      );
+
+                      if (mounted) {
+                        if (result) {
+                          AwesomeDialog(
+                            context: context,
+                            dialogType: DialogType.success,
+                            animType: AnimType.scale,
+                            title: "Thành công",
+                            desc: "Đã cập nhật vị trí check-in thành công!",
+                            btnOkOnPress: () {
+                              Navigator.pop(context);
+                            },
+                          ).show();
+                        } else {
+                          AwesomeDialog(
+                            context: context,
+                            dialogType: DialogType.error,
+                            animType: AnimType.scale,
+                            title: "Lỗi",
+                            desc:
+                                "Có lỗi xảy ra khi cập nhật. Vui lòng thử lại!",
+                            btnOkOnPress: () {},
+                          ).show();
+                        }
+                      }
+                    },
+                    child: const Text("Activate"),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 16),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  Future<bool> updateEventCheckInLocation(
+      String id, double lat, double lon, double radius) async {
+    try {
+      setState(() {
+        _isLoading = true;
+      });
+
+      final response = await _apiService.post(
+          'api/events/$id/activate-geography-checkin',
+          {"Latitude": lat, "Longitude": lon, "Radius": radius});
+
+      if (response.statusCode == 200) {
+        return true;
+      } else {
+        return false;
+      }
+    } catch (e) {
+      print('Failed to load event: $e');
+      return false;
+    } finally {
+      setState(() {
+        _isLoading = false;
+      });
+    }
+  }
+
   @override
   void initState() {
     super.initState();
@@ -365,8 +505,8 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
         inAsyncCall: _isLoading,
         opacity: 0.3,
         blurEffectIntensity: 5,
-        child: FutureBuilder<EventModel>(
-          future: _eventFuture,
+        child: FutureBuilder<List<dynamic>>(
+          future: Future.wait([_eventFuture, _historyFuture]),
           builder: (context, snapshot) {
             if (snapshot.connectionState == ConnectionState.waiting) {
               return const Center(child: CircularProgressIndicator());
@@ -386,7 +526,9 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
               );
             }
 
-            final event = snapshot.data!;
+            final event = snapshot.data![0] as EventModel;
+            final history = snapshot.data![1] as HistoryModel;
+
             return RefreshIndicator(
               onRefresh: _onRefresh,
               child: SingleChildScrollView(
@@ -424,8 +566,8 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
                                 getResponsiveFontSize),
                             _buildDateTime(
                                 event, textColor, getResponsiveFontSize),
-                            _buildButtons(
-                                event, screenSize, getResponsiveFontSize),
+                            _buildButtons(event, history, screenSize,
+                                getResponsiveFontSize),
                           ],
                         ),
                       ),
@@ -531,12 +673,12 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
     );
   }
 
-  Widget _buildButtons(
-      EventModel event, Size screenSize, Function(double) fontSize) {
+  Widget _buildButtons(EventModel event, HistoryModel history, Size screenSize,
+      Function(double) fontSize) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
-        for (var action in _eventActions(event))
+        for (var action in _eventActions(event, history))
           if (action['condition'])
             Padding(
               padding: EdgeInsets.symmetric(
@@ -579,7 +721,8 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
     );
   }
 
-  List<Map<String, dynamic>> _eventActions(EventModel event) {
+  List<Map<String, dynamic>> _eventActions(
+      EventModel event, HistoryModel history) {
     return [
       // Start Check-In or Complete
       {
@@ -636,6 +779,14 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
         'onPressed': () => context.push('/edit-event/${event.id}'),
         'condition': true,
       },
+      {
+        'label': 'Absent/Late',
+        'icon': Icons.person_off,
+        'color': Colors.green,
+        'onPressed': () =>
+            context.push('/event-permission-request/${event.id}'),
+        'condition': true,
+      },
       // Access List
       {
         'label': 'Access List',
@@ -657,8 +808,9 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
         'label': 'Location',
         'icon': Icons.location_on,
         'color': Colors.green,
-        'onPressed': () {
+        'onPressed': () async {
           // Handle location action
+          await _handleLocationAction(context);
         },
         'condition': event.eventStatus == EventStatus.inProgress,
       },
@@ -669,6 +821,8 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
         'color': Colors.green,
         'onPressed': () {
           // Handle biometrics action
+          context.push(
+              '/event-face-check-in/${event.id}/${history.attendanceTimes}');
         },
         'condition': event.eventStatus == EventStatus.inProgress,
       },

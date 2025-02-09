@@ -1,7 +1,10 @@
 import 'dart:convert';
 
+import 'package:awesome_dialog/awesome_dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:blurry_modal_progress_hud/blurry_modal_progress_hud.dart';
+import 'package:fluttertoast/fluttertoast.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:go_router/go_router.dart';
 import 'package:itproject/enums/event_status.dart';
 import 'package:itproject/models/event_history_model.dart';
@@ -116,6 +119,209 @@ class _EventCheckInScreenState extends State<EventCheckInScreen> {
         );
       },
     );
+  }
+
+  void _showAbsentLateDialog(BuildContext context) {
+    int selectedStatus = 0;
+    TextEditingController reasonController = TextEditingController();
+    bool isLoading = false;
+
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return StatefulBuilder(
+          builder: (context, setState) {
+            return AlertDialog(
+              title: const Text(
+                "Absent/Late Request",
+                style: TextStyle(fontWeight: FontWeight.bold),
+              ),
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  DropdownButtonFormField<int>(
+                    value: selectedStatus,
+                    decoration:
+                        const InputDecoration(labelText: "Select Status"),
+                    items: const [
+                      DropdownMenuItem(value: 1, child: Text("Late")),
+                      DropdownMenuItem(value: 0, child: Text("Absent")),
+                    ],
+                    onChanged: (value) {
+                      setState(() {
+                        selectedStatus = value ?? 1;
+                      });
+                    },
+                  ),
+                  const SizedBox(height: 10),
+                  TextField(
+                    controller: reasonController,
+                    maxLines: 3,
+                    decoration: const InputDecoration(
+                      labelText: "Reason",
+                      border: OutlineInputBorder(),
+                    ),
+                  ),
+                ],
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () {
+                    Navigator.pop(context);
+                  },
+                  child: const Text("Cancel"),
+                ),
+                ElevatedButton(
+                  onPressed: isLoading
+                      ? null
+                      : () async {
+                          String reason = reasonController.text.trim();
+                          if (reason.isEmpty) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text("Please enter a reason"),
+                                backgroundColor: Colors.red,
+                              ),
+                            );
+                            return;
+                          }
+
+                          setState(() {
+                            isLoading = true;
+                          });
+
+                          try {
+                            final response = await _apiService.post(
+                              'api/events/${widget.eventId}/absented-request',
+                              {
+                                'Type': selectedStatus,
+                                'Notes': reason,
+                              },
+                            );
+
+                            final message =
+                                jsonDecode(response.body)['message'];
+
+                            Fluttertoast.showToast(
+                              msg: message,
+                              toastLength: Toast.LENGTH_SHORT,
+                              gravity: ToastGravity.BOTTOM,
+                              backgroundColor: Colors.black,
+                              textColor: Colors.white,
+                            );
+
+                            if (response.statusCode == 200) {
+                              Navigator.pop(context);
+                            }
+                          } catch (e) {
+                            Fluttertoast.showToast(
+                              msg: "Error: $e",
+                              toastLength: Toast.LENGTH_SHORT,
+                              gravity: ToastGravity.BOTTOM,
+                              backgroundColor: Colors.red,
+                              textColor: Colors.white,
+                            );
+                          } finally {
+                            setState(() {
+                              isLoading = false;
+                            });
+                          }
+                        },
+                  child: isLoading
+                      ? const SizedBox(
+                          width: 24,
+                          height: 24,
+                          child: CircularProgressIndicator(color: Colors.white),
+                        )
+                      : const Text("Send"),
+                ),
+              ],
+            );
+          },
+        );
+      },
+    );
+  }
+
+  Future<void> locationCheckIn(
+      double lat, double lon, HistoryModel history) async {
+    setState(() {
+      _isLoading = true;
+    });
+
+    try {
+      final response = await _apiService
+          .post('api/events/${widget.eventId}/geography-checkin', {
+        'Latitude': lat,
+        'Longitude': lon,
+        'AttendanceAttempt': history.attendanceTimes,
+      });
+      if (response.statusCode == 200) {
+        if (mounted) {
+          AwesomeDialog(
+            context: context,
+            dialogType: DialogType.success,
+            animType: AnimType.scale,
+            title: 'Success',
+            desc: 'Successfully checked in',
+            btnOkOnPress: () {
+              context.pop();
+            },
+          ).show();
+        }
+      } else {
+        _showErrorDialog('Failed to check in: ${response.body}');
+      }
+    } catch (e) {
+      _showErrorDialog('Error: $e');
+    } finally {
+      setState(() {
+        _isLoading = false;
+      });
+    }
+  }
+
+  void _checkLocationAndCheckIn(HistoryModel history) async {
+    bool serviceEnabled;
+    LocationPermission permission;
+
+    serviceEnabled = await Geolocator.isLocationServiceEnabled();
+    if (!serviceEnabled) {
+      _showErrorDialog("Turn on GPS to check in.");
+      return;
+    }
+
+    permission = await Geolocator.checkPermission();
+    if (permission == LocationPermission.denied) {
+      permission = await Geolocator.requestPermission();
+      if (permission == LocationPermission.denied) {
+        _showErrorDialog("GPS permission is denied.");
+        return;
+      }
+    }
+
+    if (permission == LocationPermission.deniedForever) {
+      _showErrorDialog(
+          "GPS permission is permanently denied, you can enable it in app settings.");
+      return;
+    }
+
+    Position position = await Geolocator.getCurrentPosition(
+        desiredAccuracy: LocationAccuracy.high);
+
+    // Gọi API để điểm danh
+    await locationCheckIn(position.latitude, position.longitude, history);
+  }
+
+  void _showErrorDialog(String message) {
+    AwesomeDialog(
+      context: context,
+      dialogType: DialogType.error,
+      animType: AnimType.bottomSlide,
+      title: 'Error',
+      desc: message,
+      btnCancelOnPress: () {},
+    ).show();
   }
 
   @override
@@ -391,6 +597,81 @@ class _EventCheckInScreenState extends State<EventCheckInScreen> {
                                         const SizedBox(width: 8),
                                         Text(
                                           "BIOMETRICS",
+                                          style: TextStyle(
+                                            color: Colors.white,
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: getResponsiveFontSize(16),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(height: 20),
+                              Center(
+                                child: SizedBox(
+                                  // width: screenWidth * 0.5,
+                                  // height: screenHeight * 0.05,
+                                  child: ElevatedButton(
+                                    onPressed: () {
+                                      _checkLocationAndCheckIn(history);
+                                    },
+                                    style: ElevatedButton.styleFrom(
+                                      backgroundColor: const Color(0xFF0FB900),
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(25),
+                                      ),
+                                    ),
+                                    child: Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
+                                      children: [
+                                        const Icon(
+                                          Icons.pin_drop,
+                                          color: Colors.white,
+                                        ),
+                                        const SizedBox(width: 8),
+                                        Text(
+                                          "LOCATION",
+                                          style: TextStyle(
+                                            color: Colors.white,
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: getResponsiveFontSize(16),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(height: 20),
+                              Center(
+                                child: SizedBox(
+                                  // width: screenWidth * 0.5,
+                                  // height: screenHeight * 0.05,
+                                  child: ElevatedButton(
+                                    onPressed: () {
+                                      _showAbsentLateDialog(context);
+                                    },
+                                    style: ElevatedButton.styleFrom(
+                                      backgroundColor: const Color.fromARGB(
+                                          255, 255, 204, 0),
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(25),
+                                      ),
+                                    ),
+                                    child: Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
+                                      children: [
+                                        const Icon(
+                                          Icons.access_time,
+                                          color: Colors.white,
+                                        ),
+                                        const SizedBox(width: 8),
+                                        Text(
+                                          "ABSENT/LATE",
                                           style: TextStyle(
                                             color: Colors.white,
                                             fontWeight: FontWeight.bold,

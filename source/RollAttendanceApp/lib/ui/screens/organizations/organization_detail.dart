@@ -3,11 +3,13 @@ import 'dart:convert';
 import 'package:awesome_dialog/awesome_dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:blurry_modal_progress_hud/blurry_modal_progress_hud.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:go_router/go_router.dart';
 import 'package:itproject/models/event_model.dart';
 import 'package:itproject/models/organization_model.dart';
 import 'package:itproject/models/user_model.dart';
 import 'package:itproject/services/api_service.dart';
+import 'package:itproject/services/user_service.dart';
 import 'package:itproject/ui/components/organizations/org_event_card.dart';
 import 'package:itproject/ui/components/organizations/org_user_card.dart';
 
@@ -23,11 +25,15 @@ class OrganizationDetailScreen extends StatefulWidget {
 
 class _OrganizationDetailScreenState extends State<OrganizationDetailScreen> {
   final ApiService _apiService = ApiService();
+  final UserService _userService = UserService();
   bool _isLoading = false;
   late Future<OrganizationModel> _organizationFuture;
   late Future<List<EventModel>> _eventListFuture;
   late Future<List<UserModel>> _userListFuture;
   List<String> _selectedUserIds = [];
+
+  late int roleNumber = 0;
+  late String roleName = "Unknown";
 
   int _page = 1;
   final int _limit = 10;
@@ -36,6 +42,25 @@ class _OrganizationDetailScreenState extends State<OrganizationDetailScreen> {
       'https://th.bing.com/th/id/OIP.agLNnNJWhgFjK8D7AO1VdAHaDt?rs=1&pid=ImgDetMain';
   String imagePlaceHolder =
       'https://yt3.ggpht.com/a/AGF-l78urB8ASkb0JO2a6AB0UAXeEHe6-pc9UJqxUw=s900-mo-c-c0xffffffff-rj-k-no';
+
+  Future<void> initData(id) async {
+    try {
+      setState(() {
+        _isLoading = true;
+      });
+
+      final data = await _userService.getUserRoleInOrganization(id);
+
+      roleNumber = data.keys.first;
+      roleName = data.values.first;
+    } catch (e) {
+      throw Exception('Failed to load user role: $e');
+    } finally {
+      setState(() {
+        _isLoading = false;
+      });
+    }
+  }
 
   Future<OrganizationModel> getDetail(id) async {
     try {
@@ -216,6 +241,8 @@ class _OrganizationDetailScreenState extends State<OrganizationDetailScreen> {
     _organizationFuture = getDetail(widget.organizationId);
     _eventListFuture = getEvents(widget.organizationId);
     _userListFuture = getUsers(widget.organizationId);
+
+    initData(widget.organizationId);
   }
 
   @override
@@ -347,14 +374,24 @@ class _OrganizationDetailScreenState extends State<OrganizationDetailScreen> {
                                         color: Colors.white,
                                         width: 3.0,
                                       ),
+                                      boxShadow: [
+                                        BoxShadow(
+                                          color: Colors.black.withOpacity(0.2),
+                                          blurRadius: 6,
+                                          offset: Offset(0, 3),
+                                        ),
+                                      ],
                                     ),
                                   ),
                                 ),
                               ],
                             ),
                             const SizedBox(height: 70),
+
+                            // Thông tin tổ chức
                             Padding(
-                              padding: const EdgeInsets.all(16.0),
+                              padding:
+                                  const EdgeInsets.symmetric(horizontal: 16.0),
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.center,
                                 children: [
@@ -362,22 +399,25 @@ class _OrganizationDetailScreenState extends State<OrganizationDetailScreen> {
                                     organization.name,
                                     style: Theme.of(context)
                                         .textTheme
-                                        .headlineMedium,
+                                        .headlineSmall!
+                                        .copyWith(fontWeight: FontWeight.bold),
                                     textAlign: TextAlign.center,
                                   ),
-                                  const SizedBox(height: 10),
+                                  const SizedBox(height: 12),
                                   Text(
                                     organization.description,
                                     style:
-                                        Theme.of(context).textTheme.bodyMedium,
+                                        Theme.of(context).textTheme.bodyLarge,
                                     textAlign: TextAlign.center,
                                   ),
                                   const SizedBox(height: 20),
+
+                                  // Địa chỉ
                                   Row(
                                     mainAxisAlignment: MainAxisAlignment.center,
                                     children: [
-                                      const Icon(Icons.location_on,
-                                          color: Colors.grey),
+                                      Icon(Icons.location_on,
+                                          color: Colors.grey.shade700),
                                       const SizedBox(width: 5),
                                       Text(
                                         organization.address.isNotEmpty
@@ -389,166 +429,108 @@ class _OrganizationDetailScreenState extends State<OrganizationDetailScreen> {
                                       ),
                                     ],
                                   ),
-                                  const SizedBox(height: 10),
-                                  Chip(
-                                    label: Text(organization.isPrivate
-                                        ? 'Private'
-                                        : 'Public'),
-                                    backgroundColor: organization.isPrivate
-                                        ? Colors.red
-                                        : Colors.green,
-                                    labelStyle:
-                                        const TextStyle(color: Colors.white),
-                                  ),
-                                  const SizedBox(height: 50),
-                                  Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.center,
+
+                                  const SizedBox(height: 15),
+
+                                  // Trạng thái tổ chức và Role người dùng
+                                  Wrap(
+                                    spacing: 10,
+                                    alignment: WrapAlignment.center,
                                     children: [
-                                      Container(
-                                        width:
-                                            MediaQuery.of(context).size.width *
-                                                0.5,
-                                        margin:
-                                            const EdgeInsets.only(bottom: 16),
-                                        decoration: BoxDecoration(
-                                          color: Colors.green,
-                                          borderRadius:
-                                              BorderRadius.circular(12),
-                                          border:
-                                              Border.all(color: Colors.green),
-                                          boxShadow: [
-                                            BoxShadow(
-                                              color:
-                                                  Colors.green.withOpacity(0.2),
-                                              blurRadius: 4,
-                                              offset: const Offset(0, 2),
-                                            ),
-                                          ],
-                                        ),
-                                        child: TextButton.icon(
-                                          onPressed: () {
-                                            context.push(
-                                                '/edit-organization/${widget.organizationId}');
-                                          },
-                                          icon: const Icon(Icons.edit,
+                                      Chip(
+                                        label: Text(
+                                          organization.isPrivate
+                                              ? 'Private'
+                                              : 'Public',
+                                          style: const TextStyle(
                                               color: Colors.white),
-                                          label: const Text(
-                                            'Edit',
-                                            style:
-                                                TextStyle(color: Colors.white),
-                                          ),
                                         ),
-                                      ),
-                                      Container(
-                                        width:
-                                            MediaQuery.of(context).size.width *
-                                                0.5,
-                                        margin:
-                                            const EdgeInsets.only(bottom: 16),
-                                        decoration: BoxDecoration(
-                                          color: Colors.green,
-                                          borderRadius:
-                                              BorderRadius.circular(12),
-                                          border:
-                                              Border.all(color: Colors.green),
-                                          boxShadow: [
-                                            BoxShadow(
-                                              color:
-                                                  Colors.green.withOpacity(0.2),
-                                              blurRadius: 4,
-                                              offset: const Offset(0, 2),
-                                            ),
-                                          ],
-                                        ),
-                                        child: TextButton.icon(
-                                          onPressed: () {
-                                            context.push(
-                                                '/organization-requests/${widget.organizationId}');
-                                          },
-                                          icon: const Icon(Icons.mail,
-                                              color: Colors.white),
-                                          label: const Text(
-                                            'Requests',
-                                            style:
-                                                TextStyle(color: Colors.white),
-                                          ),
-                                        ),
-                                      ),
-                                      // Container(
-                                      //   width:
-                                      //       MediaQuery.of(context).size.width *
-                                      //           0.5,
-                                      //   margin:
-                                      //       const EdgeInsets.only(bottom: 16),
-                                      //   decoration: BoxDecoration(
-                                      //     color: Colors.green,
-                                      //     borderRadius:
-                                      //         BorderRadius.circular(12),
-                                      //     border:
-                                      //         Border.all(color: Colors.green),
-                                      //     boxShadow: [
-                                      //       BoxShadow(
-                                      //         color:
-                                      //             Colors.green.withOpacity(0.2),
-                                      //         blurRadius: 4,
-                                      //         offset: const Offset(0, 2),
-                                      //       ),
-                                      //     ],
-                                      //   ),
-                                      //   child: TextButton.icon(
-                                      //     onPressed: () {
-                                      //       context.push(
-                                      //           '/organization-invitations/${widget.organizationId}');
-                                      //     },
-                                      //     icon: const Icon(
-                                      //         Icons.mark_email_unread_rounded,
-                                      //         color: Colors.white),
-                                      //     label: const Text(
-                                      //       'Invitations',
-                                      //       style:
-                                      //           TextStyle(color: Colors.white),
-                                      //     ),
-                                      //   ),
-                                      // ),
-                                      Container(
-                                        width:
-                                            MediaQuery.of(context).size.width *
-                                                0.5,
-                                        margin:
-                                            const EdgeInsets.only(bottom: 16),
-                                        decoration: BoxDecoration(
-                                          color: Colors.red,
-                                          borderRadius:
-                                              BorderRadius.circular(12),
-                                          border: Border.all(color: Colors.red),
-                                          boxShadow: [
-                                            BoxShadow(
-                                              color:
-                                                  Colors.red.withOpacity(0.2),
-                                              blurRadius: 4,
-                                              offset: const Offset(0, 2),
-                                            ),
-                                          ],
-                                        ),
-                                        child: TextButton.icon(
-                                          onPressed: () {
-                                            _deleteOrganization();
-                                          },
-                                          icon: const Icon(Icons.delete,
-                                              color: Colors.white),
-                                          label: const Text(
-                                            'Delete',
-                                            style:
-                                                TextStyle(color: Colors.white),
-                                          ),
-                                        ),
+                                        backgroundColor: organization.isPrivate
+                                            ? Colors.red
+                                            : Colors.green,
                                       ),
                                     ],
-                                  )
+                                  ),
+                                  const SizedBox(height: 15),
+                                  Container(
+                                    padding: EdgeInsets.symmetric(
+                                        vertical: 4, horizontal: 12),
+                                    decoration: BoxDecoration(
+                                      color: Colors.grey[200],
+                                      borderRadius: BorderRadius.circular(8),
+                                    ),
+                                    child: Row(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        Icon(Icons.person,
+                                            size: 16, color: Colors.black54),
+                                        SizedBox(width: 5),
+                                        Text(
+                                          roleName,
+                                          style: TextStyle(
+                                            fontSize: 14,
+                                            fontWeight: FontWeight.w500,
+                                            color: Colors.black87,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
                                 ],
                               ),
                             ),
+
+                            const SizedBox(height: 40),
+
+                            // Các nút hành động
+                            Padding(
+                              padding:
+                                  const EdgeInsets.symmetric(horizontal: 20.0),
+                              child: Column(
+                                children: [
+                                  _buildButton(
+                                    context: context,
+                                    roleNumber: roleNumber,
+                                    title: 'Edit',
+                                    icon: Icons.edit,
+                                    color: Colors.green,
+                                    onPressed: () {
+                                      context.push(
+                                          '/edit-organization/${widget.organizationId}');
+                                    },
+                                    permissionMessage:
+                                        "You don't have permission to edit this organization",
+                                  ),
+                                  const SizedBox(height: 12),
+                                  _buildButton(
+                                    context: context,
+                                    roleNumber: roleNumber,
+                                    title: 'Requests',
+                                    icon: Icons.mail,
+                                    color: Colors.blue,
+                                    onPressed: () {
+                                      context.push(
+                                          '/organization-requests/${widget.organizationId}');
+                                    },
+                                    permissionMessage:
+                                        "You don't have permission to view requests",
+                                  ),
+                                  const SizedBox(height: 12),
+                                  _buildButton(
+                                    context: context,
+                                    roleNumber: roleNumber,
+                                    title: 'Delete',
+                                    icon: Icons.delete,
+                                    color: Colors.red,
+                                    onPressed: _deleteOrganization,
+                                    permissionMessage:
+                                        "You don't have permission to delete this organization",
+                                  ),
+                                ],
+                              ),
+                            ),
+
+                            const SizedBox(height: 30),
                           ],
                         ),
                       ),
@@ -586,7 +568,7 @@ class _OrganizationDetailScreenState extends State<OrganizationDetailScreen> {
                                         itemCount: events.length,
                                         itemBuilder: (context, index) {
                                           final event = events[index];
-                                          return OrgEventCard(event: event);
+                                          return OrgEventCard(event: event, roleNumber: roleNumber);
                                         },
                                       );
                                     }
@@ -600,8 +582,19 @@ class _OrganizationDetailScreenState extends State<OrganizationDetailScreen> {
                               right: 0,
                               child: ElevatedButton.icon(
                                 onPressed: () {
-                                  context.push(
-                                      '/create-event/${widget.organizationId}');
+                                  if (roleNumber == 1) {
+                                    Fluttertoast.showToast(
+                                      msg:
+                                          "You don't have permission to create an event",
+                                      toastLength: Toast.LENGTH_SHORT,
+                                      gravity: ToastGravity.BOTTOM,
+                                      backgroundColor: Colors.red,
+                                      textColor: Colors.white,
+                                    );
+                                  } else {
+                                    context.push(
+                                        '/create-event/${widget.organizationId}');
+                                  }
                                 },
                                 icon:
                                     const Icon(Icons.add, color: Colors.white),
@@ -613,7 +606,9 @@ class _OrganizationDetailScreenState extends State<OrganizationDetailScreen> {
                                   ),
                                 ),
                                 style: ElevatedButton.styleFrom(
-                                  backgroundColor: Colors.green,
+                                  backgroundColor: roleNumber == 1
+                                      ? Colors.grey
+                                      : Colors.green,
                                   foregroundColor: Colors.white,
                                   padding: const EdgeInsets.symmetric(
                                       horizontal: 20, vertical: 12),
@@ -672,29 +667,41 @@ class _OrganizationDetailScreenState extends State<OrganizationDetailScreen> {
                                 left: 16,
                                 right: 16,
                                 child: ElevatedButton.icon(
-                                  onPressed: () async {
-                                    bool shouldRemove = false;
+                                  onPressed: roleNumber == 3
+                                      ? () async {
+                                          bool shouldRemove = false;
 
-                                    await AwesomeDialog(
-                                      context: context,
-                                      dialogType: DialogType.warning,
-                                      animType: AnimType.topSlide,
-                                      title: 'Confirm Remove',
-                                      desc:
-                                          'Are you sure you want to remove selected users?',
-                                      btnOkOnPress: () {
-                                        shouldRemove = true;
-                                      },
-                                      btnCancelOnPress: () {
-                                        shouldRemove = false;
-                                      },
-                                    ).show();
+                                          await AwesomeDialog(
+                                            context: context,
+                                            dialogType: DialogType.warning,
+                                            animType: AnimType.topSlide,
+                                            title: 'Confirm Remove',
+                                            desc:
+                                                'Are you sure you want to remove selected users?',
+                                            btnOkOnPress: () {
+                                              shouldRemove = true;
+                                            },
+                                            btnCancelOnPress: () {
+                                              shouldRemove = false;
+                                            },
+                                          ).show();
 
-                                    if (shouldRemove) {
-                                      await _removeUsers(_selectedUserIds);
-                                      _onRefresh();
-                                    }
-                                  },
+                                          if (shouldRemove) {
+                                            await _removeUsers(
+                                                _selectedUserIds);
+                                            _onRefresh();
+                                          }
+                                        }
+                                      : () {
+                                          Fluttertoast.showToast(
+                                            msg:
+                                                "You don't have permission to remove users",
+                                            toastLength: Toast.LENGTH_SHORT,
+                                            gravity: ToastGravity.BOTTOM,
+                                            backgroundColor: Colors.red,
+                                            textColor: Colors.white,
+                                          );
+                                        },
                                   icon: const Icon(Icons.delete,
                                       color: Colors.white),
                                   label: const Text(
@@ -705,7 +712,9 @@ class _OrganizationDetailScreenState extends State<OrganizationDetailScreen> {
                                     ),
                                   ),
                                   style: ElevatedButton.styleFrom(
-                                    backgroundColor: Colors.red,
+                                    backgroundColor: roleNumber == 3
+                                        ? Colors.red
+                                        : Colors.grey,
                                     foregroundColor: Colors.white,
                                     padding: const EdgeInsets.symmetric(
                                         horizontal: 20, vertical: 12),
@@ -720,10 +729,21 @@ class _OrganizationDetailScreenState extends State<OrganizationDetailScreen> {
                               left: 0,
                               right: 0,
                               child: ElevatedButton.icon(
-                                onPressed: () {
-                                  context.push(
-                                      '/add-to-organization/${widget.organizationId}');
-                                },
+                                onPressed: roleNumber == 3
+                                    ? () {
+                                        context.push(
+                                            '/add-to-organization/${widget.organizationId}');
+                                      }
+                                    : () {
+                                        Fluttertoast.showToast(
+                                          msg:
+                                              "You don't have permission to add users",
+                                          toastLength: Toast.LENGTH_SHORT,
+                                          gravity: ToastGravity.BOTTOM,
+                                          backgroundColor: Colors.red,
+                                          textColor: Colors.white,
+                                        );
+                                      },
                                 icon:
                                     const Icon(Icons.add, color: Colors.white),
                                 label: const Text(
@@ -734,7 +754,9 @@ class _OrganizationDetailScreenState extends State<OrganizationDetailScreen> {
                                   ),
                                 ),
                                 style: ElevatedButton.styleFrom(
-                                  backgroundColor: Colors.green,
+                                  backgroundColor: roleNumber == 3
+                                      ? Colors.green
+                                      : Colors.grey, // Disable màu nút
                                   foregroundColor: Colors.white,
                                   padding: const EdgeInsets.symmetric(
                                       horizontal: 20, vertical: 12),
@@ -754,6 +776,54 @@ class _OrganizationDetailScreenState extends State<OrganizationDetailScreen> {
             );
           }
         },
+      ),
+    );
+  }
+
+  Widget _buildButton({
+    required BuildContext context,
+    required int roleNumber,
+    required String title,
+    required IconData icon,
+    required Color color,
+    required VoidCallback onPressed,
+    required String permissionMessage,
+  }) {
+    bool hasPermission = roleNumber == 3;
+
+    return Container(
+      width: MediaQuery.of(context).size.width * 0.5,
+      margin: const EdgeInsets.only(bottom: 16),
+      decoration: BoxDecoration(
+        color: hasPermission ? color : Colors.grey,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: hasPermission ? color : Colors.grey),
+        boxShadow: [
+          BoxShadow(
+            color: color.withOpacity(0.2),
+            blurRadius: 4,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: TextButton.icon(
+        onPressed: hasPermission
+            ? onPressed
+            : () {
+                Fluttertoast.showToast(
+                  msg: permissionMessage,
+                  toastLength: Toast.LENGTH_SHORT,
+                  gravity: ToastGravity.BOTTOM,
+                  backgroundColor: Colors.red,
+                  textColor: Colors.white,
+                );
+              },
+        icon: Icon(icon, color: hasPermission ? Colors.white : Colors.black45),
+        label: Text(
+          title,
+          style:
+              TextStyle(color: hasPermission ? Colors.white : Colors.black45),
+        ),
       ),
     );
   }

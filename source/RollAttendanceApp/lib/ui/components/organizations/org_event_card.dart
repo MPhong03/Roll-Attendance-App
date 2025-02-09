@@ -5,8 +5,9 @@ import 'package:itproject/models/event_model.dart';
 
 class OrgEventCard extends StatelessWidget {
   final EventModel event;
+  final int roleNumber;
 
-  const OrgEventCard({super.key, required this.event});
+  const OrgEventCard({super.key, required this.event, required this.roleNumber});
 
   String formatDate(DateTime? date) {
     if (date == null) return '';
@@ -34,16 +35,20 @@ class OrgEventCard extends StatelessWidget {
             const SizedBox(height: 5),
             Text(
               'Start: ${formatDate(event.startTime)}',
-              style: const TextStyle(fontSize: 12, color: Colors.grey),
+              style: const TextStyle(fontSize: 14, color: Colors.grey),
             ),
             Text(
               'End: ${formatDate(event.endTime)}',
-              style: const TextStyle(fontSize: 12, color: Colors.grey),
+              style: const TextStyle(fontSize: 14, color: Colors.grey),
             ),
           ],
         ),
         onTap: () {
-          context.push('/event-detail/${event.id}');
+          if (roleNumber == 1) {
+            context.push('/event-check-in/${event.id}');
+          } else {
+            context.push('/event-detail/${event.id}');
+          }
         },
       ),
     );

@@ -82,16 +82,6 @@ class _OrganizationScreenState extends State<OrganizationScreen> {
             }
           });
         }
-      } else {
-        Fluttertoast.showToast(
-          msg: "No organizations found",
-          toastLength: Toast.LENGTH_SHORT,
-          gravity: ToastGravity.BOTTOM,
-          timeInSecForIosWeb: 1,
-          backgroundColor: Colors.black,
-          textColor: Colors.white,
-          fontSize: 16.0,
-        );
       }
     } catch (e) {
       Fluttertoast.showToast(
@@ -141,16 +131,6 @@ class _OrganizationScreenState extends State<OrganizationScreen> {
             }
           });
         }
-      } else {
-        Fluttertoast.showToast(
-          msg: "No organizations found",
-          toastLength: Toast.LENGTH_SHORT,
-          gravity: ToastGravity.BOTTOM,
-          timeInSecForIosWeb: 1,
-          backgroundColor: Colors.black,
-          textColor: Colors.white,
-          fontSize: 16.0,
-        );
       }
     } catch (e) {
       Fluttertoast.showToast(

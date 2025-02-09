@@ -62,5 +62,17 @@
 			<string>fetch</string>
 			<string>remote-notification</string>
 		</array>
+		<key>NSLocationWhenInUseUsageDescription</key>
+		<string>Ứng dụng cần quyền truy cập vị trí để hiển thị bản đồ.</string>
+
+		<key>NSLocationAlwaysUsageDescription</key>
+		<string>Ứng dụng cần quyền vị trí để theo dõi bạn ngay cả khi không mở ứng dụng.</string>
+
+		<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+		<string>Ứng dụng cần quyền vị trí để cung cấp dịch vụ tốt hơn.</string>
+		<key>UIBackgroundModes</key>
+		<array>
+			<string>location</string>
+		</array>
 	</dict>
 </plist>

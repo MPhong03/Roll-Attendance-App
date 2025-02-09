@@ -4,7 +4,8 @@ enum AttendanceStatus {
   USER_PRESENTED,
   USER_ABSENTED,
   USER_PERMITTED_ABSENTED,
-  USER_LATED
+  USER_LATED,
+  USER_PERMITTED_LATED
 }
 
 String getRoleName(AttendanceStatus role) {
@@ -17,6 +18,8 @@ String getRoleName(AttendanceStatus role) {
       return 'Permitted Absented';
     case AttendanceStatus.USER_LATED:
       return 'Lated';
+    case AttendanceStatus.USER_PERMITTED_LATED:
+      return 'Permitted Lated';
     default:
       return 'Unknown';
   }
@@ -32,6 +35,8 @@ int getRoleValue(AttendanceStatus role) {
       return 2;
     case AttendanceStatus.USER_LATED:
       return 3;
+    case AttendanceStatus.USER_PERMITTED_LATED:
+      return 4;
     default:
       return -1;
   }
@@ -47,6 +52,8 @@ Map<String, dynamic> getRoleFromValue(int value) {
       return {'text': 'Permitted Absented', 'color': Colors.blue};
     case 3:
       return {'text': 'Lated', 'color': Colors.orange};
+    case 4:
+      return {'text': 'Permitted Lated', 'color': Colors.blue};
     default:
       return {'text': 'Unknown', 'color': Colors.grey};
   }

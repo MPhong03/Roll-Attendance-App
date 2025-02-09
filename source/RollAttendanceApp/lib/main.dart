@@ -6,6 +6,7 @@ import 'package:itproject/themes.dart';
 import 'package:itproject/ui/main_view.dart';
 import 'package:itproject/ui/screens/events/create_event.dart';
 import 'package:itproject/ui/screens/events/edit_event.dart';
+import 'package:itproject/ui/screens/events/event_absent_late_request.dart';
 import 'package:itproject/ui/screens/events/event_access_list.dart';
 import 'package:itproject/ui/screens/events/event_attendance_list.dart';
 import 'package:itproject/ui/screens/events/event_check_in_screen.dart';
@@ -284,6 +285,13 @@ class MyApp extends StatelessWidget {
               builder: (context, state) {
                 final id = state.pathParameters['id']!;
                 return EventAttendanceListScreen(eventId: id);
+              },
+            ),
+            GoRoute(
+              path: '/event-permission-request/:id',
+              builder: (context, state) {
+                final id = state.pathParameters['id']!;
+                return EventAbsentLateRequestScreen(eventId: id);
               },
             ),
             GoRoute(

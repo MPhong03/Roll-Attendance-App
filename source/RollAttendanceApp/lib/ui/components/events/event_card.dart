@@ -191,29 +191,37 @@ class EventCard extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     // Trạng thái điểm danh
-                    Text(
-                      event.isCheckInYet == true
-                          ? "Attendance: ${getRoleFromValue(event.attendanceStatus ?? -1)['text']}"
-                          : "Not Absent Yet",
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        color: event.isCheckInYet == true
-                            ? getRoleFromValue(
-                                event.attendanceStatus ?? -1)['color']
-                            : Colors.grey,
-                        fontSize: getResponsiveFontSize(14),
+                    Expanded(
+                      child: Text(
+                        event.isCheckInYet == true
+                            ? "${getRoleFromValue(event.attendanceStatus ?? -1)['text']}"
+                            : "Not Absent Yet",
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          color: event.isCheckInYet == true
+                              ? getRoleFromValue(
+                                  event.attendanceStatus ?? -1)['color']
+                              : Colors.grey,
+                          fontSize: getResponsiveFontSize(14),
+                        ),
+                        overflow: TextOverflow.ellipsis,
                       ),
                     ),
+                    const SizedBox(width: 8), // Tạo khoảng cách nhỏ
+
                     // Trạng thái sự kiện
-                    Text(
-                      getEventStatus(
-                          parseEventStatus(event.eventStatus))["text"],
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        color: getEventStatus(
-                          parseEventStatus(event.eventStatus),
-                        )["color"],
-                        fontSize: getResponsiveFontSize(14),
+                    Expanded(
+                      child: Text(
+                        getEventStatus(
+                            parseEventStatus(event.eventStatus))["text"],
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          color: getEventStatus(
+                              parseEventStatus(event.eventStatus))["color"],
+                          fontSize: getResponsiveFontSize(14),
+                        ),
+                        overflow: TextOverflow.ellipsis,
+                        textAlign: TextAlign.right, // Canh phải
                       ),
                     ),
                   ],

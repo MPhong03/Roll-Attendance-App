@@ -7,6 +7,13 @@ import 'package:itproject/services/api_service.dart';
 class UserService {
   final ApiService _apiService = ApiService();
 
+  final Map<int, String> roleMap = {
+    1: "User",
+    2: "Organizart",
+    3: "Representative",
+    0: "Unknown"
+  };
+
   Future<String?> createProfile(String? email, String? uid) async {
     try {
       final data = {
@@ -69,6 +76,26 @@ class UserService {
       return UserModel.fromJson(jsonDecode(response.body));
     } else {
       throw Exception('Failed to load user');
+    }
+  }
+
+  Future<Map<int, String>> getUserRoleInOrganization(
+      String organizationId) async {
+    try {
+      final response =
+          await _apiService.get('api/Organization/get-role/$organizationId');
+
+      if (response.statusCode == 200) {
+        final body = jsonDecode(response.body);
+
+        int roleNumber = body['role'];
+
+        return {roleNumber: roleMap[roleNumber] ?? "UNKNOWN"};
+      } else {
+        return {0: "UNKNOWN"};
+      }
+    } catch (e) {
+      throw Exception('Error in getUserRoleInOrganization: $e');
     }
   }
 }
