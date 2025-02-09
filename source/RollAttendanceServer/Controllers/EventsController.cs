@@ -294,7 +294,7 @@ namespace RollAttendanceServer.Controllers
                     return Unauthorized("Invalid user.");
                 }
 
-                var newRequest = await _eventService.SendRequest(id, userId, request.Notes, 0);
+                var newRequest = await _eventService.SendRequest(id, userId, request.Notes, (short)request.Type);
 
                 return Ok(new { request = newRequest, message = "Successfully send request" });
             }
