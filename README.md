@@ -1,8 +1,8 @@
 # Roll Attendance App
 
 ## Getting Started
-- [Flutter SDK Installation](https://docs.flutter.dev/)
-- 
+- [Flutter SDK](https://docs.flutter.dev/)
+- [Dart SDK](https://dart.dev/get-dart)
 
 ## Run Project
 - Application: `flutter pub get` and `flutter run`
