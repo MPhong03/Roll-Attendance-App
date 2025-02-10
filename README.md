@@ -3,6 +3,7 @@
 ## Getting Started
 - [Flutter SDK Installation](https://docs.flutter.dev/)
 - 
+
 ## Run Project
 - Application: `flutter pub get` and `flutter run`
 - Server: Run with Visual Studio
@@ -15,7 +16,7 @@
 
 ## Configuration
 ### Server
-- Go to [Firebase Console](https://console.firebase.google.com) -> Project Settings -> General ->  Your Apps -> SDK setup and configuration -> Download google-services.json and Paste to source\RollAttendanceServer\AppData
+- Go to [Firebase Console](https://console.firebase.google.com) -> Project Settings -> General ->  Your Apps -> SDK setup and configuration -> Download google-services.json and Paste to `source\RollAttendanceServer\AppData` and `source\RollAttendanceApp\android\app`, GoogleService-Info.plist for `source\RollAttendanceApp\ios\Runner`
 - Configure appsettings.json
 - Our production server url: http://mphong-api.ap-southeast-2.elasticbeanstalk.com
 
