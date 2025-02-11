@@ -391,7 +391,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           '/my-invitations'),
                       _buildListTile(
                           context, Icons.notifications, 'Notifications', '/my-notifications'),
-                      _buildListTile(context, Icons.language, 'Language', ''),
+                      _buildListTile(context, Icons.settings, 'Settings', '/settings'),
                       _buildListTile(context, Icons.help, 'Help & Support', ''),
                       Divider(),
                       ListTile(

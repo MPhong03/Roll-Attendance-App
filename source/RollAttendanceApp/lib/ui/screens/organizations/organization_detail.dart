@@ -35,8 +35,13 @@ class _OrganizationDetailScreenState extends State<OrganizationDetailScreen> {
   late int roleNumber = 0;
   late String roleName = "Unknown";
 
-  int _page = 1;
+  // int _page = 1;
+  int _pageEvent = 1;
+  int _pageUser = 1;
   final int _limit = 10;
+
+  bool _hasMoreEvents = true;
+  bool _hasMoreUsers = true;
 
   String bannerPlaceHolder =
       'https://th.bing.com/th/id/OIP.agLNnNJWhgFjK8D7AO1VdAHaDt?rs=1&pid=ImgDetMain';
@@ -86,8 +91,8 @@ class _OrganizationDetailScreenState extends State<OrganizationDetailScreen> {
 
   Future<List<EventModel>> getEvents(id) async {
     try {
-      final response = await _apiService
-          .get('api/events/organization/$id?page=$_page&limit=$_limit');
+      final response = await _apiService.get(
+          'api/events/organization/$id?pageIndex=$_pageEvent&pageSize=$_limit');
       if (response.statusCode == 200) {
         final List eventsData = jsonDecode(response.body);
         return eventsData.map((event) => EventModel.fromMap(event)).toList();
@@ -101,8 +106,8 @@ class _OrganizationDetailScreenState extends State<OrganizationDetailScreen> {
 
   Future<List<UserModel>> getUsers(id) async {
     try {
-      final response = await _apiService
-          .get('api/organization/getusers/$id?page=$_page&limit=$_limit');
+      final response = await _apiService.get(
+          'api/organization/getusers/$id?pageIndex=$_pageUser&pageSize=$_limit');
       if (response.statusCode == 200) {
         final List usersData = jsonDecode(response.body);
 
@@ -114,6 +119,58 @@ class _OrganizationDetailScreenState extends State<OrganizationDetailScreen> {
       }
     } catch (e) {
       throw Exception('Failed to load events: $e');
+    }
+  }
+
+  Future<void> _loadMoreEvents() async {
+    if (!_hasMoreEvents) return;
+
+    try {
+      final response = await _apiService.get(
+          'api/events/organization/${widget.organizationId}?pageIndex=${_pageEvent + 1}&pageSize=$_limit');
+      if (response.statusCode == 200) {
+        final List eventsData = jsonDecode(response.body);
+        if (eventsData.isNotEmpty) {
+          setState(() {
+            _pageEvent++;
+            _eventListFuture = _eventListFuture.then((existingEvents) =>
+                existingEvents +
+                eventsData.map((e) => EventModel.fromMap(e)).toList());
+          });
+        } else {
+          setState(() {
+            _hasMoreEvents = false;
+          });
+        }
+      }
+    } catch (e) {
+      throw Exception('Failed to load more events: $e');
+    }
+  }
+
+  Future<void> _loadMoreUsers() async {
+    if (!_hasMoreUsers) return;
+
+    try {
+      final response = await _apiService.get(
+          'api/organization/getusers/${widget.organizationId}?pageIndex=${_pageUser + 1}&pageSize=$_limit');
+      if (response.statusCode == 200) {
+        final List usersData = jsonDecode(response.body);
+        if (usersData.isNotEmpty) {
+          setState(() {
+            _pageUser++;
+            _userListFuture = _userListFuture.then((existingUsers) =>
+                existingUsers +
+                usersData.map((u) => UserModel.fromMap(u)).toList());
+          });
+        } else {
+          setState(() {
+            _hasMoreUsers = false;
+          });
+        }
+      }
+    } catch (e) {
+      throw Exception('Failed to load more users: $e');
     }
   }
 
@@ -209,22 +266,6 @@ class _OrganizationDetailScreenState extends State<OrganizationDetailScreen> {
       desc: message,
       btnCancelOnPress: () {},
     ).show();
-  }
-
-  void _nextPage() {
-    setState(() {
-      _page++;
-    });
-    _onRefresh();
-  }
-
-  void _prevPage() {
-    if (_page > 1) {
-      setState(() {
-        _page--;
-      });
-      _onRefresh();
-    }
   }
 
   Future<void> _onRefresh() async {
@@ -561,15 +602,34 @@ class _OrganizationDetailScreenState extends State<OrganizationDetailScreen> {
                                           child: Text('No events available'));
                                     } else {
                                       final events = snapshot.data!;
-                                      return ListView.builder(
-                                        shrinkWrap: true,
-                                        physics:
-                                            const NeverScrollableScrollPhysics(),
-                                        itemCount: events.length,
-                                        itemBuilder: (context, index) {
-                                          final event = events[index];
-                                          return OrgEventCard(event: event, roleNumber: roleNumber);
-                                        },
+                                      return Column(
+                                        children: [
+                                          ListView.builder(
+                                            shrinkWrap: true,
+                                            physics:
+                                                const NeverScrollableScrollPhysics(),
+                                            itemCount: events.length,
+                                            itemBuilder: (context, index) {
+                                              final event = events[index];
+                                              return OrgEventCard(
+                                                  event: event,
+                                                  roleNumber: roleNumber);
+                                            },
+                                          ),
+                                          if (_hasMoreEvents)
+                                            Center(
+                                              child: GestureDetector(
+                                                onTap: _loadMoreEvents,
+                                                child: const Text(
+                                                  "Load More",
+                                                  style: TextStyle(
+                                                      fontSize: 16,
+                                                      fontWeight:
+                                                          FontWeight.bold),
+                                                ),
+                                              ),
+                                            ),
+                                        ],
                                       );
                                     }
                                   },
@@ -647,14 +707,32 @@ class _OrganizationDetailScreenState extends State<OrganizationDetailScreen> {
                                           child: Text('No users available'));
                                     } else {
                                       final users = snapshot.data!;
-                                      return OrgUserCard(
-                                        users: users,
-                                        onUserSelectionChanged:
-                                            (selectedUserIds) {
-                                          setState(() {
-                                            _selectedUserIds = selectedUserIds;
-                                          });
-                                        },
+                                      return Column(
+                                        children: [
+                                          OrgUserCard(
+                                            users: users,
+                                            onUserSelectionChanged:
+                                                (selectedUserIds) {
+                                              setState(() {
+                                                _selectedUserIds =
+                                                    selectedUserIds;
+                                              });
+                                            },
+                                          ),
+                                          if (_hasMoreUsers)
+                                            Center(
+                                              child: GestureDetector(
+                                                onTap: _loadMoreUsers,
+                                                child: const Text(
+                                                  "Load More",
+                                                  style: TextStyle(
+                                                      fontSize: 16,
+                                                      fontWeight:
+                                                          FontWeight.bold),
+                                                ),
+                                              ),
+                                            ),
+                                        ],
                                       );
                                     }
                                   },

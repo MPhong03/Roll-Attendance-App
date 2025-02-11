@@ -32,7 +32,10 @@ import 'package:itproject/ui/screens/forgot_password_screen.dart';
 import 'package:itproject/ui/screens/settings/my_invitation_screen.dart';
 import 'package:itproject/ui/screens/settings/my_notifications_screen.dart';
 import 'package:itproject/ui/screens/settings/my_request_screen.dart';
+import 'package:itproject/ui/screens/settings/settings_screen.dart';
 import 'package:itproject/ui/screens/settings/update_face_data_screen.dart';
+import 'package:itproject/utils/theme_provider.dart';
+import 'package:provider/provider.dart';
 import 'firebase_options.dart';
 import 'package:go_router/go_router.dart';
 import 'package:logging/logging.dart';
@@ -88,11 +91,14 @@ Future<void> initFCM() async {
   });
 
   FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {
-    print("Nhấn vào thông báo khi ứng dụng nền: ${message.notification?.title}");
+    print(
+        "Nhấn vào thông báo khi ứng dụng nền: ${message.notification?.title}");
   });
 
-  const AndroidInitializationSettings androidSettings = AndroidInitializationSettings('@mipmap/launcher_icon');
-  final InitializationSettings settingsInit = InitializationSettings(android: androidSettings);
+  const AndroidInitializationSettings androidSettings =
+      AndroidInitializationSettings('@mipmap/launcher_icon');
+  final InitializationSettings settingsInit =
+      InitializationSettings(android: androidSettings);
 
   await flutterLocalNotificationsPlugin.initialize(settingsInit);
 }
@@ -105,7 +111,8 @@ void showLocalNotification(RemoteMessage message) async {
     priority: Priority.high,
   );
 
-  const NotificationDetails details = NotificationDetails(android: androidDetails);
+  const NotificationDetails details =
+      NotificationDetails(android: androidDetails);
 
   await flutterLocalNotificationsPlugin.show(
     0,
@@ -130,7 +137,12 @@ Future<void> main() async {
   await initFCM();
 
   setupLogging();
-  runApp(const MyApp());
+  runApp(
+    ChangeNotifierProvider(
+      create: (context) => ThemeProvider(),
+      child: const MyApp(),
+    ),
+  );
 }
 
 class MyApp extends StatelessWidget {
@@ -138,6 +150,8 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final themeProvider = Provider.of<ThemeProvider>(context);
+
     return StreamBuilder<User?>(
       stream: FirebaseAuth.instance.authStateChanges(),
       builder: (context, snapshot) {
@@ -181,6 +195,10 @@ class MyApp extends StatelessWidget {
               builder: (context, state) => LoginScreen(
                 controller: PageController(),
               ),
+            ),
+            GoRoute(
+              path: '/settings',
+              builder: (context, state) => const SettingsScreen(),
             ),
             GoRoute(
               path: '/forgot-password',
@@ -318,12 +336,16 @@ class MyApp extends StatelessWidget {
           ),
         );
 
-        return MaterialApp.router(
-          routerConfig: router,
-          debugShowCheckedModeBanner: false,
-          theme: customLightTheme,
-          darkTheme: customDarkTheme,
-          themeMode: ThemeMode.system,
+        return Consumer<ThemeProvider>(
+          builder: (context, themeProvider, child) {
+            return MaterialApp.router(
+              routerConfig: router,
+              debugShowCheckedModeBanner: false,
+              theme: customLightTheme,
+              darkTheme: customDarkTheme,
+              themeMode: themeProvider.themeMode,
+            );
+          },
         );
       },
     );

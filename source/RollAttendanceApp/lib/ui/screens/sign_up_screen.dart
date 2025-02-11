@@ -169,112 +169,129 @@ class _SignUpScreenState extends State<SignUpScreen> {
       child: Scaffold(
         backgroundColor:
             isDarkMode ? Color(0xFF1E1E1E) : Color.fromRGBO(197, 240, 200, 1),
-        body: SingleChildScrollView(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              Center(
-                child: Padding(
-                  padding: EdgeInsets.only(
-                      top: MediaQuery.of(context).size.height * 0.05),
-                  child: Image.asset(
-                    "assets/images/logo.png",
-                    // Logo responsive
-                    width: screenWidth > 1024
-                        ? screenWidth * 0.4
-                        : screenWidth * 0.6,
-                    fit: BoxFit.cover,
-                  ),
-                ),
-              ),
-              const SizedBox(height: 15),
-              const Text(
-                "Apelo",
-                style: TextStyle(
-                  fontSize: 32,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.green,
-                ),
-                textAlign: TextAlign.center,
-              ),
-              Padding(
-                padding: EdgeInsets.symmetric(horizontal: screenWidth * 0.1),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+        body: Center(
+          child: SingleChildScrollView(
+            child: LayoutBuilder(
+              builder: (context, constraints) {
+                bool isMobileView = constraints.maxWidth < 768;
+                return Flex(
+                  direction: isMobileView ? Axis.vertical : Axis.horizontal,
+                  mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    const SizedBox(height: 20),
-                    // Email TextBox
-                    _buildResponsiveTextBox(
-                        context, _emailController, Icons.email, 'Email'),
-                    const SizedBox(height: 30),
-                    // Password TextBox
-                    _buildResponsiveTextBox(
-                        context, _passController, Icons.lock, 'Password',
-                        isObscure: true, toggleObscure: () {
-                      setState(() {
-                        _isPasswordHidden = !_isPasswordHidden;
-                      });
-                    }),
-                    const SizedBox(height: 30),
-                    // Confirm Password TextBox
-                    _buildResponsiveTextBox(context, _repassController,
-                        Icons.lock, 'Confirm Password', isObscure: true,
-                        toggleObscure: () {
-                      setState(() {
-                        _isConfirmPasswordHidden = !_isConfirmPasswordHidden;
-                      });
-                    }),
-                    const SizedBox(height: 60),
-                    // SIGN UP Button
-                    Center(
-                      child: ClipRRect(
-                        borderRadius:
-                            const BorderRadius.all(Radius.circular(10)),
-                        child: SizedBox(
-                          width: screenWidth * 0.8,
-                          height: 45,
-                          child: ElevatedButton(
-                            onPressed: _register,
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: const Color(0xFF1E8925),
-                            ),
-                            child: Text(
-                              'SIGN UP',
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontSize: getResponsiveFontSize(18),
-                                fontFamily: 'Baloo',
-                                fontWeight: FontWeight.w700,
-                              ),
-                            ),
+                    Expanded(
+                      flex: 6,
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Image.asset(
+                            "assets/images/logo.png",
+                            width: screenWidth * 0.4,
+                            fit: BoxFit.cover,
                           ),
-                        ),
+                          const SizedBox(height: 15),
+                          const Text(
+                            "Apelo",
+                            style: TextStyle(
+                              fontSize: 32,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.green,
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
+                        ],
                       ),
                     ),
-                    const SizedBox(height: 60),
-                    Center(
-                      child: GestureDetector(
-                        onTap: () {
-                          widget.controller.animateToPage(0,
-                              duration: const Duration(milliseconds: 500),
-                              curve: Curves.ease);
-                        },
-                        child: Text(
-                          'Already have an account? Log in now',
-                          style: TextStyle(
-                            color: isDarkMode ? Colors.white : Colors.black,
-                            fontSize: getResponsiveFontSize(14),
-                            fontFamily: 'Baloo',
-                            fontWeight: FontWeight.w700,
-                            decoration: TextDecoration.none,
-                          ),
+                    Expanded(
+                      flex: 6,
+                      child: Padding(
+                        padding: EdgeInsets.symmetric(
+                            horizontal: screenWidth * 0.05),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const SizedBox(height: 20),
+                            // Email Input
+                            _buildResponsiveTextBox(context, _emailController,
+                                Icons.email, 'Email'),
+                            const SizedBox(height: 30),
+                            // Password Input
+                            _buildResponsiveTextBox(context, _passController,
+                                Icons.lock, 'Password',
+                                isObscure: _isPasswordHidden,
+                                toggleObscure: () {
+                              setState(() {
+                                _isPasswordHidden = !_isPasswordHidden;
+                              });
+                            }),
+                            const SizedBox(height: 30),
+                            // Confirm Password Input
+                            _buildResponsiveTextBox(context, _repassController,
+                                Icons.lock, 'Confirm Password',
+                                isObscure: _isConfirmPasswordHidden,
+                                toggleObscure: () {
+                              setState(() {
+                                _isConfirmPasswordHidden =
+                                    !_isConfirmPasswordHidden;
+                              });
+                            }),
+                            const SizedBox(height: 60),
+                            // SIGN UP Button
+                            Center(
+                              child: ClipRRect(
+                                borderRadius:
+                                    const BorderRadius.all(Radius.circular(10)),
+                                child: SizedBox(
+                                  width: screenWidth * 0.8,
+                                  height: 45,
+                                  child: ElevatedButton(
+                                    onPressed: _register,
+                                    style: ElevatedButton.styleFrom(
+                                      backgroundColor: const Color(0xFF1E8925),
+                                    ),
+                                    child: Text(
+                                      'SIGN UP',
+                                      style: TextStyle(
+                                        color: Colors.white,
+                                        fontSize: getResponsiveFontSize(18),
+                                        fontFamily: 'Baloo',
+                                        fontWeight: FontWeight.w700,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ),
+                            const SizedBox(height: 30),
+                            Center(
+                              child: GestureDetector(
+                                onTap: () {
+                                  widget.controller.animateToPage(0,
+                                      duration:
+                                          const Duration(milliseconds: 500),
+                                      curve: Curves.ease);
+                                },
+                                child: Text(
+                                  'Already have an account? Log in now',
+                                  style: TextStyle(
+                                    color: isDarkMode
+                                        ? Colors.white
+                                        : Colors.black,
+                                    fontSize: getResponsiveFontSize(14),
+                                    fontFamily: 'Baloo',
+                                    fontWeight: FontWeight.w700,
+                                    decoration: TextDecoration.none,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
                         ),
                       ),
                     ),
                   ],
-                ),
-              ),
-            ],
+                );
+              },
+            ),
           ),
         ),
       ),
@@ -337,7 +354,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
               ),
             ),
             contentPadding: const EdgeInsets.only(left: 60),
-            suffixIcon: isObscure && toggleObscure != null
+            suffixIcon: toggleObscure != null
                 ? IconButton(
                     icon: Icon(
                       isObscure ? Icons.visibility_off : Icons.visibility,

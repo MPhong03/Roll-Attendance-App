@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:flutter/foundation.dart';
 import 'package:intl/intl.dart';
 
 import 'package:firebase_auth/firebase_auth.dart';
@@ -50,15 +51,17 @@ class _HomeScreenState extends State<HomeScreen> {
         await _apiService.post('api/users/fcm-token', { 'Token': token });
       }
     } catch (e) {
-      Fluttertoast.showToast(
-        msg: "Failed to share profile, $e",
-        toastLength: Toast.LENGTH_SHORT,
-        gravity: ToastGravity.BOTTOM,
-        timeInSecForIosWeb: 1,
-        backgroundColor: Colors.black,
-        textColor: Colors.white,
-        fontSize: 16.0,
-      );
+      if (!kIsWeb) {
+        Fluttertoast.showToast(
+          msg: "Failed to share profile, $e",
+          toastLength: Toast.LENGTH_SHORT,
+          gravity: ToastGravity.BOTTOM,
+          timeInSecForIosWeb: 1,
+          backgroundColor: Colors.black,
+          textColor: Colors.white,
+          fontSize: 16.0,
+        );
+      }
     }
   }
 

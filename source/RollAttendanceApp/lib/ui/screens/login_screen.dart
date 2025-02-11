@@ -211,13 +211,7 @@ class _LoginScreenState extends State<LoginScreen> {
     final screenWidth = MediaQuery.of(context).size.width;
     final bool isDarkMode = Theme.of(context).brightness == Brightness.dark;
 
-    double getResponsiveFontSize(double baseFontSize) {
-      if (screenWidth > 480) {
-        return baseFontSize * 1.2;
-      } else {
-        return baseFontSize;
-      }
-    }
+    bool isLargeScreen = screenWidth > 768;
 
     return BlurryModalProgressHUD(
       inAsyncCall: _isLoading,
@@ -225,294 +219,268 @@ class _LoginScreenState extends State<LoginScreen> {
       blurEffectIntensity: 5,
       child: Scaffold(
         backgroundColor:
-            isDarkMode ? Color(0xFF1E1E1E) : Color.fromRGBO(197, 240, 200, 1),
-        body: SingleChildScrollView(
-          controller: _scrollController,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              Center(
-                child: Padding(
-                  padding: EdgeInsets.only(
-                      top: MediaQuery.of(context).size.height * 0.05),
-                  child: Image.asset(
-                    "assets/images/logo.png",
-                    width: screenWidth > 1024
-                        ? screenWidth * 0.4
-                        : screenWidth * 0.6,
-                    fit: BoxFit.cover,
-                  ),
-                ),
-              ),
-              const SizedBox(height: 5),
-              const Text(
-                "Apelo",
-                style: TextStyle(
-                  fontSize: 32,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.green,
-                ),
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 8),
-              const Text(
-                "From here, light will be shining everywhere in the universe",
-                style: TextStyle(
-                  fontSize: 13,
-                  fontStyle: FontStyle.italic,
-                  color: Colors.grey,
-                ),
-                textAlign: TextAlign.center,
-              ),
-              Padding(
-                padding: EdgeInsets.symmetric(horizontal: screenWidth * 0.1),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const SizedBox(height: 20),
-                    Stack(
-                      clipBehavior: Clip.none,
+            isDarkMode ? const Color(0xFF1E1E1E) : const Color(0xFFC5F0C8),
+        body: Center(
+          child: SingleChildScrollView(
+            controller: _scrollController,
+            child: Padding(
+              padding: EdgeInsets.symmetric(horizontal: screenWidth * 0.05),
+              child: isLargeScreen
+                  ? Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        TextField(
-                          controller: _emailController,
-                          style: TextStyle(
-                            fontSize: getResponsiveFontSize(15),
-                            fontFamily: 'Baloo',
-                            color: isDarkMode ? Colors.white : Colors.black,
-                            fontWeight: FontWeight.w400,
-                          ),
-                          decoration: InputDecoration(
-                            hintText: 'Email',
-                            hintStyle: TextStyle(
-                              color: Colors.grey,
-                              fontSize: getResponsiveFontSize(15),
-                              fontFamily: 'Baloo',
-                              fontWeight: FontWeight.w600,
-                            ),
-                            filled: true,
-                            fillColor: isDarkMode ? Colors.black : Colors.white,
-                            enabledBorder: OutlineInputBorder(
-                              borderRadius:
-                                  BorderRadius.all(Radius.circular(10)),
-                              borderSide: BorderSide(
-                                width: 1,
-                                color: Color(0xFF48B02C),
+                        Expanded(
+                          flex: 6,
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Image.asset(
+                                "assets/images/logo.png",
+                                width: screenWidth * 0.4,
+                                fit: BoxFit.cover,
                               ),
-                            ),
-                            focusedBorder: OutlineInputBorder(
-                              borderRadius:
-                                  BorderRadius.all(Radius.circular(10)),
-                              borderSide: BorderSide(
-                                width: 1,
-                                color: Color(0xFF48B02C),
+                              const SizedBox(height: 10),
+                              const Text(
+                                "Apelo",
+                                style: TextStyle(
+                                  fontSize: 32,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.green,
+                                ),
+                                textAlign: TextAlign.center,
                               ),
-                            ),
-                            contentPadding: EdgeInsets.only(left: 60),
+                              const SizedBox(height: 8),
+                              const Text(
+                                "From here, light will be shining everywhere in the universe",
+                                style: TextStyle(
+                                  fontSize: 13,
+                                  fontStyle: FontStyle.italic,
+                                  color: Colors.grey,
+                                ),
+                                textAlign: TextAlign.center,
+                              ),
+                            ],
                           ),
                         ),
-                        Positioned(
-                          left: -25,
-                          top: 0,
-                          bottom: 0,
-                          child: Container(
-                            width: 60,
-                            height: 60,
-                            decoration: const BoxDecoration(
-                              color: Color(0xFF48B02C),
-                              shape: BoxShape.circle,
-                            ),
-                            child: Icon(
-                              Icons.email,
-                              color: Colors.white,
-                              size: getResponsiveFontSize(24),
-                            ),
-                          ),
+
+                        Expanded(
+                          flex: 6,
+                          child: _buildLoginForm(context, isDarkMode),
                         ),
                       ],
-                    ),
-                    const SizedBox(height: 30),
-                    // Password TextBox
-                    Stack(
-                      clipBehavior: Clip.none,
+                    )
+                  : Column(
+                      crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
-                        TextField(
-                          controller: _passController,
-                          obscureText: _isPasswordHidden,
-                          style: TextStyle(
-                            fontSize: getResponsiveFontSize(15),
-                            fontFamily: 'Baloo',
-                            color: isDarkMode ? Colors.white : Colors.black,
-                            fontWeight: FontWeight.w400,
-                          ),
-                          decoration: InputDecoration(
-                            hintText: 'Password',
-                            hintStyle: TextStyle(
-                              color: Colors.grey,
-                              fontSize: getResponsiveFontSize(15),
-                              fontFamily: 'Baloo',
-                              fontWeight: FontWeight.w600,
-                            ),
-                            filled: true,
-                            fillColor: isDarkMode ? Colors.black : Colors.white,
-                            enabledBorder: const OutlineInputBorder(
-                              borderRadius:
-                                  BorderRadius.all(Radius.circular(10)),
-                              borderSide: BorderSide(
-                                width: 1,
-                                color: Color(0xFF48B02C),
-                              ),
-                            ),
-                            focusedBorder: const OutlineInputBorder(
-                              borderRadius:
-                                  BorderRadius.all(Radius.circular(10)),
-                              borderSide: BorderSide(
-                                width: 1,
-                                color: Color(0xFF48B02C),
-                              ),
-                            ),
-                            contentPadding: const EdgeInsets.only(left: 60),
-                            suffixIcon: IconButton(
-                              icon: Icon(
-                                _isPasswordHidden
-                                    ? Icons.visibility_off
-                                    : Icons.visibility,
-                                color: const Color(0xFF48B02C),
-                              ),
-                              onPressed: () {
-                                setState(() {
-                                  _isPasswordHidden = !_isPasswordHidden;
-                                });
-                              },
-                            ),
-                          ),
+                        Image.asset(
+                          "assets/images/logo.png",
+                          width: screenWidth * 0.6,
+                          fit: BoxFit.cover,
                         ),
-                        Positioned(
-                          left: -25,
-                          top: 0,
-                          bottom: 0,
-                          child: Container(
-                            width: 60,
-                            height: 60,
-                            decoration: const BoxDecoration(
-                              color: Color(0xFF48B02C),
-                              shape: BoxShape.circle,
-                            ),
-                            child: Icon(
-                              Icons.lock,
-                              color: Colors.white,
-                              size: getResponsiveFontSize(24),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 15),
-                    // Forgot Password
-                    Align(
-                      alignment: Alignment.centerRight,
-                      child: GestureDetector(
-                        onTap: () {
-                          context.push('/forgot-password');
-                        },
-                        child: Text(
-                          'Forgot Password',
+                        const SizedBox(height: 5),
+                        const Text(
+                          "Apelo",
                           style: TextStyle(
+                            fontSize: 32,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.green,
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                        const SizedBox(height: 8),
+                        const Text(
+                          "From here, light will be shining everywhere in the universe",
+                          style: TextStyle(
+                            fontSize: 13,
+                            fontStyle: FontStyle.italic,
                             color: Colors.grey,
-                            fontSize: getResponsiveFontSize(12),
-                            fontFamily: 'Baloo',
-                            fontWeight: FontWeight.w700,
                           ),
+                          textAlign: TextAlign.center,
                         ),
-                      ),
+                        const SizedBox(height: 20),
+                        _buildLoginForm(context, isDarkMode),
+                      ],
                     ),
-                    const SizedBox(height: 50),
-                    Center(
-                      child: ClipRRect(
-                        borderRadius:
-                            const BorderRadius.all(Radius.circular(10)),
-                        child: SizedBox(
-                          width: screenWidth * 0.8,
-                          height: 45,
-                          child: ElevatedButton(
-                            onPressed: _login,
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: const Color(0xFF1E8925),
-                            ),
-                            child: Text(
-                              'LOG IN',
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontSize: getResponsiveFontSize(18),
-                                fontFamily: 'Baloo',
-                                fontWeight: FontWeight.w700,
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-                    Center(
-                      child: ClipRRect(
-                        borderRadius:
-                            const BorderRadius.all(Radius.circular(10)),
-                        child: SizedBox(
-                          width: screenWidth * 0.8,
-                          height: 45,
-                          child: ElevatedButton(
-                            onPressed: _loginWithGoogle,
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.white,
-                              side: BorderSide(color: Colors.grey.shade300),
-                            ),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Image.asset(
-                                  'assets/images/google.png',
-                                  height: 24,
-                                ),
-                                const SizedBox(width: 10),
-                                Text(
-                                  'Sign in with Google',
-                                  style: TextStyle(
-                                    color: Colors.black87,
-                                    fontSize: getResponsiveFontSize(16),
-                                    fontFamily: 'Baloo',
-                                    fontWeight: FontWeight.w700,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 45),
-                    Center(
-                      child: InkWell(
-                        onTap: () {
-                          widget.controller.animateToPage(1,
-                              duration: const Duration(milliseconds: 500),
-                              curve: Curves.ease);
-                        },
-                        child: Text(
-                          'CREATE AN ACCOUNT',
-                          style: TextStyle(
-                            color: isDarkMode ? Colors.white : Colors.black,
-                            fontSize: getResponsiveFontSize(14),
-                            fontFamily: 'Baloo',
-                            fontWeight: FontWeight.w700,
-                            decoration: TextDecoration.none,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildLoginForm(BuildContext context, bool isDarkMode) {
+    final screenWidth = MediaQuery.of(context).size.width;
+
+    return Padding(
+      padding: EdgeInsets.symmetric(horizontal: screenWidth * 0.05),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _buildTextField(
+            controller: _emailController,
+            hintText: 'Email',
+            icon: Icons.email,
+            isDarkMode: isDarkMode,
+          ),
+          const SizedBox(height: 20),
+
+          _buildTextField(
+            controller: _passController,
+            hintText: 'Password',
+            icon: Icons.lock,
+            isDarkMode: isDarkMode,
+            isPassword: true,
+          ),
+          const SizedBox(height: 15),
+
+          Align(
+            alignment: Alignment.centerRight,
+            child: GestureDetector(
+              onTap: () => context.push('/forgot-password'),
+              child: const Text(
+                'Forgot Password',
+                style: TextStyle(
+                  color: Colors.grey,
+                  fontSize: 12,
+                  fontFamily: 'Baloo',
+                  fontWeight: FontWeight.w700,
                 ),
               ),
-            ],
+            ),
           ),
+          const SizedBox(height: 30),
+
+          _buildButton(
+            onPressed: _login,
+            text: 'LOG IN',
+            backgroundColor: const Color(0xFF1E8925),
+            textColor: Colors.white,
+          ),
+          const SizedBox(height: 16),
+
+          _buildButton(
+            onPressed: _loginWithGoogle,
+            text: 'Sign in with Google',
+            backgroundColor: Colors.white,
+            textColor: Colors.black87,
+            icon: Image.asset('assets/images/google.png', height: 24),
+          ),
+          const SizedBox(height: 45),
+
+          Center(
+            child: InkWell(
+              onTap: () {
+                widget.controller.animateToPage(1,
+                    duration: const Duration(milliseconds: 500),
+                    curve: Curves.ease);
+              },
+              child: Text(
+                'CREATE AN ACCOUNT',
+                style: TextStyle(
+                  color: isDarkMode ? Colors.white : Colors.black,
+                  fontSize: 14,
+                  fontFamily: 'Baloo',
+                  fontWeight: FontWeight.w700,
+                  decoration: TextDecoration.none,
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildTextField({
+    required TextEditingController controller,
+    required String hintText,
+    required IconData icon,
+    required bool isDarkMode,
+    bool isPassword = false,
+  }) {
+    return Stack(
+      clipBehavior: Clip.none,
+      children: [
+        TextField(
+          controller: controller,
+          obscureText: isPassword && _isPasswordHidden,
+          style: TextStyle(
+            fontSize: 15,
+            fontFamily: 'Baloo',
+            color: isDarkMode ? Colors.white : Colors.black,
+            fontWeight: FontWeight.w400,
+          ),
+          decoration: InputDecoration(
+            hintText: hintText,
+            hintStyle: const TextStyle(
+              color: Colors.grey,
+              fontSize: 15,
+              fontFamily: 'Baloo',
+              fontWeight: FontWeight.w600,
+            ),
+            filled: true,
+            fillColor: isDarkMode ? Colors.black : Colors.white,
+            enabledBorder: const OutlineInputBorder(
+              borderRadius: BorderRadius.all(Radius.circular(10)),
+              borderSide: BorderSide(width: 1, color: Color(0xFF48B02C)),
+            ),
+            focusedBorder: const OutlineInputBorder(
+              borderRadius: BorderRadius.all(Radius.circular(10)),
+              borderSide: BorderSide(width: 1, color: Color(0xFF48B02C)),
+            ),
+            contentPadding: const EdgeInsets.only(left: 60),
+            suffixIcon: isPassword
+                ? IconButton(
+                    icon: Icon(
+                      _isPasswordHidden
+                          ? Icons.visibility_off
+                          : Icons.visibility,
+                      color: const Color(0xFF48B02C),
+                    ),
+                    onPressed: () {
+                      setState(() {
+                        _isPasswordHidden = !_isPasswordHidden;
+                      });
+                    },
+                  )
+                : null,
+          ),
+        ),
+        Positioned(
+          left: -25,
+          top: 0,
+          bottom: 0,
+          child: Container(
+            width: 60,
+            height: 60,
+            decoration: const BoxDecoration(
+              color: Color(0xFF48B02C),
+              shape: BoxShape.circle,
+            ),
+            child: Icon(icon, color: Colors.white, size: 24),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildButton({
+    required VoidCallback onPressed,
+    required String text,
+    required Color backgroundColor,
+    required Color textColor,
+    Widget? icon,
+  }) {
+    return Center(
+      child: ElevatedButton(
+        onPressed: onPressed,
+        style: ElevatedButton.styleFrom(backgroundColor: backgroundColor),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            if (icon != null) ...[icon, const SizedBox(width: 10)],
+            Text(text, style: TextStyle(color: textColor, fontSize: 16)),
+          ],
         ),
       ),
     );
