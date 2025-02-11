@@ -1,5 +1,6 @@
 ﻿using Newtonsoft.Json;
 using System.Diagnostics;
+using System.Drawing;
 
 namespace RollAttendanceServer.Helpers
 {
@@ -14,9 +15,34 @@ namespace RollAttendanceServer.Helpers
                 .ToArray());
         }
 
+        public static float[] ConvertImageToFloatArray(Bitmap image)
+        {
+            const int width = 160;
+            const int height = 160;
+
+            // Resize về 368x368
+            using var resized = new Bitmap(image, new System.Drawing.Size(width, height));
+
+            float[] imageArray = new float[width * height * 3];
+
+            for (int i = 0; i < height; i++)
+            {
+                for (int j = 0; j < width; j++)
+                {
+                    var pixel = resized.GetPixel(j, i);
+                    imageArray[(i * width + j) * 3] = pixel.R / 255.0f;
+                    imageArray[(i * width + j) * 3 + 1] = pixel.G / 255.0f;
+                    imageArray[(i * width + j) * 3 + 2] = pixel.B / 255.0f;
+                }
+            }
+
+            return imageArray;
+        }
+
+
         public static string? FindMatchingUser(string inputFaceData, Dictionary<string, string> userFaceData)
         {
-            var inputVector = JsonConvert.DeserializeObject<List<List<float>>>(inputFaceData);
+            var inputVector = JsonConvert.DeserializeObject<List<float>>(inputFaceData);
             if (inputVector == null) return null;
 
             string? bestMatchUserId = null;
@@ -24,11 +50,11 @@ namespace RollAttendanceServer.Helpers
 
             foreach (var (userId, faceVectorData) in userFaceData)
             {
-                var userVector = JsonConvert.DeserializeObject<List<List<float>>>(faceVectorData);
+                var userVector = JsonConvert.DeserializeObject<List<float>>(faceVectorData);
                 if (userVector == null) continue;
                 Debug.WriteLine("VECTOR 1: ", inputVector);
                 Debug.WriteLine("VECTOR 2: ", userVector);
-                var similarity = CalculateCosineSimilarity(inputVector[0], userVector[0]);
+                var similarity = CalculateCosineSimilarity(inputVector, userVector);
                 Debug.WriteLine("NUM: ", similarity);
                 if (similarity > highestSimilarity)
                 {
@@ -40,7 +66,7 @@ namespace RollAttendanceServer.Helpers
             Debug.WriteLine("SIMILITARI: ", highestSimilarity);
             Debug.WriteLine("USERID: ", bestMatchUserId);
 
-            return highestSimilarity > 0.8 ? bestMatchUserId : null;
+            return highestSimilarity > 0.9 ? bestMatchUserId : null;
         }
 
         // Hàm tính cosine similarity

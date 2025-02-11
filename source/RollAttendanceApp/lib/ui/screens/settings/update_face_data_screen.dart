@@ -14,7 +14,6 @@ import 'package:camera/camera.dart';
 import 'package:google_mlkit_face_detection/google_mlkit_face_detection.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:google_mediapipe_face_detection/google_mediapipe_face_detection.dart';
-import 'package:tflite_flutter/tflite_flutter.dart';
 import 'package:image/image.dart' as img;
 
 class UpdateFaceDataScreen extends StatefulWidget {
@@ -30,7 +29,6 @@ class _UpdateFaceDataScreenState extends State<UpdateFaceDataScreen> {
   late CameraController _cameraController;
   late FaceDetector _faceDetector;
   late GoogleMediapipeFaceDetection _faceDetectorForWeb;
-  late Interpreter _interpreter;
   bool _isDetecting = false;
   bool _isCameraInitialized = false;
 
@@ -38,7 +36,6 @@ class _UpdateFaceDataScreenState extends State<UpdateFaceDataScreen> {
   void initState() {
     super.initState();
     _initializeCamera();
-    _loadModel();
     if (kIsWeb) {
       // Sử dụng Google MediaPipe cho web
       _faceDetectorForWeb = GoogleMediapipeFaceDetection();
@@ -49,25 +46,6 @@ class _UpdateFaceDataScreenState extends State<UpdateFaceDataScreen> {
         enableContours: false,
         enableTracking: false,
       ));
-    }
-  }
-
-  Future<void> _loadModel() async {
-    try {
-      _interpreter =
-          await Interpreter.fromAsset('assets/models/facenet.tflite');
-      print('Model loaded successfully');
-    } catch (e) {
-      if (mounted) {
-        print('Error loading model: $e');
-        AwesomeDialog(
-          context: context,
-          dialogType: DialogType.error,
-          title: 'Error',
-          desc: 'Failed to load model: $e',
-          btnOkOnPress: () {},
-        ).show();
-      }
     }
   }
 
@@ -143,91 +121,30 @@ class _UpdateFaceDataScreenState extends State<UpdateFaceDataScreen> {
 
   Future<void> _detectFaces(CameraImage image) async {
     try {
-      final inputShape = [1, 160, 160, 3];
-      final input = await _preprocessImage(image);
+      final input = await _convertImageToBytes(image);
 
-      final reshapedInput =
-          input.shape == inputShape ? input : input.reshape([1, 160, 160, 3]);
-
-      // Allocate output buffer (đảm bảo kích thước đầu ra khớp với yêu cầu của mô hình)
-      final output = List.generate(1, (_) => List.filled(128, 0.0));
-
-      _interpreter.run(reshapedInput, output);
-
-      final faceData = json.encode(output);
-      await _updateFaceData(faceData);
+      final faceVector = await _extractFaceFeatures(input);
+      if (faceVector != null) {
+        await _updateFaceData(faceVector);
+      }
     } catch (e) {
       print('Error during face detection: $e');
       throw Exception('Face detection error: $e');
     }
   }
 
-  Future<List<List<List<double>>>> _preprocessImage(CameraImage image) async {
-    if (image.format.group == ImageFormatGroup.yuv420) {
-      final List<int> rgbData = _yuv420ToRgb(image);
+  Future<Uint8List> _convertImageToBytes(CameraImage image) async {
+    final img.Image convertedImage = img.Image.fromBytes(
+      width: image.width,
+      height: image.height,
+      bytes: Uint8List.fromList(_yuv420ToRgb(image)).buffer,
+      format: img.Format.uint8,
+    );
 
-      final ByteBuffer byteBuffer = Uint8List.fromList(rgbData).buffer;
+    final img.Image resizedImage =
+        img.copyResize(convertedImage, width: 160, height: 160);
 
-      // Tạo đối tượng Image từ dữ liệu RGB
-      final img.Image convertedImage = img.Image.fromBytes(
-        width: image.width,
-        height: image.height,
-        bytes: byteBuffer,
-        format: img.Format.uint8,
-      );
-
-      final WriteBuffer allBytes = WriteBuffer();
-      for (Plane plane in image.planes) {
-        allBytes.putUint8List(plane.bytes);
-      }
-      final bytes = allBytes.done().buffer.asUint8List();
-      final inputImage =
-          InputImage.fromBytes(bytes: bytes, metadata: _buildMetaData(image));
-
-      final faces = await _faceDetector.processImage(inputImage);
-
-      // Nếu phát hiện khuôn mặt
-      if (faces.isNotEmpty) {
-        final face = faces.first; // Chọn khuôn mặt đầu tiên
-
-        final faceImage = img.copyCrop(
-          convertedImage,
-          x: face.boundingBox.left.toInt(),
-          y: face.boundingBox.top.toInt(),
-          width: face.boundingBox.width.toInt(),
-          height: face.boundingBox.height.toInt(),
-        );
-
-        final img.Image resizedImage = img.copyResize(
-          faceImage,
-          width: 160,
-          height: 160,
-        );
-
-        final Float32List input = Float32List(160 * 160 * 3);
-        for (int y = 0; y < 160; y++) {
-          for (int x = 0; x < 160; x++) {
-            final pixel = resizedImage.getPixel(x, y);
-            final r = pixel.r;
-            final g = pixel.g;
-            final b = pixel.b;
-
-            final index = (y * 160 + x) * 3;
-            input[index] = (r - 127.5) / 128.0;
-            input[index + 1] = (g - 127.5) / 128.0;
-            input[index + 2] = (b - 127.5) / 128.0;
-          }
-        }
-
-        return [
-          [input.toList()],
-        ];
-      } else {
-        throw Exception('No face detected in image');
-      }
-    } else {
-      throw Exception('Unsupported image format');
-    }
+    return Uint8List.fromList(img.encodeJpg(resizedImage));
   }
 
   List<int> _yuv420ToRgb(CameraImage image) {
@@ -266,72 +183,27 @@ class _UpdateFaceDataScreenState extends State<UpdateFaceDataScreen> {
     return rgbData;
   }
 
-  InputImageMetadata _buildMetaData(CameraImage image) {
-    final size = Size(image.width.toDouble(), image.height.toDouble());
-    const rotation = InputImageRotation.rotation0deg;
-    const format = InputImageFormat.yuv_420_888;
-    print("Image Size: $size");
-    return InputImageMetadata(
-        size: size, rotation: rotation, format: format, bytesPerRow: 8);
-  }
-
-  String _extractFaceDataFromRect(List<Rect> faces) {
-    final faceData = faces.map((rect) {
-      return {
-        "boundingBox": rect.toString(),
-        "left": rect.left,
-        "top": rect.top,
-        "right": rect.right,
-        "bottom": rect.bottom,
-      };
-    }).toList();
-
-    return json.encode(faceData);
-  }
-
   Future<void> _takePictureAndDetectFace() async {
+    // TODO: Implement taking picture and detecting face
+  }
+
+  Future<String?> _extractFaceFeatures(Uint8List imageBytes) async {
     try {
-      setState(() {
-        _isDetecting = true; // Tạm dừng nhận diện trước khi gọi API
-        _isLoading = true;
-      });
+      final response = await _apiService.postFiles(
+        'api/Recognitions/extract',
+        {'image': imageBytes},
+      );
 
-      final XFile imageFile = await _cameraController.takePicture();
-
-      final inputImage = InputImage.fromFilePath(imageFile.path);
-
-      // Phát hiện khuôn mặt
-      dynamic faces = await _faceDetectorForWeb.processImage(inputImage);
-
-      if (faces != null && faces.isNotEmpty) {
-        final faceData = _extractFaceDataFromRect(faces);
-        await _updateFaceData(faceData);
+      if (response.statusCode == 200) {
+        final extractedData = json.decode(response.body);
+        return json.encode(extractedData['features']);
       } else {
-        if (mounted) {
-          AwesomeDialog(
-            context: context,
-            dialogType: DialogType.error,
-            title: 'Error',
-            desc: 'No face detected.',
-            btnOkOnPress: () {},
-          ).show();
-        }
+        print('Error extracting face features: ${response.body}');
+        return null;
       }
     } catch (e) {
-      if (mounted) {
-        AwesomeDialog(
-          context: context,
-          dialogType: DialogType.error,
-          title: 'Error',
-          desc: 'Error detecting faces: $e.',
-          btnOkOnPress: () {},
-        ).show();
-      }
-    } finally {
-      setState(() {
-        _isDetecting = false;
-        _isLoading = false;
-      });
+      print('API Error: $e');
+      return null;
     }
   }
 
