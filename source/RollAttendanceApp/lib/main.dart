@@ -65,47 +65,32 @@ Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
 
 Future<void> initFCM() async {
   FirebaseMessaging messaging = FirebaseMessaging.instance;
-  // ApiService apiService = ApiService();
 
-  // Lấy FCM Token và gửi lên server
-  String? token = await messaging.getToken();
-  print("FCM Token: $token");
+  try {
+    NotificationSettings settings = await messaging.requestPermission(
+      alert: true,
+      badge: true,
+      sound: true,
+    );
 
-  // if (token != null) {
-  //   await apiService.post('api/users/fcm-token', { 'Token': token });
-  // }
-
-  // Lắng nghe sự kiện thay đổi token
-  // FirebaseMessaging.instance.onTokenRefresh.listen((newToken) async {
-  //   print("FCM Token mới: $newToken");
-  //   await apiService.post('api/users/fcm-token', { 'Token': newToken });
-  // });
-
-  // Yêu cầu quyền nhận thông báo
-  NotificationSettings settings = await messaging.requestPermission(
-    alert: true,
-    badge: true,
-    sound: true,
-  );
-
-  if (settings.authorizationStatus == AuthorizationStatus.authorized) {
-    print("Đã cấp quyền nhận thông báo!");
-  } else {
-    print("Người dùng từ chối nhận thông báo!");
+    if (settings.authorizationStatus == AuthorizationStatus.authorized) {
+      print("Đã cấp quyền nhận thông báo!");
+    } else {
+      print("Người dùng từ chối nhận thông báo hoặc bị chặn!");
+    }
+  } catch (e) {
+    print("Lỗi khi yêu cầu quyền thông báo: $e");
   }
 
-  // Lắng nghe thông báo khi app đang chạy
   FirebaseMessaging.onMessage.listen((RemoteMessage message) {
     print("Nhận thông báo khi đang mở: ${message.notification?.title}");
     showLocalNotification(message);
   });
 
-  // Khi nhấn vào thông báo và mở app
   FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {
     print("Nhấn vào thông báo khi ứng dụng nền: ${message.notification?.title}");
   });
 
-  // Cấu hình hiển thị thông báo cục bộ
   const AndroidInitializationSettings androidSettings = AndroidInitializationSettings('@mipmap/launcher_icon');
   final InitializationSettings settingsInit = InitializationSettings(android: androidSettings);
 
