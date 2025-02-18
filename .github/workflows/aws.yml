@@ -36,8 +36,8 @@ on:
 env:
   AWS_REGION: ap-southeast-2
   PROJECT_LOCATION: source/RollAttendanceServer/RollAttendanceServer.csproj
-  ELASTIC_BEANSTALK_NAME: MPhong-EB-RA-V2
-  ELASTIC_BEANSTALK_ENV_NAME: MPhong-EB-RA-V2-env
+  ELASTIC_BEANSTALK_NAME: RollAttendanceApp
+  ELASTIC_BEANSTALK_ENV_NAME: RollAttendanceEnv
   VERSION_LABEL: ${{ github.run_id }}
 
 jobs:
