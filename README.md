@@ -3,6 +3,8 @@
 # LƯU Ý
 Do tài khoản AWS Cũ của chúng em đã suspended nên mong thầy sử dụng domain server mới: mphong-api-2.ap-southeast-2.elasticbeanstalk.com
 
+# BUILD (Hướng dẫn trong readme.txt)
+
 ## Getting Started
 - [Flutter SDK](https://docs.flutter.dev/)
 - [Dart SDK](https://dart.dev/get-dart)
