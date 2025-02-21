@@ -5,7 +5,7 @@ HƯỚNG DẪN DỰ ÁN CNTT
 - Lê Gia Huy_52100033
 
 2. Thông tin nhanh
-- Source dự án này đã có chứa sẵn key nhóm cấu hình, nên chỉ cần cài đặt thư viện và chạy dự án
+- Source dự án này đã có chứa sẵn key nhóm cấu hình, nên chỉ cần cài đặt thư viện và chạy dự án (folder em nộp trên elit có chứa tất cả key, cấu hình flutter)
 - Phiên bản các thư viện, công nghệ có trong dự án:
 	+ Flutter 3.27.4
 	+ Dart 3.6.2
@@ -13,6 +13,15 @@ HƯỚNG DẪN DỰ ÁN CNTT
 	+ Android Studio (version 2023.3) - Jellyfish PATCH 2
 	+ ASP.NET Core 6
 - Server domain đã hosting bằng AWS: http://mphong-api-2.ap-southeast-2.elasticbeanstalk.com
+- Tài khoản vào app: 
+	+ Email: user@example.com, Pass: 123456
+	+ Email: user1@example.com, Pass: 123456
+	+ Email: test@example.com, Pass: 123456
+	+ Email: test2@example.com, Pass: 123456
+	+ Email: test3@example.com, Pass: 123456
+	+ Email: test5@example.com, Pass: 123456
+- Tài khoản vào server:
+	+ Email: admin@gmail.com, Pass: admin
 
 3. Set up
 3.1. API Server
